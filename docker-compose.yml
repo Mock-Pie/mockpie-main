@@ -1,4 +1,3 @@
-
 services:
   db:
     image: postgres:15
@@ -22,6 +21,10 @@ services:
   frontend:
     build: ./frontend
     container_name: react_frontend
+    env_file: .env
+    environment:
+      - HOST=0.0.0.0
+      - WDS_SOCKET_PORT=3000
     depends_on:
       - backend
     ports:
