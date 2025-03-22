@@ -16,7 +16,11 @@ services:
       - db
     env_file: .env
     ports:
-      - "8000:8000"
+      - "80:8000"
+    environment:
+      - CORS_ORIGINS=http://localhost:3000,http://frontend:3000,http://react_frontend:3000,*
+    volumes:
+      - ./backend:/app  # Map local backend directory to container
 
   frontend:
     build: ./frontend
@@ -25,10 +29,16 @@ services:
     environment:
       - HOST=0.0.0.0
       - WDS_SOCKET_PORT=3000
+      - WATCHPACK_POLLING=true  # Enable polling for file changes
+      - CHOKIDAR_USEPOLLING=true  # Enable polling for file watcher
+      - REACT_APP_API_URL=http://backend:8000
     depends_on:
       - backend
     ports:
       - "3000:3000"
+    volumes:
+      - ./frontend:/app  # Mount local directory to container
+      - /app/node_modules  # Use container's node_modules
     stdin_open: true
     tty: true
 
