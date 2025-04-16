@@ -1,0 +1,199 @@
+.container {
+  display: flex;
+  height: 100vh;
+  background-color: #1a1a1a;
+  color: white;
+  font-family: 'Poppins';
+}
+
+.tooltipContainer {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip {
+  visibility: hidden;
+  background-color: #333;
+  color: #fff; /* White text */
+  text-align: center;
+  border-radius: 5px;
+  padding: 5px 10px;
+  position: absolute;
+  z-index: 1;
+  left: 110%; /* Position to the right of the icon */
+  top: 50%;
+  transform: translateY(-50%); /* Center vertically */
+  /* white-space: nowrap; Prevent text wrapping */
+  opacity: 0;
+  transition: opacity 0.7s ease;
+  font-size: 12px;
+  /* box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); */
+}
+
+.tooltipContainer:hover .tooltip {
+  visibility: visible;
+  opacity: 1;
+}
+
+.sidebar {
+  width: 5%;
+  background-color: black;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-right: 10px;
+}
+
+.logo {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.mainContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  justify-content: center;
+
+}
+
+.menu {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  color: gray;
+  cursor: pointer;
+  margin-bottom: 10px;
+  transition: color 0.3s;
+}
+
+.menuItem:hover {
+  color: white;
+}
+
+.icon {
+  font-size: 18px;
+}
+
+.titleSubtitleContainer {
+  position: absolute;
+  top: 20px;
+  left: 120px; /* Adjust based on sidebar width */
+  text-align: left;
+  padding-left: 500px;
+}
+
+.title {
+  font-size: 32px;
+  margin-top: 20px;
+}
+
+.loginBox {
+  width: 400px;
+  border-radius: 10px;
+  margin-left: 50px;
+  margin-bottom: 100px;
+}
+
+.subtitle {
+  text-align: start;
+  color: white;
+  margin-bottom: 50px;
+  margin-left: 50px;
+  font-size: 32;
+}
+
+.inputGroup {
+  margin-top: 10px;
+  color: #FAD85D;
+}
+
+.input {
+  width: 100%;
+  padding: 5px;
+  background: transparent;
+  margin-top: 2px;
+  border : none;
+  outline: none;
+  border-bottom: 1px solid white;
+}
+
+.input::placeholder {
+  color: #888; /* Placeholder text color */
+  font-style: italic; /* Optional: Make placeholder text italic */
+  font-size: 14px; /* Adjust placeholder font size */
+  opacity: 0.8; /* Optional: Adjust placeholder opacity */
+}
+
+.signInButton {
+  width: 100%;
+  padding: 10px;
+  background-color: #FAD85D;
+  color: white;
+  font-weight: bold;
+  border-radius: 5px;
+  margin-top: 40px;
+  margin-bottom: 10px;
+  border: none;
+  cursor: pointer;
+}
+
+.signInButton:hover {
+  background-color: #D4A017;
+}
+
+.footerText {
+  text-align: center;
+  margin-top: 15px;
+}
+
+.link {
+  color: #FAD85D;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.illustrationContainer {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-right: 100px;
+  margin-bottom: 50px;
+}
+
+.SignInImage {
+  width: 520px;
+  height: 600px;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+
+
+.button {
+  width: 80px;
+  height: 30px;
+  background-color: #FAD85D;
+}
+
+.logoImage{
+  width: 37.62px;
+  height: 37.62px;
+  margin-bottom: 20px;
+}

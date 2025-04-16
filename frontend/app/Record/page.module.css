@@ -1,0 +1,76 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    width: 100vw;
+    background-color: #1a1a1a;
+    color: white;
+    margin: 0;
+    padding: 0;
+}
+
+.preview {
+    width: 60%; /* Increased width for the camera preview */
+    height: 75%; /* Increased height for the camera preview */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 20px; /* Add spacing above the preview */
+}
+
+.videoWrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.videoPreview, .recordedVideo {
+    width: 100%;
+    height: 90%; /* Fill the entire preview area */
+    object-fit: cover;
+    border-radius: 15px;
+    margin-top: 5%;
+    outline: 1px solid #ccc; /* Add a solid outline with a custom color */
+    outline-offset: -4px; /* Adjust the spacing between the outline and the element */
+}
+
+.timer {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: bold;
+    z-index: 1;
+}
+
+.actionButton {
+    font-size: 16px;
+    background-color: #FAD85D;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    padding: 10px 10px;
+    width: 150px; /* Fixed width for consistency */
+    text-align: center;
+    transition: background-color 0.3s ease;
+}
+
+.actionButton:hover {
+    background-color: #D4A017;
+}
+
+.footer {
+    display: flex;
+    justify-content: center;
+    gap: 20px; /* Add spacing between the buttons */
+    margin-top: 20px; /* Add spacing above the footer */
+}
