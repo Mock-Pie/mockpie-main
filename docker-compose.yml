@@ -41,6 +41,10 @@ services:
       - /app/node_modules  # Use container's node_modules
     stdin_open: true
     tty: true
+    command: >
+      sh -c "npm install &&
+             npm run build &&
+             npm start"
 
 volumes:
   postgres_data:
