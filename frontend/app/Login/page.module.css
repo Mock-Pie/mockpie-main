@@ -1,8 +1,8 @@
 .container {
   display: flex;
   height: 100vh;
-  background-color: #1a1a1a;
-  color: white;
+  background-color: var(--raisin-black);
+  color: var(--white);
   font-family: 'Poppins';
 }
 
@@ -13,21 +13,19 @@
 
 .tooltip {
   visibility: hidden;
-  background-color: #333;
-  color: #fff; /* White text */
+  background-color: var(--raisin-black);
+  color: var(--white);
   text-align: center;
   border-radius: 5px;
   padding: 5px 10px;
   position: absolute;
   z-index: 1;
-  left: 110%; /* Position to the right of the icon */
+  left: 110%;
   top: 50%;
-  transform: translateY(-50%); /* Center vertically */
-  /* white-space: nowrap; Prevent text wrapping */
+  transform: translateY(-50%);
   opacity: 0;
   transition: opacity 0.7s ease;
-  font-size: 12px;
-  /* box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); */
+  font-size: var(--text-xs);
 }
 
 .tooltipContainer:hover .tooltip {
@@ -37,7 +35,7 @@
 
 .sidebar {
   width: 5%;
-  background-color: black;
+  background-color: var(--chinese-black);
   padding: 20px;
   display: flex;
   flex-direction: column;
@@ -46,7 +44,7 @@
 }
 
 .logo {
-  font-size: 24px;
+  font-size: var(--text-2xl);
   font-weight: bold;
   margin-bottom: 20px;
 }
@@ -57,7 +55,6 @@
   flex-direction: column;
   align-items: start;
   justify-content: center;
-
 }
 
 .menu {
@@ -65,37 +62,36 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
-  
 }
 
 .menuItem {
   display: flex;
   align-items: center;
   gap: 20px;
-  color: gray;
+  color: var(--light-grey);
   cursor: pointer;
   margin-bottom: 10px;
   transition: color 0.3s;
 }
 
 .menuItem:hover {
-  color: white;
+  color: var(--white);
 }
 
 .icon {
-  font-size: 18px;
+  font-size: var(--text-lg);
 }
 
 .titleSubtitleContainer {
   position: absolute;
   top: 20px;
-  left: 120px; /* Adjust based on sidebar width */
+  left: 120px;
   text-align: left;
   padding-left: 500px;
 }
 
 .title {
-  font-size: 32px;
+  font-size: var(--text-4xl);
   margin-top: 20px;
 }
 
@@ -108,15 +104,15 @@
 
 .subtitle {
   text-align: start;
-  color: white;
+  color: var(--white);
   margin-bottom: 50px;
   margin-left: 50px;
-  font-size: 32;
+  font-size: var(--text-3xl);
 }
 
 .inputGroup {
   margin-top: 10px;
-  color: #FAD85D;
+  color: var(--font-yellow);
 }
 
 .input {
@@ -124,23 +120,23 @@
   padding: 5px;
   background: transparent;
   margin-top: 2px;
-  border : none;
+  border: none;
   outline: none;
   border-bottom: 1px solid white;
 }
 
 .input::placeholder {
-  color: #888; /* Placeholder text color */
-  font-style: italic; /* Optional: Make placeholder text italic */
-  font-size: 14px; /* Adjust placeholder font size */
-  opacity: 0.8; /* Optional: Adjust placeholder opacity */
+  color: var(--light-grey);
+  font-style: italic;
+  font-size: var(--text-sm);
+  opacity: 0.8;
 }
 
 .signInButton {
   width: 100%;
   padding: 10px;
-  background-color: #FAD85D;
-  color: white;
+  background-color: var(--naples-yellow);
+  color: var(--white);
   font-weight: bold;
   border-radius: 5px;
   margin-top: 40px;
@@ -150,7 +146,7 @@
 }
 
 .signInButton:hover {
-  background-color: #D4A017;
+  background-color: var(--dark-yellow);
 }
 
 .footerText {
@@ -159,7 +155,7 @@
 }
 
 .link {
-  color: #FAD85D;
+  color: var(--naples-yellow);
   cursor: pointer;
   display: flex;
   justify-content: center;
@@ -185,15 +181,136 @@
   padding: 20px;
 }
 
-
 .button {
   width: 80px;
   height: 30px;
-  background-color: #FAD85D;
+  background-color: var(--naples-yellow);
 }
 
-.logoImage{
+.logoImage {
   width: 37.62px;
   height: 37.62px;
   margin-bottom: 20px;
+}
+
+/* Media Queries for Responsive Design */
+
+/* Large tablets and desktops (992px and up) */
+@media (max-width: 1600px) {
+  .titleSubtitleContainer {
+    padding-left: 35%;
+  }
+  
+  .SignInImage {
+    max-width: 450px;
+  }
+}
+
+/* Medium devices (tablets, 768px and up) */
+@media (max-width: 992px) {
+  .container {
+    flex-direction: row;
+  }
+  
+  .sidebar {
+    width: 5%;
+    min-width: 60px;
+    background-color: var(--chinese-black);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-right: 10px;
+  }
+  
+  .menu {
+    flex-direction: row;
+    margin-top: 0;
+  }
+  
+  .logoImage {
+    margin-bottom: 0;
+  }
+  
+  .titleSubtitleContainer {
+    position: relative;
+    top: 0;
+    left: 0;
+    padding: 20px;
+    text-align: center;
+  }
+  
+  .mainContent {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .loginBox {
+    margin-left: 0;
+    margin-bottom: 30px;
+  }
+  
+  .subtitle {
+    margin-left: 0;
+    text-align: center;
+    font-size: var(--text-2xl);
+    margin-bottom: 30px;
+  }
+  
+  .illustrationContainer {
+    margin-right: 0;
+  }
+}
+
+/* Small devices (landscape phones, 576px and up) */
+@media (max-width: 768px) {
+  .container {
+    height: auto;
+    min-height: 100vh;
+  }
+  
+  .illustrationContainer {
+    display: none; /* Hide illustration on smaller screens */
+  }
+  
+  .loginBox {
+    width: 85%;
+  }
+  
+  .title {
+    font-size: var(--text-2xl);
+  }
+  
+  .subtitle {
+    font-size: var(--text-xl);
+  }
+  
+  .tooltip {
+    left: 0;
+    top: 100%;
+    transform: translateY(0);
+  }
+}
+
+/* Extra small devices (portrait phones) */
+@media (max-width: 576px) {
+  .sidebar {
+    padding: 10px;
+  }
+  
+  .loginBox {
+    width: 90%;
+  }
+  
+  .menuItem {
+    gap: 10px;
+  }
+  
+  .menu {
+    gap: 10px;
+  }
+  
+  .subtitle {
+    font-size: var(--text-lg);
+  }
 }

@@ -9,14 +9,14 @@
 }
 
 .link {
-    color: #FAD85D;
+    color: var(--naples-yellow);
     cursor: pointer;
     justify-content: center;
     margin-top: 10px;
 }
 
 .or{
-    color: #D9D9D9;
+    color: var(--light-grey);
     margin-top: 10px;
 }
 
@@ -25,7 +25,7 @@
     justify-content: center;
     align-items: center;
     gap: 10px;
-    color: #D9D9D9;
+    color: var(--light-grey);
 }
 
 .SignUpImage{

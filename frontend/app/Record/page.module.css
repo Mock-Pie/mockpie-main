@@ -5,8 +5,8 @@
     justify-content: center;
     height: 100vh;
     width: 100vw;
-    background-color: #1a1a1a;
-    color: white;
+    background-color: var(--raisin-black);
+    color: var(--white);
     margin: 0;
     padding: 0;
 }
@@ -34,7 +34,7 @@
     object-fit: cover;
     border-radius: 15px;
     margin-top: 5%;
-    outline: 1px solid #ccc; /* Add a solid outline with a custom color */
+    outline: 1px solid var(--light-grey); /* Updated to use variable */
     outline-offset: -4px; /* Adjust the spacing between the outline and the element */
 }
 
@@ -42,8 +42,8 @@
     position: absolute;
     top: 10px;
     left: 10px;
-    background-color: rgba(0, 0, 0, 0.5);
-    color: white;
+    background-color: var(--chinese-black);
+    color: var(--white);
     padding: 5px 10px;
     border-radius: 5px;
     font-size: 14px;
@@ -53,8 +53,8 @@
 
 .actionButton {
     font-size: 16px;
-    background-color: #FAD85D;
-    color: white;
+    background-color: var(--naples-yellow);
+    color: var(--white);
     border: none;
     border-radius: 5px;
     cursor: pointer;
@@ -65,7 +65,7 @@
 }
 
 .actionButton:hover {
-    background-color: #D4A017;
+    background-color: var(--dark-yellow);
 }
 
 .footer {

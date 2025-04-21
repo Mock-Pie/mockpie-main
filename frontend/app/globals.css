@@ -1,6 +1,35 @@
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Primary Colors */
+  --naples-yellow: #FAD85D;
+  
+  /* Secondary Colors */
+  --charleston-green: #2B2C2C;
+  --raisin-black: #242424;
+  --chinese-black: #161717;
+  --light-grey: #BEBCBC;
+  
+  /* Accent Colors */
+  --light-purple: #F2A0FF;
+  --blue: #6F82E8;
+  --red: #B83F3F;
+  --brick: #FE7070;
+  --aqua: #73FFCC;
+  --dark-yellow: #D4A017;
+
+  /* font colors */
+  --white: #FFFFFF;
+  --font-yellow: #FAD85D;
+
+  
+  /* Font Sizes */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
 }
 
 @media (prefers-color-scheme: dark) {

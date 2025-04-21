@@ -35,8 +35,8 @@
     bottom: 23%; /* Distance from the bottom of the viewport */
     right: 25%; /* Distance from the right of the viewport */
     padding: 8px;
-    background-color: #FAD85D;
-    color: white;
+    background-color: var(--naples-yellow);
+    color: var(--white);
     font-weight: bold;
     border-radius: 5px;
     border: none;
@@ -51,8 +51,8 @@
     bottom: 23%; /* Distance from the bottom of the viewport */
     left: 41%; /* Distance from the right of the viewport */
     padding: 8px;
-    background-color: #FAD85D;
-    color: white;
+    background-color: var(--naples-yellow);
+    color: var(--white);
     font-weight: bold;
     border-radius: 5px;
     border: none;
@@ -63,11 +63,11 @@
 }
 
 .RecordButton:hover {
-    background-color: #D4A017;
+    background-color: var(--dark-yellow);
 }
 
 .UploadButton:hover {
-    background-color: #D4A017;
+    background-color: var(--dark-yellow);
 }
 
 .footerContainer {
@@ -76,7 +76,7 @@
     left: 12%;
     padding: 10px;
     border-radius: 8px; /* Rounded corners */
-    color: white;
+    color: var(--white);
     z-index: 1000; /* Ensure it appears above other elements */
     max-width: 100%; /* Optional: Limit the width of the footer */
 }
@@ -85,12 +85,12 @@
     font-size: 28px;
     font-weight: bold;
     margin-bottom: 10px;
-    color: #FAD85D; /* Optional: Adjust color to match your theme */
+    color: var(--font-yellow); /* Optional: Adjust color to match your theme */
 }
 
 .FooterList {
     list-style-type: disc; /* Adds bullets to the list */
     margin-left: 20px; /* Indents the list */
-    color: white; /* Ensures the text is visible on a dark background */
+    color: var(--white); /* Ensures the text is visible on a dark background */
     font-size: 19px;
 }
