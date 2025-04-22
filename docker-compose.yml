@@ -9,6 +9,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  
   backend:
     build: ./backend
     container_name: fastapi_backend

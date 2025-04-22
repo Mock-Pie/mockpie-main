@@ -14,4 +14,4 @@ COPY . .
 RUN npm run build
 
 # Command to start the app
-CMD ["npm", "start"]
+CMD ["npx", "next", "start"]

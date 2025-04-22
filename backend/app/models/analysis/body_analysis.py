@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, Float, String, ForeignKey
 from sqlalchemy.orm import relationship
-from ...database import Base
+from ....database.database import Base
 from .base_analysis import BaseAnalysis
 
 class BodyAnalysis(Base, BaseAnalysis):

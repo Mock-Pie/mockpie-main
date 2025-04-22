@@ -1,4 +1,4 @@
-from ...database import Base
+from ....database.database import Base
 from sqlalchemy import Column, Integer, String, DateTime, Enum
 from sqlalchemy.sql import func
 import enum
@@ -9,15 +9,15 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
-    username = Column(String, unique=True, index=True, nullable=False)
-    email = Column(String, unique=True, index=True, nullable=False)
-    phone_number = Column(String, unique=True, index=True, nullable=False)
+    username = Column(String, unique=True, nullable=False)
+    email = Column(String, unique=True, nullable=False)
+    phone_number = Column(String, unique=True, nullable=False)
     gender = Column(Enum(Gender), nullable=False)
     _password = Column("password", String, nullable=False)
     created_at = Column(DateTime, server_default=func.now(), nullable=False)
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
-    token = Column(String, index=True, nullable=False)
-    refresh_token = Column(String, index=True, nullable=False)
+    token = Column(String, index=True, nullable=True, default="")
+    refresh_token = Column(String, index=True, nullable=True, default="")
     
     @property
     def password(self):
@@ -29,3 +29,4 @@ class User(Base):
     
     def verify_password(self, plain_password):
         return bcrypt.verify(plain_password, self._password)
+
