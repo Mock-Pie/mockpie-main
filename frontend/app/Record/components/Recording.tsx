@@ -36,10 +36,28 @@ const Recording = () => {
         };
     }, []);
 
-    const startRecording = () => {
-        if (videoStreamRef.current) {
+    const startRecording = async () => {
+        try {
+            // Reset video URL when starting a new recording
+            if (videoURL) {
+                URL.revokeObjectURL(videoURL);
+                setVideoURL("");
+            }
+
+            // Reinitialize camera stream if needed
+            if (!videoStreamRef.current) {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                videoStreamRef.current = stream;
+            }
+
+            if (videoPreviewRef.current) {
+                videoPreviewRef.current.srcObject = videoStreamRef.current;
+                videoPreviewRef.current.play();
+            }
+
             const mediaRecorder = new MediaRecorder(videoStreamRef.current);
             mediaRecorderRef.current = mediaRecorder;
+            chunksRef.current = []; // Reset chunks array
 
             mediaRecorder.ondataavailable = (event) => {
                 if (event.data.size > 0) {
@@ -49,13 +67,8 @@ const Recording = () => {
 
             mediaRecorder.onstop = () => {
                 const blob = new Blob(chunksRef.current, { type: "video/webm" });
-                chunksRef.current = [];
                 const url = URL.createObjectURL(blob);
                 setVideoURL(url);
-
-                if (videoPreviewRef.current) {
-                    videoPreviewRef.current.srcObject = null;
-                }
             };
 
             mediaRecorder.start();
@@ -65,6 +78,8 @@ const Recording = () => {
             timerRef.current = setInterval(() => {
                 setRecordingTime((prevTime) => prevTime + 1);
             }, 1000);
+        } catch (error) {
+            console.error("Error starting recording:", error);
         }
     };
 

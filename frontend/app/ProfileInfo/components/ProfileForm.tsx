@@ -86,9 +86,6 @@ const ProfileForm = () => {
                             <p className={styles.emailTimestamp}>1 month ago</p>
                         </div>
                     </div>
-                    <button className={styles.addEmailButton}>
-                        <FiPlus /> Add Email Address
-                    </button>
                 </div>
             </div>
         </div>

@@ -91,6 +91,7 @@ const Uploading = () => {
                         key={previewUrl} // Force the video to reload when the URL changes
                         controls
                         className={styles.VideoPreview}
+                        style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                     >
                         <source src={previewUrl} type="video/mp4" />
                         Your browser does not support the video tag.
@@ -100,6 +101,7 @@ const Uploading = () => {
                         src="/Images/Uploading.png"
                         alt="Sign Up"
                         className={styles.ImagePreview}
+                        style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                     />
                 )}
             </div>
