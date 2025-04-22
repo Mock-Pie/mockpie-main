@@ -1,9 +1,9 @@
 import React from 'react';
-import styles from "../../Login/page.module.css";
+import styles from "../page.module.css";
 
 const Header = () => {
     return (
-        <div className={styles.titleSubtitleContainer}>
+        <div className={styles.titleContainer}>
             <h2 className={styles.title}>Profile</h2>
         </div>
     );

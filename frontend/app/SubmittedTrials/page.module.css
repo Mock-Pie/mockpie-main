@@ -1,0 +1,137 @@
+.container {
+  display: flex;
+  min-height: 100vh;
+  background-color: #1a1a1a;
+  color: #ffffff;
+}
+
+.mainContent {
+  flex: 1;
+  padding: 2rem;
+}
+
+.pageTitle {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 2rem;
+}
+
+.trialsContainer {
+  background-color: #242424;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Table Styles */
+.table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 0.5rem;
+}
+
+.tableHeader {
+  text-align: left;
+  color: #888;
+  padding: 1rem;
+  font-size: 0.9rem;
+}
+
+.tableRow {
+  background-color: #2a2a2a;
+  transition: background-color 0.2s;
+}
+
+.tableRow:hover {
+  background-color: #333;
+}
+
+.tableCell {
+  padding: 1rem;
+  border-top: 1px solid #333;
+  border-bottom: 1px solid #333;
+}
+
+.tableCell:first-child {
+  border-left: 1px solid #333;
+  border-top-left-radius: 0.5rem;
+  border-bottom-left-radius: 0.5rem;
+}
+
+.tableCell:last-child {
+  border-right: 1px solid #333;
+  border-top-right-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+}
+
+/* Header Styles */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.filterContainer {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.submitButton {
+  background-color: #F0C419;
+  color: #1a1a1a;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.submitButton:hover {
+  background-color: #ddb617;
+}
+
+/* Action Buttons */
+.actionButton {
+  background: none;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  padding: 0.5rem;
+  transition: color 0.2s;
+}
+
+.actionButton:hover {
+  color: #F0C419;
+}
+
+/* Video Thumbnail */
+.videoThumbnail {
+  width: 120px;
+  height: 68px;
+  border-radius: 0.25rem;
+  object-fit: cover;
+}
+
+/* Feedback Text */
+.feedbackText {
+  color: #888;
+  font-size: 0.9rem;
+  max-width: 300px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.viewMore {
+  color: #F0C419;
+  text-decoration: none;
+  margin-left: 0.5rem;
+  font-size: 0.8rem;
+}
+
+.viewMore:hover {
+  text-decoration: underline;
+}

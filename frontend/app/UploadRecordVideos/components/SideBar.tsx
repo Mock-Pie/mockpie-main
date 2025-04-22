@@ -26,12 +26,12 @@ const SideBar = () => {
                         <span className={styles.tooltip}>Upload or Record</span>
                     </div>
                 </Link>
-                <div className={styles.menuItem}>
+                <Link href="/SubmittedTrials" className={styles.menuItem}>
                     <div className={styles.tooltipContainer}>
                         <FiFileText className={styles.icon} />
-                        <span className={styles.tooltip}>Files</span>
+                        <span className={styles.tooltip}>Submitted Trials</span>
                     </div>
-                </div>
+                </Link>
                 <Link href="/Calendar" className={styles.menuItem}>
                     <div className={styles.tooltipContainer}>
                         <VscCalendar className={styles.icon} />
