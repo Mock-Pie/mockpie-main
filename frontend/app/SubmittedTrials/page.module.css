@@ -108,6 +108,15 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 4px;
+}
+
+.feedbackText {
+    color: var(--white);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .viewMore {
@@ -115,6 +124,7 @@
     border: none;
     color: var(--naples-yellow);
     cursor: pointer;
+    white-space: nowrap;
 }
 
 .actions {
@@ -136,15 +146,6 @@
     opacity: 1;
 }
 
-.downloadButton {
-    background-color: var(--naples-yellow);
-    mask: url('/download-icon.svg') no-repeat center;
-}
-
-.deleteButton {
-    background-color: var(--brick);
-    mask: url('/trash-icon.svg') no-repeat center;
-}
 
 .videoThumbnail {
     position: relative;
@@ -212,6 +213,20 @@
     border-radius: 8px;
     width: 400px;
     max-width: 90%;
+}
+
+.filterTypeOptions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.filterTypeOptions label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
 }
 
 .filterOptions {
