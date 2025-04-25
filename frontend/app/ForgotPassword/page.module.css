@@ -1,0 +1,11 @@
+.ForgotPasswordImage{
+    width: 550px;
+    height: 450px;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    margin-right: 70px;
+    margin-top: 40px;
+}

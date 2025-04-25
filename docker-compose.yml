@@ -9,6 +9,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  
   backend:
     build: ./backend
     container_name: fastapi_backend
@@ -28,9 +29,11 @@ services:
     env_file: .env
     environment:
       - HOST=0.0.0.0
+      - PORT=3000
       - WDS_SOCKET_PORT=3000
       - WATCHPACK_POLLING=true  # Enable polling for file changes
       - CHOKIDAR_USEPOLLING=true  # Enable polling for file watcher
+      - FAST_REFRESH=true  # Enable fast refresh for React
       - REACT_APP_API_URL=http://backend:8000
     depends_on:
       - backend
@@ -41,6 +44,9 @@ services:
       - /app/node_modules  # Use container's node_modules
     stdin_open: true
     tty: true
+    command: >
+      sh -c "npm install &&
+             npm run dev"
 
 volumes:
   postgres_data:
