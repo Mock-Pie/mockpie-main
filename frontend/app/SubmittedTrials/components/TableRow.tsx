@@ -1,6 +1,8 @@
 import React from 'react';
 import styles from "../page.module.css";
 import { TfiDownload } from "react-icons/tfi";
+import { AiOutlineDelete } from "react-icons/ai";
+
 
 interface Trial {
     id: string;
@@ -40,10 +42,7 @@ const TableRow = ({ trial }: TableRowProps) => {
                     <TfiDownload size={18} color="#F9C74F" />
                 </button>
                 <button className={styles.deleteButton}>
-                    <img 
-                        src="/Images/TrashIcon.png"
-                        className={styles.trashIcon}
-                    />
+                    <AiOutlineDelete size={18} color="#F9C74F" />
                 </button>
             </div>
         </div>
