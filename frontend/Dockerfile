@@ -1,5 +1,5 @@
 # Use official Node.js image
-FROM node:18
+FROM --platform=linux/arm64 node:18
 
 WORKDIR /app
 
