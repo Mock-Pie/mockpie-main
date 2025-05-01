@@ -1,7 +1,7 @@
 from pydantic import BaseModel, EmailStr, field_validator, Field
 from typing import Optional
 from datetime import datetime
-from ...enums import Gender
+from backend.app.enums.gender import Gender
 
 class UserBase(BaseModel):
     username: str
@@ -18,9 +18,11 @@ class UserUpdate(BaseModel):
 class UserRegistration(BaseModel):
     email: EmailStr
     username: str = Field(..., min_length=3, max_length=50)
-    phone_number: str = Field(..., regex=r'^\+?[1-9]\d{1,14}$')  # E.164 format
+    phone_number: str = Field(..., pattern=r'^\+?[1-9]\d{1,14}$')
     password: str = Field(..., min_length=8)
     password_confirmation: str
+    gender: Gender
+
     
     @field_validator('password')
     def password_strength(cls, v):

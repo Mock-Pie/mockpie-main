@@ -1,4 +1,5 @@
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
+from pathlib import Path
 
 class Settings(BaseSettings):
     app_name: str
@@ -9,9 +10,9 @@ class Settings(BaseSettings):
     postgres_password: str
     postgres_db: str
     secret_key: str
+    algorithm: str
+    access_token_expire_minutes: int
 
-    class Config:
-        env_file = ".env"
-
+    model_config = SettingsConfigDict(env_file=str(Path(__file__).parent / ".env"))
 
 settings = Settings()
