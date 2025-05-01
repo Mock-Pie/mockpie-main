@@ -1,34 +1,48 @@
-from pydantic import BaseModel, EmailStr, validator, Field
+from pydantic import BaseModel, EmailStr, field_validator, Field
 from typing import Optional
 from datetime import datetime
 from ...enums import Gender
 
-# Base DTO with common attributes
 class UserBase(BaseModel):
     username: str
     email: EmailStr
     phone_number: str
     gender: Gender
 
-# DTO for creating new users (request)
-class UserCreate(UserBase):
-    password: str = Field(..., min_length=8)
+class UserUpdate(BaseModel):
+    username: Optional[str] = None
+    email: Optional[EmailStr] = None
+    phone_number: Optional[str] = None
+    password: Optional[str] = None
     
-    @validator('password')
+class UserRegistration(BaseModel):
+    email: EmailStr
+    username: str = Field(..., min_length=3, max_length=50)
+    phone_number: str = Field(..., regex=r'^\+?[1-9]\d{1,14}$')  # E.164 format
+    password: str = Field(..., min_length=8)
+    password_confirmation: str
+    
+    @field_validator('password')
     def password_strength(cls, v):
         if not any(c.isdigit() for c in v):
             raise ValueError('Password must contain at least one number')
         if not any(c.isupper() for c in v):
             raise ValueError('Password must contain at least one uppercase letter')
         return v
-
-# DTO for updating existing users (request)
-class UserUpdate(BaseModel):
+    
+class UserLogin(BaseModel):
+    email: EmailStr
+    phone: Optional[str] = None
     username: Optional[str] = None
-    email: Optional[EmailStr] = None
-    phone_number: Optional[str] = None
-    gender: Optional[Gender] = None
-    password: Optional[str] = None
+    password: str = Field(..., min_length=8)
+    
+    @field_validator('password')
+    def password_strength(cls, v):
+        if not any(c.isdigit() for c in v):
+            raise ValueError('Password must contain at least one number')
+        if not any(c.isupper() for c in v):
+            raise ValueError('Password must contain at least one uppercase letter')
+        return v
 
 # DTO for returning user data (response)
 class UserResponse(UserBase):
