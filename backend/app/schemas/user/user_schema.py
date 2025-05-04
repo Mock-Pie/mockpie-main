@@ -1,7 +1,7 @@
 from pydantic import BaseModel, EmailStr, field_validator, Field
 from typing import Optional
 from datetime import datetime
-from backend.app.enums.gender import Gender
+from app.enums.gender import Gender
 
 class UserBase(BaseModel):
     username: str

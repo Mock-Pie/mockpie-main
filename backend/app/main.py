@@ -1,14 +1,35 @@
 from fastapi import FastAPI, HTTPException, status, Depends, Form
 from pydantic import BaseModel, EmailStr, field_validator, Field
-from ..database.database import get_db
+from database.database import get_db, engine, Base
 from sqlalchemy.orm import Session
-from ..app.schemas.user.user_schema import UserRegistration, UserResponse
-from ..app.models.user.user import User
-from ..app.enums.gender import Gender
-from ..app.static.lang.error_messages.exception_responses import ErrorMessage
+from app.schemas.user.user_schema import UserRegistration, UserResponse
+from app.models.user.user import User
+from app.enums.gender import Gender
+from app.static.lang.error_messages.exception_responses import ErrorMessage
+from fastapi.middleware.cors import CORSMiddleware
+import logging
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Create all tables in the database
+# This will ensure the users table with all columns exists
+try:
+    logger.info("Creating database tables...")
+    Base.metadata.create_all(bind=engine)
+    logger.info("Database tables created successfully")
+except Exception as e:
+    logger.error(f"Failed to create database tables: {e}")
 
 app = FastAPI()
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Replace with specific origins in production
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 @app.post("/auth/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 async def register_user(
     email: EmailStr = Form(...),
@@ -67,3 +88,9 @@ async def register_user(
     db.refresh(new_user)
     
     return new_user
+
+
+
+@app.get("/")
+async def root():
+    return {"message": "Welcome to the FastAPI application!"}

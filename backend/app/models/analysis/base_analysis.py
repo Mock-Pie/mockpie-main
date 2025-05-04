@@ -1,4 +1,4 @@
-from ....database.database import Base
+from database.database import Base
 from sqlalchemy import Column, Integer, DateTime, ForeignKey
 from sqlalchemy.sql import func
 from sqlalchemy.ext.declarative import declared_attr

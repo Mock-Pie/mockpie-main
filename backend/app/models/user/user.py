@@ -1,8 +1,8 @@
-from backend.database.database import Base
+from database.database import Base
 from sqlalchemy import Column, Integer, String, DateTime, Enum
 from sqlalchemy.sql import func
 from passlib.hash import bcrypt
-from backend.app.enums.gender import Gender
+from app.enums.gender import Gender
 
 class User(Base):
     __tablename__ = "users"

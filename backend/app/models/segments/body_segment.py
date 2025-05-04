@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Float, String
 from sqlalchemy.orm import relationship
-from ....database.database import Base
+from database.database import Base
 from .base_segment import BaseSegment
 
 class BodySegment(Base, BaseSegment):
