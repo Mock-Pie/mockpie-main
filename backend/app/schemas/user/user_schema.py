@@ -1,7 +1,7 @@
 from pydantic import BaseModel, EmailStr, field_validator, Field
 from typing import Optional
 from datetime import datetime
-from app.enums.gender import Gender
+from backend.app.enums.gender import Gender
 
 class UserBase(BaseModel):
     username: str
@@ -45,11 +45,3 @@ class UserLogin(BaseModel):
         if not any(c.isupper() for c in v):
             raise ValueError('Password must contain at least one uppercase letter')
         return v
-
-# DTO for returning user data (response)
-class UserResponse(UserBase):
-    id: int
-    created_at: datetime
-    
-    class Config:
-        from_attributes = True  # Formerly orm_mode=True

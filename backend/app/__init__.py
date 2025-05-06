@@ -1,1 +1,1 @@
-from database import *
+from backend.database.database import *
