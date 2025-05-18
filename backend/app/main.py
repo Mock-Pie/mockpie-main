@@ -49,5 +49,5 @@ async def register_user(
     gender: Gender = Form(...),
     db: Session = Depends(get_db)
 ):
-    RegisterUser.register_user(email=email, username=username, phone_number=phone_number, password=password, password_confirmation=password_confirmation,gender=gender, db=db)
+    return RegisterUser.register_user(email=email, username=username, phone_number=phone_number, password=password, password_confirmation=password_confirmation,gender=gender, db=db)
     
