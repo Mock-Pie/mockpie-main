@@ -1,2 +1,7 @@
 node_modules
 .env
+*.pyc
+*.cpython-310.pyc
+__pycache__/
+*.py[cod]
+*$py.class

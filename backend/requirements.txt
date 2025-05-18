@@ -2,3 +2,8 @@ fastapi
 uvicorn
 sqlalchemy
 psycopg2
+passlib[bcrypt]
+python-multipart # for decoding data
+python-jose[cryptography] # for creating JWT tokens
+pydantic
+pydantic[email]
