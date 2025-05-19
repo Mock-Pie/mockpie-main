@@ -10,9 +10,10 @@ from backend.app.schemas.user.user_schema import *
 from backend.app.models.user.user import *
 from backend.app.static.lang.error_messages.exception_responses import *
 from backend.config import *
-from backend.app.utils.user_auth_response_wrapper import *
-from backend.app.utils.user_response import *
-
+from backend.app.schemas.user.user_schema import *
+from backend.app.utils.token_handler import TokenHandler
+from backend.app.utils.encryption_handler import EncryptionHandler
+from backend.app.utils.redis_client import RedisClient
 app = FastAPI()
 
 # Password hashing
@@ -22,27 +23,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
 
 class RegisterUser():
-
-    # Utility functions
-    def verify_password(plain_password, hashed_password):
-        return pwd_context.verify(plain_password, hashed_password)
-
-    @staticmethod
-    def get_password_hash(password):
-        return pwd_context.hash(password)
-
-    @staticmethod
-    def create_access_token(data: dict, expires_delta: timedelta | None = None):
-        to_encode = data.copy()
-        if expires_delta:
-            expire = datetime.now(timezone.utc) + expires_delta
-        else:
-            expire = datetime.now(timezone.utc) + timedelta(minutes=15)
-        to_encode.update({"exp": expire})
-        encoded_jwt = jwt.encode(to_encode, settings.secret_key, algorithm=settings.algorithm)
-        return encoded_jwt
-
-    # @app.post("/auth/register", response_model=UserAuthResponse, status_code=status.HTTP_201_CREATED)
+    
     def register_user(
         email: EmailStr = Form(...),
         username: str = Form(...),
@@ -90,17 +71,29 @@ class RegisterUser():
             gender=gender,
             remember_token=""
         )
-        new_user.password = RegisterUser.get_password_hash(password)
+        new_user.password = EncryptionHandler.get_password_hash(password)
         
         db.add(new_user)
         db.commit()
         db.refresh(new_user)
         
         # Generate token
-        token = RegisterUser.create_access_token(data={"sub": new_user.email})    
-        
+        access_token_expires = timedelta(minutes=settings.access_token_expire_minutes)
+        access_token = TokenHandler.create_access_token(
+            data={"sub": new_user.email}, expires_delta=access_token_expires
+        )
+        refresh_token_expires = timedelta(days=settings.refresh_token_expire_days)
+        refresh_token = TokenHandler.create_access_token(
+            data={"sub": new_user.email}, expires_delta=refresh_token_expires
+        )
+        redis_client = RedisClient()
+        # Store tokens in Redis
+        redis_client.set_access_token(new_user.id, access_token, access_token_expires)
+        redis_client.set_refresh_token(new_user.id, refresh_token, refresh_token_expires)
+
         return {
-            "token": token,
+            "access_token": access_token,
+            "refresh_token": refresh_token,
             "user": {
             "id": new_user.id,
             "username": new_user.username,

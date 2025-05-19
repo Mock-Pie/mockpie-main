@@ -45,3 +45,18 @@ class UserLogin(BaseModel):
         if not any(c.isupper() for c in v):
             raise ValueError('Password must contain at least one uppercase letter')
         return v
+
+class UserResponse(BaseModel):
+    id: int
+    username: str
+    email: EmailStr
+    phone_number: str
+    gender: Gender
+    created_at: datetime
+    updated_at: datetime
+
+
+class UserAuthResponse(BaseModel):
+    access_token: str
+    refresh_token: str
+    user: UserResponse

@@ -3,12 +3,12 @@ from sqlalchemy.orm import Session
 from typing import List
 from database.database import get_db
 from app.models.user.user import User
-from app.schemas.user import UserCreate, UserResponse, UserUpdate
+from backend.app.schemas.user.user_schema import *
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
 @router.post("/", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
-def create_user(user_data: UserCreate, db: Session = Depends(get_db)):
+def create_user(user_data: UserRegistration, db: Session = Depends(get_db)):
     # Check if user exists
     db_user = db.query(User).filter(User.email == user_data.email).first()
     if db_user:
@@ -25,7 +25,7 @@ def create_user(user_data: UserCreate, db: Session = Depends(get_db)):
     )
     
     
-    # Set password (uses your property setter)
+    # Set password (uses the password property setter)
     new_user.password = user_data.password
     
     # Save to database
