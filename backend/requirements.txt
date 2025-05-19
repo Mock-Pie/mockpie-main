@@ -7,3 +7,6 @@ python-multipart # for decoding data
 python-jose[cryptography] # for creating JWT tokens
 pydantic
 pydantic[email]
+psycopg2-binary
+python-dotenv
+pydantic_settings
