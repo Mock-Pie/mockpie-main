@@ -2,6 +2,7 @@ fastapi
 uvicorn
 sqlalchemy
 psycopg2
+psycopg2-binary
 passlib[bcrypt]
 python-multipart # for decoding data
 python-jose[cryptography] # for creating JWT tokens
@@ -12,3 +13,4 @@ PyJWT>=2.0.0
 redis 
 fastapi-redis-cache
 watchfiles
+python-dotenv
