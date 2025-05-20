@@ -1,6 +1,6 @@
-from fastapi import FastAPI, HTTPException, status, Depends, Form
+from fastapi import FastAPI, status, Depends, Form
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.responses import RedirectResponse
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import Session
 from backend.database.database import get_db, engine, Base
@@ -117,14 +117,10 @@ async def list_routes():
         routes.append(route_info)
     return {"routes": routes}
 
+# Replace your current root route with this:
+@app.get("/", include_in_schema=False)
+async def root():
+    """Redirect root to API documentation"""
+    return RedirectResponse(url="/docs")
 
-# import random
-# reload_test_id = random.randint(1000, 9999)
 
-# @app.get("/test-reload")
-# def test_reload():
-#     """Test if hot reloading is working"""
-#     return {
-#         "message": "Hot reload works!",
-#         "id": reload_test_id  # This will change on each reload
-#     }

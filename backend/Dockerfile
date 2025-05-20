@@ -6,7 +6,7 @@ WORKDIR /
 # Install requirements first (for better caching)
 COPY requirements.txt .
 RUN pip install -r requirements.txt
-RUN pip install watchfiles  
+
 
 # We don't need to copy anything here as it will be mounted by docker-compose
 # COPY . .

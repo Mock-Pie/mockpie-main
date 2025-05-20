@@ -4,12 +4,12 @@ services:
     container_name: postgres_db
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: mockpie
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
     restart: always
-    env_file: .env
+    env_file: backend/.env
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
@@ -19,38 +19,56 @@ services:
     container_name: fastapi_backend
     depends_on:
       - db
-    env_file: .env
+      - redis
+    env_file: backend/.env
     ports:
       - "8081:8000"
     environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/postgres
       - CORS_ORIGINS=http://localhost:3000,http://frontend:3000,http://react_frontend:3000,*
+      - PYTHONDONTWRITEBYTECODE=1  # Don't create .pyc files
+      - PYTHONUNBUFFERED=1  # Don't buffer stdout/stderr
     volumes:
-      - ./backend:/app  # Map local backend directory to container
-
-  frontend:
-    build: ./frontend
-    container_name: react_frontend
-    env_file: .env
-    environment:
-      - HOST=0.0.0.0
-      - PORT=3000
-      - WDS_SOCKET_PORT=3000
-      - WATCHPACK_POLLING=true  # Enable polling for file changes
-      - CHOKIDAR_USEPOLLING=true  # Enable polling for file watcher
-      - FAST_REFRESH=true  # Enable fast refresh for React
-      - REACT_APP_API_URL=http://backend:8000
-    depends_on:
-      - backend
-    ports:
-      - "3000:3000"
-    volumes:
-      - ./frontend:/app  # Mount local directory to container
-      - /app/node_modules  # Use container's node_modules
-    stdin_open: true
-    tty: true
+    - ./backend:/backend 
     command: >
-      sh -c "npm install &&
-             npm run dev"
-
+      uvicorn backend.app.main:app 
+      --host 0.0.0.0 
+      --port 8000 
+      --reload 
+      --reload-dir /backend 
+      --log-level debug
+  # frontend:
+  #   build: ./frontend
+  #   container_name: react_frontend
+  #   env_file: frontend/.env
+  #   environment:
+  #     - HOST=0.0.0.0
+  #     - PORT=3000
+  #     - WDS_SOCKET_PORT=3000
+  #     - WATCHPACK_POLLING=true  # Enable polling for file changes
+  #     - CHOKIDAR_USEPOLLING=true  # Enable polling for file watcher
+  #     - FAST_REFRESH=true  # Enable fast refresh for React
+  #     - REACT_APP_API_URL=http://backend:8000
+  #   depends_on:
+  #     - backend
+  #   ports:
+  #     - "3000:3000"
+  #   volumes:
+  #     - ./frontend:/app  # Mount local directory to container
+  #     - /app/node_modules  # Use container's node_modules
+  #   stdin_open: true
+  #   tty: true
+  #   command: >
+  #     sh -c "npm install &&
+  #            npm run dev"
+  redis:
+    image: redis:alpine
+    container_name: redis_cache
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: always
 volumes:
   postgres_data:
+  redis_data:
