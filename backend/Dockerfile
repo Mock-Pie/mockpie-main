@@ -1,7 +1,7 @@
 # Stage 1: Builder
 FROM python:3.10-slim AS builder
 
-WORKDIR /
+WORKDIR /app
 
 # Install system dependencies needed to build some Python packages
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -19,17 +19,20 @@ RUN pip install --user --no-cache-dir --upgrade pip \
 # Stage 2: Final Image
 FROM python:3.10-slim
 
-WORKDIR /
+WORKDIR /app
 
 # Copy installed Python packages from builder
 COPY --from=builder /root/.local /root/.local
 ENV PATH=/root/.local/bin:$PATH
 
+# Create backend directory to match the structure expected by imports
+RUN mkdir -p /app/backend
+
 # Make sure Python can find your app modules
-ENV PYTHONPATH=/
+ENV PYTHONPATH=/app
 
-# Copy all source code into container (keeping /app/backend structure)
-COPY . .
+# Copy all source code into the backend directory
+COPY . /app/backend/
 
-# Start the FastAPI server with hot reload for development
-CMD ["uvicorn", "backend.app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload", "--reload-dir", "/backend", "--log-level", "debug"]
+# For production, start the FastAPI server without hot reload
+CMD ["uvicorn", "backend.app.main:app", "--host", "0.0.0.0", "--port", "8000", "--log-level", "info"]
