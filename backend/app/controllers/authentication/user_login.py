@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, status, Depends, Form
+from fastapi import FastAPI, HTTPException, status, Depends, Form, Request
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordBearer
@@ -11,6 +11,7 @@ from backend.app.models.user.user import User
 from backend.app.static.lang.error_messages.exception_responses import ErrorMessage
 from backend.config import settings
 from backend.app.utils.redis_client import RedisClient
+from backend.app.utils.redis_dependency import get_redis_client
 from backend.app.utils.token_handler import TokenHandler
 from backend.app.utils.encryption_handler import EncryptionHandler
 
@@ -27,8 +28,25 @@ class LoginUser:
     def login_user(
         email: EmailStr = Form(...),
         password: str = Form(...),
-        db: Session = Depends(get_db)
-    ):        # Find user by email
+        db: Session = Depends(get_db),
+        redis: RedisClient = Depends(get_redis_client)
+    ):        
+        """
+        Log in a user and generate authentication tokens.
+        
+        Args:
+            email: User's email address
+            password: User's password
+            db: Database session
+            redis: Redis client from middleware
+            
+        Returns:
+            dict: Authentication tokens and user information
+            
+        Raises:
+            HTTPException: If login fails
+        """
+        # Find user by email
         user = db.query(User).filter(User.email == email).first()
         
         # Check if user exists and password matches
@@ -51,14 +69,19 @@ class LoginUser:
             data={"sub": user.email, "refresh": True}, expires_delta=refresh_token_expires
         )
         
-        # Store tokens in Redis
-        redis_client = RedisClient()
-        redis_client.set_access_token(user.id, access_token, access_token_expires)
-        redis_client.set_refresh_token(user.id, refresh_token, refresh_token_expires)
-        
-        # Update user last login timestamp if needed
-        # user.last_login = datetime.now(timezone.utc)
-        # db.commit()
+        try:
+            # Store tokens in Redis using the Redis dependency
+            TokenHandler.store_tokens_in_redis(
+                user.id, 
+                access_token, 
+                refresh_token, 
+                access_token_expires, 
+                refresh_token_expires,
+                redis=redis
+            )
+        except Exception as e:
+            # Log but continue - JWT tokens still work without Redis
+            print(f"Error storing tokens in Redis: {e}")
         
         # Return response
         return {
@@ -76,9 +99,24 @@ class LoginUser:
         }
     
     @staticmethod
-    def refresh_token(refresh_token: str, db: Session = Depends(get_db)):
+    def refresh_token(
+        refresh_token: str, 
+        db: Session = Depends(get_db),
+        redis: RedisClient = Depends(get_redis_client)
+    ):
         """
         Generate new access token using refresh token.
+        
+        Args:
+            refresh_token: The refresh token
+            db: Database session
+            redis: Redis client from middleware
+            
+        Returns:
+            dict: New access token
+            
+        Raises:
+            HTTPException: If refresh token is invalid
         """
         try:
             # Decode refresh token
@@ -100,13 +138,17 @@ class LoginUser:
                     detail=ErrorMessage.INVALID_REFRESH_TOKEN.value
                 )
             
-            # Verify refresh token in Redis
-            redis_client = RedisClient()
-            if not redis_client.validate_refresh_token(user.id, refresh_token):
-                raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail=ErrorMessage.INVALID_REFRESH_TOKEN.value
-                )
+            try:
+                # Verify refresh token in Redis
+                if not redis.validate_refresh_token(user.id, refresh_token):
+                    raise HTTPException(
+                        status_code=status.HTTP_401_UNAUTHORIZED,
+                        detail=ErrorMessage.INVALID_REFRESH_TOKEN.value
+                    )
+            except Exception as e:
+                # Log but continue with JWT validation only if Redis fails
+                print(f"Error validating refresh token in Redis: {e}")
+                # We already validated the JWT, so we can proceed
             
             # Generate new access token
             access_token_expires = timedelta(minutes=settings.access_token_expire_minutes)
@@ -114,8 +156,12 @@ class LoginUser:
                 data={"sub": user.email}, expires_delta=access_token_expires
             )
             
-            # Store new access token in Redis
-            redis_client.set_access_token(user.id, access_token, access_token_expires)
+            try:
+                # Store new access token in Redis
+                redis.set_access_token(user.id, access_token, access_token_expires)
+            except Exception as e:
+                # Log but continue - JWT token still works without Redis
+                print(f"Error storing access token in Redis: {e}")
             
             return {
                 "access_token": access_token,

@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, status, Depends, Form
+from fastapi import FastAPI, HTTPException, status, Depends, Form, Request
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordBearer
@@ -14,6 +14,8 @@ from backend.app.schemas.user.user_schema import *
 from backend.app.utils.token_handler import TokenHandler
 from backend.app.utils.encryption_handler import EncryptionHandler
 from backend.app.utils.redis_client import RedisClient
+from backend.app.utils.redis_dependency import get_redis_client
+
 app = FastAPI()
 
 # Password hashing
@@ -31,8 +33,28 @@ class RegisterUser():
         password: str = Form(...),
         password_confirmation: str = Form(...),
         gender: Gender = Form(...),
-        db: Session = Depends(get_db)
+        db: Session = Depends(get_db),
+        redis: RedisClient = Depends(get_redis_client)
     ):
+        """
+        Register a new user and generate authentication tokens.
+        
+        Args:
+            email: User's email address
+            username: User's username
+            phone_number: User's phone number
+            password: User's password
+            password_confirmation: Password confirmation
+            gender: User's gender
+            db: Database session
+            redis: Redis client from middleware
+            
+        Returns:
+            dict: Authentication tokens and user information
+            
+        Raises:
+            HTTPException: If registration fails
+        """
         if password != password_confirmation:
             raise HTTPException(
                 status_code=400, 
@@ -76,8 +98,7 @@ class RegisterUser():
         db.add(new_user)
         db.commit()
         db.refresh(new_user)
-        
-        # Generate token
+          # Generate token
         access_token_expires = timedelta(minutes=settings.access_token_expire_minutes)
         access_token = TokenHandler.create_access_token(
             data={"sub": new_user.email}, expires_delta=access_token_expires
@@ -86,10 +107,20 @@ class RegisterUser():
         refresh_token = TokenHandler.create_access_token(
             data={"sub": new_user.email}, expires_delta=refresh_token_expires
         )
-        redis_client = RedisClient()
-        # Store tokens in Redis
-        redis_client.set_access_token(new_user.id, access_token, access_token_expires)
-        redis_client.set_refresh_token(new_user.id, refresh_token, refresh_token_expires)
+        
+        try:
+            # Store tokens in Redis using the dependency
+            TokenHandler.store_tokens_in_redis(
+                new_user.id, 
+                access_token, 
+                refresh_token, 
+                access_token_expires, 
+                refresh_token_expires,
+                redis=redis
+            )
+        except Exception as e:
+            # Log but continue - JWT tokens still work without Redis
+            print(f"Error storing tokens in Redis during registration: {e}")
 
         return {
             "access_token": access_token,
