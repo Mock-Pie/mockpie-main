@@ -105,8 +105,14 @@ async def logout(
     current_user: User = Depends(TokenHandler.get_current_user),
     redis: RedisClient = Depends(get_redis_client)
 ):
-    TokenHandler.revoke_tokens(current_user.id, redis=redis)
-    return {"message": "Successfully logged out"}
+    # Attempt to revoke tokens and get the result
+    revocation_success = TokenHandler.revoke_tokens(current_user.id, redis=redis)
+    
+    if not revocation_success:
+        # Log the issue but still respond with success to the client
+        print(f"Warning: There was an issue revoking tokens for user {current_user.id}")
+    
+    return {"message": "Successfully logged out", "tokens_revoked": revocation_success}
 
 # Add a diagnostic routes endpoint to help troubleshoot API registration
 @app.get("/api/routes")

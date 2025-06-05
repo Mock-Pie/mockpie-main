@@ -125,18 +125,25 @@ class TokenHandler:
                     detail=ErrorMessage.INVALID_TOKEN.value,
                     headers={"WWW-Authenticate": "Bearer"},
                 )
-                
-            # Verify token in Redis if Redis client is available
+                  # Verify token in Redis if Redis client is available
             try:
+                # Always validate token in Redis - if it fails, it's invalid
                 if not redis.validate_access_token(user.id, token):
                     raise HTTPException(
                         status_code=status.HTTP_401_UNAUTHORIZED,
                         detail=ErrorMessage.INVALID_TOKEN.value,
                         headers={"WWW-Authenticate": "Bearer"},
                     )
-            except Exception:
-                # Fall back to JWT validation only if Redis is unavailable
-                pass
+            except Exception as e:
+                # Log the error but still consider token as invalid
+                # This is to ensure security - a token should be checked against Redis
+                # If Redis is down, we should not bypass token validation
+                print(f"Error validating token in Redis: {e}")
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail=ErrorMessage.INVALID_TOKEN.value,
+                    headers={"WWW-Authenticate": "Bearer"},
+                )
                 
             return user
             
@@ -175,7 +182,6 @@ class TokenHandler:
         except Exception as e:
             # Log the error but don't fail - the JWT itself is still valid
             print(f"Error storing tokens in Redis: {e}")
-    
     @staticmethod
     def revoke_tokens(user_id: Union[int, Any], redis: RedisClient = None):
         """
@@ -184,11 +190,26 @@ class TokenHandler:
         Args:
             user_id: User ID
             redis: Redis client instance (optional)
+        
+        Returns:
+            bool: True if tokens were successfully revoked, False otherwise
         """
         try:
             # Use provided Redis client or create a new one
             redis_client = redis or RedisClient()
+            # Try to revoke tokens and verify the operation
             redis_client.revoke_tokens(user_id)
+            
+            # Verify that tokens were actually revoked by checking they don't exist anymore
+            access_token = redis_client.get_access_token(user_id)
+            refresh_token = redis_client.get_refresh_token(user_id)
+            
+            if access_token is not None or refresh_token is not None:
+                print(f"Warning: Tokens for user {user_id} may not have been fully revoked")
+                return False
+            
+            return True
         except Exception as e:
             # Log the error
             print(f"Error revoking tokens: {e}")
+            return False
