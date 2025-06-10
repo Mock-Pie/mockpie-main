@@ -81,7 +81,6 @@ class RedisClient:
         user_id_int = self._ensure_int(user_id)
         stored_token = self.get_access_token(user_id_int)
         return stored_token == token
-        
     def validate_refresh_token(self, user_id: Union[int, Any], token: str) -> bool:
         """Validate if refresh token matches stored token"""
         user_id_int = self._ensure_int(user_id)
@@ -91,7 +90,18 @@ class RedisClient:
     def revoke_tokens(self, user_id: Union[int, Any]):
         """Revoke all tokens for user (logout)"""
         user_id_int = self._ensure_int(user_id)
-        self.redis.delete(f"access_token:{user_id_int}", f"refresh_token:{user_id_int}")
+        access_key = f"access_token:{user_id_int}"
+        refresh_key = f"refresh_token:{user_id_int}"
+        
+        # Check if keys exist before deleting
+        access_exists = self.redis.exists(access_key)
+        refresh_exists = self.redis.exists(refresh_key)
+        
+        # Delete the tokens
+        deleted_count = self.redis.delete(access_key, refresh_key)
+        
+        # Return the number of keys deleted (should be 0, 1, or 2)
+        return deleted_count
         
     def revoke_all_tokens(self, user_id: Union[int, Any]):
         """Revoke all tokens for a user across all devices"""

@@ -1,28 +1,28 @@
 services:
   db:
     image: postgres:15
-    container_name: postgres_db_dev
+    container_name: postgres_db_prod
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: postgres
-    restart: unless-stopped
+    restart: always
     env_file: backend/.env
     ports:
       - "5433:5432"
     volumes:
-      - postgres_data_dev:/var/lib/postgresql/data
+      - postgres_data_prod:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
+      interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 3
 
   backend:
     build:
       context: ./backend
-      dockerfile: Dockerfile.dev
-    container_name: fastapi_backend_dev
+      dockerfile: Dockerfile
+    container_name: fastapi_backend_prod
     depends_on:
       db:
         condition: service_healthy
@@ -33,54 +33,42 @@ services:
       - "8081:8000"
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/postgres
-      - CORS_ORIGINS=http://localhost:3000,http://frontend:3000,http://react_frontend:3000,*
-      - PYTHONDONTWRITEBYTECODE=1
-      - PYTHONUNBUFFERED=1
-    volumes:
-      - ./backend:/backend
-    restart: unless-stopped
+      - CORS_ORIGINS=http://localhost:3000,http://frontend:3000,*
+    restart: always
+    # Using the CMD from the Dockerfile - no reload in production
 
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile.dev
-    container_name: react_frontend_dev
+      dockerfile: Dockerfile
+    container_name: react_frontend_prod
     env_file: frontend/.env
     environment:
       - HOST=0.0.0.0
       - PORT=3000
-      - WDS_SOCKET_PORT=3000
-      - WATCHPACK_POLLING=true
-      - CHOKIDAR_USEPOLLING=true
-      - FAST_REFRESH=true
+      - NODE_ENV=production
       - REACT_APP_API_URL=http://localhost:8081
       - NEXT_PUBLIC_API_URL=http://localhost:8081
     depends_on:
       - backend
     ports:
       - "3000:3000"
-    volumes:
-      - ./frontend:/app
-      - frontend_node_modules_dev:/app/node_modules
-    stdin_open: true
-    tty: true
-    restart: unless-stopped
+    restart: always
 
   redis:
     image: redis:alpine
-    container_name: redis_cache_dev
+    container_name: redis_cache_prod
     ports:
       - "6379:6379"
     volumes:
-      - redis_data_dev:/data
-    restart: unless-stopped
+      - redis_data_prod:/data
+    restart: always
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
 volumes:
-  postgres_data_dev:
-  redis_data_dev:
-  frontend_node_modules_dev:
+  postgres_data_prod:
+  redis_data_prod:
