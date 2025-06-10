@@ -13,6 +13,7 @@ from backend.config import settings
 from backend.app.utils.redis_client import RedisClient
 from backend.app.utils.token_handler import TokenHandler
 from backend.app.utils.encryption_handler import EncryptionHandler
+from backend.app.crud.user import *
 
 
 # Password hashing
@@ -24,16 +25,16 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
 class LoginUser:
 
     @staticmethod
-    def login_user(
+    async def login_user(
         email: EmailStr = Form(...),
         password: str = Form(...),
         db: Session = Depends(get_db)
-    ):        # Find user by email
+    ):        
+        # Find user by email
         user = db.query(User).filter(User.email == email).first()
         
         # Check if user exists and password matches
-        if not user or not user.verify_password(password):
-            print("Invalid credentials")
+        if not user or not match_plain_and_hashed_passwords(user, password):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail=ErrorMessage.INVALID_CREDENTIALS.value,
@@ -52,9 +53,9 @@ class LoginUser:
         )
         
         # Store tokens in Redis
-        redis_client = RedisClient()
-        redis_client.set_access_token(user.id, access_token, access_token_expires)
-        redis_client.set_refresh_token(user.id, refresh_token, refresh_token_expires)
+        # redis_client = RedisClient()
+        # redis_client.set_access_token(user.id, access_token, access_token_expires)
+        # redis_client.set_refresh_token(user.id, refresh_token, refresh_token_expires)
         
         # Update user last login timestamp if needed
         # user.last_login = datetime.now(timezone.utc)

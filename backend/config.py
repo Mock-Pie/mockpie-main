@@ -13,6 +13,10 @@ class Settings(BaseSettings):
     algorithm: str
     access_token_expire_minutes: int
     refresh_token_expire_days: int
+    smtp_server: str
+    smtp_port: int
+    smtp_username: str
+    smtp_password: str
     model_config = SettingsConfigDict(env_file=str(Path(__file__).parent / ".env"))
 
 settings = Settings()
