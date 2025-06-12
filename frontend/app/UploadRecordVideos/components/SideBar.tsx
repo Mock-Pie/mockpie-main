@@ -6,12 +6,13 @@ import { TbLogout } from "react-icons/tb";
 import Link from "next/link"; // Import Link from Next.js
 import styles from "../../Login/page.module.css";
 import { VscCalendar } from "react-icons/vsc";
+import Image from "next/image";
 
 const SideBar = () => {
     return (
         <div className={styles.sidebar}>
             <div className={styles.logo}>
-                <img src="/Images/logo.png" className={styles.logoImage} />
+                <Image src="/Images/logo.png" alt="Logo" width={120} height={40} className={styles.logoImage} priority />
             </div>
             <div className={styles.menu}>
                 <Link href="/Dashboard" className={styles.menuItem}>

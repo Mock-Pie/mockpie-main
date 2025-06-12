@@ -18,8 +18,9 @@
 }
 
 .title {
+  font-family: var(--font-poppins), sans-serif;
+  font-weight: 400;
   font-size: var(--text-4xl);
-  font-weight: 600;
   color: var(--white);
   margin: 0;
 }
