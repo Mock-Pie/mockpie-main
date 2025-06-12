@@ -75,3 +75,6 @@ class ErrorMessage(str, Enum):
     ENDPOINT_NOT_FOUND = "API endpoint not found"
     METHOD_NOT_ALLOWED = "HTTP method not allowed for this endpoint"
     TOO_MANY_REQUESTS = "Too many requests"
+    
+    # Redis errors
+    REDIS_CONNECTION_ERROR = "Failed to connect to Redis"

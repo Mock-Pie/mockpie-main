@@ -112,6 +112,7 @@ class TokenHandler:
             email = payload.get("sub")
             
             if email is None:
+                # print('here')
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     detail=ErrorMessage.INVALID_TOKEN.value,
@@ -140,8 +141,8 @@ class TokenHandler:
                 # If Redis is down, we should not bypass token validation
                 print(f"Error validating token in Redis: {e}")
                 raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail=ErrorMessage.INVALID_TOKEN.value,
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail=ErrorMessage.REDIS_CONNECTION_ERROR.value,
                     headers={"WWW-Authenticate": "Bearer"},
                 )
                 
