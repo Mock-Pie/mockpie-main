@@ -12,7 +12,7 @@ class EncryptionHandler:
     """
     
     @staticmethod
-    def verify_password(plain_password: str, hashed_password: str) -> bool:
+    def verify_plain_password(plain_password: str, hashed_password: str) -> bool:
         """
         Verify a plain password against a hashed password.
         

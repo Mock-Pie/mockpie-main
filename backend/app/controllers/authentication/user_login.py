@@ -14,6 +14,7 @@ from backend.app.utils.redis_client import RedisClient
 from backend.app.utils.redis_dependency import get_redis_client
 from backend.app.utils.token_handler import TokenHandler
 from backend.app.utils.encryption_handler import EncryptionHandler
+from backend.app.crud.user import *
 
 
 # Password hashing
@@ -25,9 +26,9 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
 class LoginUser:
 
     @staticmethod
-    def login_user(
+    async def login_user(
         email: EmailStr = Form(...),
-        password: str = Form(...),
+        password: str = Form(...),        
         db: Session = Depends(get_db),
         redis: RedisClient = Depends(get_redis_client)
     ):        
@@ -50,8 +51,7 @@ class LoginUser:
         user = db.query(User).filter(User.email == email).first()
         
         # Check if user exists and password matches
-        if not user or not user.verify_password(password):
-            print("Invalid credentials")
+        if not user or not match_plain_and_hashed_passwords(user, password):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail=ErrorMessage.INVALID_CREDENTIALS.value,

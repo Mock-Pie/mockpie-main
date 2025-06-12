@@ -13,3 +13,5 @@ redis
 fastapi-redis-cache
 watchfiles
 python-dotenv
+fastapi_mail
+

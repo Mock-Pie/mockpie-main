@@ -12,8 +12,11 @@ from backend.app.static.lang.error_messages.exception_responses import *
 from backend.config import *
 from backend.app.schemas.user.user_schema import *
 from backend.app.utils.token_handler import TokenHandler
+from backend.app.utils.otp_handler import OTPHandler
+from backend.app.services.authentication.email_service import EmailService
 from backend.app.utils.encryption_handler import EncryptionHandler
 from backend.app.utils.redis_client import RedisClient
+from backend.app.crud.user import *
 from backend.app.utils.redis_dependency import get_redis_client
 
 app = FastAPI()
@@ -26,7 +29,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
 
 class RegisterUser():
     
-    def register_user(
+    async def register_user(
         email: EmailStr = Form(...),
         username: str = Form(...),
         phone_number: str = Form(...),
@@ -98,6 +101,18 @@ class RegisterUser():
         db.add(new_user)
         db.commit()
         db.refresh(new_user)
+        
+         # Generate OTP
+        otp = OTPHandler.generate_otp()
+        otp_expiry = OTPHandler.get_otp_expiry()
+        
+        # Store OTP in database
+        set_otp_and_otp_expiry_time(db, new_user, otp, otp_expiry)
+        
+        # Send OTP email
+        await EmailService.send_otp_email(email, otp, is_registration=True)
+        
+        # Generate token
           # Generate token
         access_token_expires = timedelta(minutes=settings.access_token_expire_minutes)
         access_token = TokenHandler.create_access_token(
@@ -107,6 +122,10 @@ class RegisterUser():
         refresh_token = TokenHandler.create_access_token(
             data={"sub": new_user.email}, expires_delta=refresh_token_expires
         )
+        # redis_client = RedisClient()
+        # # Store tokens in Redis
+        # redis_client.set_access_token(new_user.id, access_token, access_token_expires)
+        # redis_client.set_refresh_token(new_user.id, refresh_token, refresh_token_expires)
         
         try:
             # Store tokens in Redis using the dependency
@@ -126,12 +145,12 @@ class RegisterUser():
             "access_token": access_token,
             "refresh_token": refresh_token,
             "user": {
-            "id": new_user.id,
-            "username": new_user.username,
-            "email": new_user.email,
-            "phone_number": new_user.phone_number,
-            "gender": new_user.gender,
-            "created_at": new_user.created_at,
-            "updated_at": new_user.updated_at,
+                "id": new_user.id,
+                "username": new_user.username,
+                "email": new_user.email,
+                "phone_number": new_user.phone_number,
+                "gender": new_user.gender,
+                "created_at": new_user.created_at,
+                "updated_at": new_user.updated_at,
             }
         }

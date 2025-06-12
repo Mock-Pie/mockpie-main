@@ -3,6 +3,7 @@ from sqlalchemy import Column, Integer, String, DateTime, Enum
 from sqlalchemy.sql import func
 from passlib.hash import bcrypt
 from backend.app.enums.gender import Gender
+from backend.app.utils.encryption_handler import *
 
 class User(Base):
     __tablename__ = "users"
@@ -16,6 +17,9 @@ class User(Base):
     created_at = Column(DateTime, server_default=func.now(), nullable=False)
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
     remember_token = Column(String, index=True, nullable=True, default="")
+    otp = Column(String, nullable=True)
+    otp_expired_at = Column(DateTime, nullable=True)
+    email_verified_at = Column(DateTime, nullable=True)
     
     @property
     def password(self):
@@ -40,5 +44,7 @@ class User(Base):
         # Ensure _password is a string before passing to bcrypt.verify
         # stored_hash = str(self._password) if self._password is not None else ""
         # return bcrypt.verify(plain_password, stored_hash)
-        return True
+        # return True
+        
+        return EncryptionHandler.verify_plain_password(plain_password, self._password)
 

@@ -22,6 +22,8 @@ class ErrorMessage(str, Enum):
     PHONE_TAKEN = "Phone number already registered"
     INVALID_PASSWORD = "Password does not meet security requirements"
     PASSWORD_MISMATCH = "Passwords do not match"
+    EMAIL_DOES_NOT_EXIST = "Email address does not exist"
+    EMAIL_NOT_VERIFIED = "Email address not verified"
     
     # Presentation related errors
     PRESENTATION_NOT_FOUND = "Presentation not found"
