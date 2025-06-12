@@ -15,7 +15,7 @@ $redisTestResponse | ConvertTo-Json -Depth 5
 # Test 3: Testing login with Redis
 Write-Host "`n3. Testing login with Redis..." -ForegroundColor Green
 $loginData = @{
-    email = "test@example.com"
+    email = "testuser_499233720@example.com"
     password = "password123"
 }
 $loginResponse = try {
@@ -96,6 +96,30 @@ if ($loginResponse) {
     }
 } else {
     Write-Host "Login test skipped due to failure" -ForegroundColor Yellow
+}
+
+# Test 8: Testing registration
+Write-Host "`n8. Testing registration..." -ForegroundColor Green
+$registerData = @{
+    email = "testuser_$(Get-Random)@example.com"
+    username = "testuser_$(Get-Random)"
+    phone_number = "23457898765"
+    password = "password123"
+    password_confirmation = "password123"
+    gender = "male"
+}
+$registerResponse = try {
+    Invoke-RestMethod -Uri "http://localhost:8081/auth/register" -Method Post -Body $registerData -ContentType "application/x-www-form-urlencoded"
+} catch {
+    Write-Host "Registration failed: $_" -ForegroundColor Red
+    $null
+}
+
+if ($registerResponse) {
+    $registerResponse | ConvertTo-Json -Depth 5
+    Write-Host "Registration test passed." -ForegroundColor Green
+} else {
+    Write-Host "Registration test failed." -ForegroundColor Red
 }
 
 Write-Host "`n========== Redis Test Complete ==========" -ForegroundColor Cyan

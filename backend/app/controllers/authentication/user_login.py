@@ -17,9 +17,6 @@ from backend.app.utils.encryption_handler import EncryptionHandler
 from backend.app.crud.user import *
 
 
-# Password hashing
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
 # OAuth2 configuration
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
 
@@ -49,6 +46,8 @@ class LoginUser:
         """
         # Find user by email
         user = db.query(User).filter(User.email == email).first()
+        
+        # print(match_plain_and_hashed_passwords(user, password), password, user.password)
         
         # Check if user exists and password matches
         if not user or not match_plain_and_hashed_passwords(user, password):

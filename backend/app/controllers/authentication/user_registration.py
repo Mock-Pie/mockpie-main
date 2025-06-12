@@ -96,7 +96,9 @@ class RegisterUser():
             gender=gender,
             remember_token=""
         )
-        new_user.password = EncryptionHandler.get_password_hash(password)
+        new_user.password = password 
+        
+        # print(password, new_user._password)
         
         db.add(new_user)
         db.commit()

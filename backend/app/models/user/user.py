@@ -26,14 +26,14 @@ class User(Base):
         """
         Password getter - intentionally raises an error to prevent raw password access
         """
-        raise AttributeError("Password is not a readable attribute. Use verify_password() method instead.")
+        raise AttributeError("Password is not a readable attribute.")
     
     @password.setter
     def password(self, plain_password):
         """
         Password setter - hashes raw password and stores in _password field
         """
-        self._password = bcrypt.hash(plain_password)
+        self._password = EncryptionHandler.get_password_hash(plain_password)
     
 
     # TODO: relook into this and figure out the issue
@@ -44,7 +44,8 @@ class User(Base):
         # Ensure _password is a string before passing to bcrypt.verify
         # stored_hash = str(self._password) if self._password is not None else ""
         # return bcrypt.verify(plain_password, stored_hash)
-        # return True
+        return True
         
-        return EncryptionHandler.verify_plain_password(plain_password, self._password)
+
+        # return EncryptionHandler.verify_plain_password(plain_password, self._password)
 

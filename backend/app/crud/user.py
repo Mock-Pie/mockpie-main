@@ -63,7 +63,6 @@ def match_plain_and_hashed_passwords(user: User, password: str) -> bool:
     """
     Verify user's password against the stored hash.
     """
-    # print(password, user._password)
     if not user or not user._password:
         return False
     return EncryptionHandler.verify_plain_password(password, user._password)
