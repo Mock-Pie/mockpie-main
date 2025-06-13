@@ -24,8 +24,7 @@ class EncryptionHandler:
             bool: True if the password matches, False otherwise
         """
         
-        # return pwd_context.verify(plain_password, hashed_password)
-        return True
+        return pwd_context.verify(plain_password, hashed_password)
 
     @staticmethod
     def get_password_hash(password: str) -> str:

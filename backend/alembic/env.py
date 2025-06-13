@@ -13,14 +13,29 @@ from pathlib import Path
 backend_dir = Path(__file__).parents[1]
 sys.path.append(str(backend_dir))
 
+# Also add the parent of backend directory for local development
+project_root = Path(__file__).parents[2]
+sys.path.append(str(project_root))
+
 # Import the Base class and all models
-from backend.database.database import Base
-from backend.app.models.user.user import User
-from backend.app.models.presentation.presentation import Presentation
-from backend.app.models.analysis.voice_analysis import VoiceAnalysis
-from backend.app.models.analysis.body_analysis import BodyAnalysis
-from backend.app.models.segments.voice_segment import VoiceSegment
-from backend.app.models.segments.body_segment import BodySegment
+try:
+    # Try Docker/container import first
+    from backend.database.database import Base
+    from backend.app.models.user.user import User
+    from backend.app.models.presentation.presentation import Presentation
+    from backend.app.models.analysis.voice_analysis import VoiceAnalysis
+    from backend.app.models.analysis.body_analysis import BodyAnalysis
+    from backend.app.models.segments.voice_segment import VoiceSegment
+    from backend.app.models.segments.body_segment import BodySegment
+except ImportError:
+    # Fallback to local import
+    from database.database import Base
+    from app.models.user.user import User
+    from app.models.presentation.presentation import Presentation
+    from app.models.analysis.voice_analysis import VoiceAnalysis
+    from app.models.analysis.body_analysis import BodyAnalysis
+    from app.models.segments.voice_segment import VoiceSegment
+    from app.models.segments.body_segment import BodySegment
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

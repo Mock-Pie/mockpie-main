@@ -14,4 +14,4 @@ fastapi-redis-cache
 watchfiles
 python-dotenv
 fastapi_mail
-
+alembic
