@@ -12,29 +12,52 @@ const ForgotPasswordForm = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
 
-  // Placeholder for API call to request OTP
+  // Request OTP
   const handleRequestOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    // TODO: Call your API to send OTP
-    // Example: await api.sendOtp(emailOrUsername)
-    // If success:
-    setStep(2);
-    // If error: setError('User not found')
+    try {
+      const data = new FormData();
+      data.append("email", emailOrUsername);
+      const response = await fetch("http://localhost:8081/auth/forgot-password", {
+        method: "POST",
+        body: data,
+      });
+      if (response.ok) {
+        setStep(2);
+      } else {
+        const errorData = await response.json();
+        setError(errorData.detail || errorData.message || "User not found");
+      }
+    } catch (err) {
+      setError("Failed to send OTP. Please try again.");
+    }
   };
 
-  // Placeholder for API call to verify OTP
+  // Verify OTP
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    // TODO: Call your API to verify OTP
-    // Example: await api.verifyOtp(emailOrUsername, otp)
-    // If success:
-    setStep(3);
-    // If error: setError('Invalid OTP')
+    try {
+      const data = new FormData();
+      data.append("email", emailOrUsername);
+      data.append("otp", otp);
+      const response = await fetch("http://localhost:8081/auth/verify-otp", {
+        method: "POST",
+        body: data,
+      });
+      if (response.ok) {
+        setStep(3);
+      } else {
+        const errorData = await response.json();
+        setError(errorData.detail || errorData.message || "Invalid OTP");
+      }
+    } catch (err) {
+      setError("Failed to verify OTP. Please try again.");
+    }
   };
 
-  // Placeholder for API call to reset password
+  // Reset Password
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -42,11 +65,24 @@ const ForgotPasswordForm = () => {
       setError("Passwords do not match");
       return;
     }
-    // TODO: Call your API to reset password
-    // Example: await api.resetPassword(emailOrUsername, otp, newPassword)
-    // If success:
-    window.location.href = "/Login";
-    // If error: setError('Failed to reset password')
+    try {
+      const data = new FormData();
+      data.append("email", emailOrUsername);
+      data.append("new_password", newPassword);
+      data.append("confirm_password", confirmPassword);
+      const response = await fetch("http://localhost:8081/auth/reset-password", {
+        method: "POST",
+        body: data,
+      });
+      if (response.ok) {
+        window.location.href = "/Login";
+      } else {
+        const errorData = await response.json();
+        setError(errorData.detail || errorData.message || "Failed to reset password");
+      }
+    } catch (err) {
+      setError("Failed to reset password. Please try again.");
+    }
   };
 
   return (
