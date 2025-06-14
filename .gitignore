@@ -72,3 +72,7 @@ dump.rdb
 *.sqlite
 *.sqlite3
 *.db
+
+
+
+uploads/videos/*

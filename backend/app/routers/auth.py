@@ -19,30 +19,30 @@ from backend.app.utils.token_handler import TokenHandler
 router = APIRouter(prefix="/auth", tags=["authentication"])
 
 
-@router.post("/register", response_model=UserAuthResponse, status_code=status.HTTP_201_CREATED)
-async def register_user(
-    first_name: str = Form(...),
-    last_name: str = Form(...),
-    email: EmailStr = Form(...),
-    username: str = Form(...),
-    phone_number: str = Form(...),
-    password: str = Form(...),
-    password_confirmation: str = Form(...),
-    gender: Gender = Form(...),
-    db: Session = Depends(get_db),
-    redis: RedisClient = Depends(get_redis_client)
-):    return await RegisterUser.register_user(
-        first_name=first_name,
-        last_name=last_name,
-        email=email, 
-        username=username, 
-        phone_number=phone_number, 
-        password=password, 
-        password_confirmation=password_confirmation,
-        gender=gender, 
-        db=db, 
-        redis=redis
-    )
+# @router.post("/register", response_model=UserAuthResponse, status_code=status.HTTP_201_CREATED)
+# async def register_user(
+#     first_name: str = Form(...),
+#     last_name: str = Form(...),
+#     email: EmailStr = Form(...),
+#     username: str = Form(...),
+#     phone_number: str = Form(...),
+#     password: str = Form(...),
+#     password_confirmation: str = Form(...),
+#     gender: Gender = Form(...),
+#     db: Session = Depends(get_db),
+#     redis: RedisClient = Depends(get_redis_client)
+# ):    return await RegisterUser.register_user(
+#         first_name=first_name,
+#         last_name=last_name,
+#         email=email, 
+#         username=username, 
+#         phone_number=phone_number, 
+#         password=password, 
+#         password_confirmation=password_confirmation,
+#         gender=gender, 
+#         db=db, 
+#         redis=redis
+#     )
 
 
 @router.post("/login", response_model=UserAuthResponse, status_code=status.HTTP_200_OK)
@@ -52,7 +52,7 @@ async def login_user(
     db: Session = Depends(get_db),
     redis: RedisClient = Depends(get_redis_client)
 ):
-    return await LoginUser.login_user(email=email, password=password, db=db)
+    return await LoginUser.login_user(email=email, password=password, db=db, redis=redis)
 
 
 @router.post("/refresh", status_code=status.HTTP_200_OK)

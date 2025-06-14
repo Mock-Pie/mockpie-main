@@ -46,9 +46,12 @@ app.include_router(utils.router)
 app.include_router(presentations.router)
 
 # Mount static files for uploaded videos
-uploads_dir = os.path.join(os.path.dirname(__file__), "..", "uploads")
+uploads_dir = "uploads"  # Relative to the app working directory
 if os.path.exists(uploads_dir):
     app.mount("/uploads", StaticFiles(directory=uploads_dir), name="uploads")
+    logger.info(f"Mounted uploads directory: {os.path.abspath(uploads_dir)}")
+else:
+    logger.warning(f"Uploads directory not found: {os.path.abspath(uploads_dir)}")
 
 # Global exception handler
 @app.exception_handler(Exception)
