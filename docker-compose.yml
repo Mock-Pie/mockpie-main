@@ -35,9 +35,9 @@ services:
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/postgres
       - CORS_ORIGINS=http://localhost:3000,http://frontend:3000,http://react_frontend:3000,*
       - PYTHONDONTWRITEBYTECODE=1
-      - PYTHONUNBUFFERED=1
+      - PYTHONUNBUFFERED=1    
     volumes:
-      - ./backend:/app/backend
+      - ./:/app  # Mount entire project so backend module is available
     restart: unless-stopped
   frontend:
     build:
@@ -71,7 +71,7 @@ services:
     image: redis:alpine
     container_name: redis_cache_dev
     ports:
-      - "6379:6379"
+      - "6378:6379"
     volumes:
       - redis_data_dev:/data
     restart: unless-stopped
