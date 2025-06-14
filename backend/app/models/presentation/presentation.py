@@ -11,10 +11,9 @@ class Presentation(Base):
     title = Column(String, nullable=False)
     url = Column(String, nullable=False)
     uploaded_at = Column(DateTime, server_default=func.now(), nullable=False)
-    
     # Establish the relationship with the User model
     user = relationship("User", back_populates="presentations")
     
-    # Analysis relationships
-    voice_analysis = relationship("VoiceAnalysis", back_populates="presentation", uselist=False)
-    body_analysis = relationship("BodyAnalysis", back_populates="presentation", uselist=False)
+    # Analysis relationships (commented out until analysis models are properly set up)
+    # voice_analysis = relationship("VoiceAnalysis", back_populates="presentation", uselist=False)
+    # body_analysis = relationship("BodyAnalysis", back_populates="presentation", uselist=False)

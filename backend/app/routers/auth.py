@@ -21,6 +21,8 @@ router = APIRouter(prefix="/auth", tags=["authentication"])
 
 @router.post("/register", response_model=UserAuthResponse, status_code=status.HTTP_201_CREATED)
 async def register_user(
+    first_name: str = Form(...),
+    last_name: str = Form(...),
     email: EmailStr = Form(...),
     username: str = Form(...),
     phone_number: str = Form(...),
@@ -29,8 +31,9 @@ async def register_user(
     gender: Gender = Form(...),
     db: Session = Depends(get_db),
     redis: RedisClient = Depends(get_redis_client)
-):
-    return await RegisterUser.register_user(
+):    return await RegisterUser.register_user(
+        first_name=first_name,
+        last_name=last_name,
         email=email, 
         username=username, 
         phone_number=phone_number, 

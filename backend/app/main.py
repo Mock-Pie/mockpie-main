@@ -1,12 +1,14 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 import logging
 import traceback
+import os
 
 from backend.database.database import init_db
 from backend.app.middleware.redis_middleware import RedisMiddleware
-from backend.app.routers import auth, health, utils
+from backend.app.routers import auth, health, presentations, utils
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -41,6 +43,12 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(health.router)
 app.include_router(utils.router)
+app.include_router(presentations.router)
+
+# Mount static files for uploaded videos
+uploads_dir = os.path.join(os.path.dirname(__file__), "..", "uploads")
+if os.path.exists(uploads_dir):
+    app.mount("/uploads", StaticFiles(directory=uploads_dir), name="uploads")
 
 # Global exception handler
 @app.exception_handler(Exception)

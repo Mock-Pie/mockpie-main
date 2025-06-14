@@ -81,13 +81,14 @@ class LoginUser:
         except Exception as e:
             # Log but continue - JWT tokens still work without Redis
             print(f"Error storing tokens in Redis: {e}")
-        
         # Return response
         return {
             "access_token": access_token,
             "refresh_token": refresh_token,
             "user": {
                 "id": user.id,
+                "first_name": user.first_name,
+                "last_name": user.last_name,
                 "username": user.username,
                 "email": user.email,
                 "phone_number": user.phone_number,

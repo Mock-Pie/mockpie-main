@@ -1,5 +1,6 @@
 from backend.database.database import Base
 from sqlalchemy import Column, Integer, String, DateTime, Enum
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from passlib.hash import bcrypt
 from backend.app.enums.gender import Gender
@@ -9,6 +10,8 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
+    first_name = Column(String, nullable=True)
+    last_name = Column(String, nullable=True)
     username = Column(String, unique=True, nullable=False)
     email = Column(String, unique=True, nullable=False)
     phone_number = Column(String, unique=True, nullable=False)
@@ -34,18 +37,12 @@ class User(Base):
         Password setter - hashes raw password and stores in _password field
         """
         self._password = EncryptionHandler.get_password_hash(plain_password)
-    
-
-    # TODO: relook into this and figure out the issue
     def verify_password(self, plain_password):
         """
         Verify password against stored hash
-        """
-        # Ensure _password is a string before passing to bcrypt.verify
-        # stored_hash = str(self._password) if self._password is not None else ""
-        # return bcrypt.verify(plain_password, stored_hash)
-        return True
-        
-
-        # return EncryptionHandler.verify_plain_password(plain_password, self._password)
+        """      
+        return EncryptionHandler.verify_plain_password(plain_password, self._password)
+    
+    # Relationships
+    presentations = relationship("Presentation", back_populates="user")
 

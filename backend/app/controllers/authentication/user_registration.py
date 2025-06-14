@@ -28,8 +28,10 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
 
 class RegisterUser():
-    
+    @staticmethod
     async def register_user(
+        first_name: str = Form(...),
+        last_name: str = Form(...),
         email: EmailStr = Form(...),
         username: str = Form(...),
         phone_number: str = Form(...),
@@ -43,6 +45,8 @@ class RegisterUser():
         Register a new user and generate authentication tokens.
         
         Args:
+            first_name: User's first name
+            last_name: User's last name
             email: User's email address
             username: User's username
             phone_number: User's phone number
@@ -87,9 +91,10 @@ class RegisterUser():
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=ErrorMessage.PHONE_TAKEN.value
             )
-        
         # Create new user
         new_user = User(
+            first_name=first_name,
+            last_name=last_name,
             username=username,
             email=email,
             phone_number=phone_number,
@@ -141,13 +146,14 @@ class RegisterUser():
             )
         except Exception as e:
             # Log but continue - JWT tokens still work without Redis
-            print(f"Error storing tokens in Redis during registration: {e}")
-
-        return {
+            print(f"Error storing tokens in Redis during registration: {e}")        
+            return {
             "access_token": access_token,
             "refresh_token": refresh_token,
             "user": {
                 "id": new_user.id,
+                "first_name": new_user.first_name,
+                "last_name": new_user.last_name,
                 "username": new_user.username,
                 "email": new_user.email,
                 "phone_number": new_user.phone_number,
