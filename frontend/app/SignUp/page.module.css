@@ -56,3 +56,41 @@
     padding: 20px;
     margin-top: 50px;
 }
+
+/* Dropdown option hover styling */
+.input option:hover {
+    background-color: transparent !important;
+    color: black !important;
+}
+
+.input option {
+    background-color: white;
+    color: black;
+}
+
+.input option:checked {
+    background-color: transparent;
+}
+
+/* Gender select specific styling */
+.genderSelect {
+    width: 100%;
+    padding: 5px;
+    background: transparent;
+    margin-top: 2px;
+    border: none;
+    outline: none;
+    border-bottom: 1px solid white;
+    color: white;
+}
+
+.genderSelect option {
+    background-color: white;
+    color: black;
+}
+
+.genderSelect option:hover {
+    background-color: transparent !important;
+    color: black !important;
+}
+

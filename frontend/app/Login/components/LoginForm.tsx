@@ -4,6 +4,7 @@ import Link from "next/link";
 import styles from "../page.module.css";
 import styles1 from "../../SignUp/page.module.css";
 import { FcGoogle } from "react-icons/fc";
+import { FiEye, FiEyeOff } from "react-icons/fi";
 import { signIn } from "next-auth/react";
 
 const LoginForm = () => {
@@ -21,16 +22,11 @@ const LoginForm = () => {
     const validateField = (name: string, value: string) => {
         switch (name) {
             case "identifier":
-                if (!value) return "Email or phone number is required.";
-                if (/^\+20(10|11|12|15)\d{8}$/.test(value)) return ""; // valid Egyptian phone
-                if (/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(value)) return ""; // valid email
-                return "Enter a valid email or Egyptian phone number.";
+                if (!value) return "Email is required.";
+                if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(value)) return "Enter a valid email address.";
+                return "";
             case "password":
                 if (!value) return "Password is required.";
-                if (value.length < 8) return "Password must be at least 8 characters.";
-                if (!/[A-Z]/.test(value)) return "Password must contain at least one uppercase letter.";
-                if (!/\d/.test(value)) return "Password must contain at least one number.";
-                if (!/[!@#$%^&*(),.?\":{}|<>\[\]\\/~`_+=;'\-]/.test(value)) return "Password must contain at least one special character.";
                 return "";
             default:
                 return "";
@@ -56,11 +52,7 @@ const LoginForm = () => {
         setLoading(true);
         // Prepare FormData for backend
         const data = new FormData();
-        if (/^\+20(10|11|12|15)\d{8}$/.test(formData.identifier)) {
-            data.append("phone", formData.identifier);
-        } else {
-            data.append("email", formData.identifier);
-        }
+        data.append("email", formData.identifier);
         data.append("password", formData.password);
         try {
             const response = await fetch("http://localhost:8081/auth/login", {
@@ -68,6 +60,16 @@ const LoginForm = () => {
                 body: data,
             });
             if (response.ok) {
+                const responseData = await response.json();
+                
+                // Store tokens in localStorage for logout functionality
+                if (responseData.access_token) {
+                    localStorage.setItem('access_token', responseData.access_token);
+                }
+                if (responseData.refresh_token) {
+                    localStorage.setItem('refresh_token', responseData.refresh_token);
+                }
+                
                 window.location.href = "/Dashboard";
             } else {
                 const errorData = await response.json();
@@ -84,7 +86,7 @@ const LoginForm = () => {
             <p className={styles.subtitle}>Welcome to MockPie!</p>
             <form className={styles.loginBox} onSubmit={handleSubmit}>
                 <div className={styles.inputGroup}>
-                    <label>Email or Phone number</label>
+                    <label>Email</label>
                     <input
                         type="text"
                         name="identifier"
@@ -115,12 +117,13 @@ const LoginForm = () => {
                                 background: 'none',
                                 border: 'none',
                                 cursor: 'pointer',
-                                fontSize: '1em',
-                                color: '#888'
+                                fontSize: '1.2em',
+                                color: '#888',
+                                padding: 0
                             }}
                             tabIndex={-1}
                         >
-                            {showPassword ? "Hide" : "Show"}
+                            {showPassword ? <FiEyeOff /> : <FiEye />}
                         </button>
                     </div>
                     {formErrors.password && <div style={{ color: 'red', fontSize: '0.9em' }}>{formErrors.password}</div>}

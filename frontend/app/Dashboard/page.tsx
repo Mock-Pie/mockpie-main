@@ -31,7 +31,7 @@ const Dashboard = () => {
     <div className={styles.container}>
       <SideBar />
       <div className={styles.mainContent}>
-        {/* <h1 className={styles.greeting}>Hello, Jana</h1> */}
+        <h1 className={styles.greeting}>Hello, Jana</h1>
         
         <div className={styles.dashboardGrid}>
           {/* Improvement Chart Section */}

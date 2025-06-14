@@ -10,6 +10,7 @@ import { FiEye, FiEyeOff } from "react-icons/fi";
 
 const SignUpPage = () => {
   const router = useRouter(); // Initialize the router
+  const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -17,8 +18,9 @@ const SignUpPage = () => {
     email: "",
     password: "",
     confirmPassword: "",
-    gender: "male", // default gender
+    gender: "", // no default gender
   });
+  const [otp, setOtp] = useState("");
   const [formErrors, setFormErrors] = useState({
     firstName: "",
     lastName: "",
@@ -30,6 +32,7 @@ const SignUpPage = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [error, setError] = useState("");
 
   const validateField = (name: string, value: string) => {
     switch (name) {
@@ -117,15 +120,43 @@ const SignUpPage = () => {
       });
 
       if (response.ok) {
-        alert("Sign up successful!");
-        router.push("/Login"); // Navigate to the login page
+        setStep(2);
       } else {
         const errorData = await response.json();
-        alert(`Error: ${errorData.detail || errorData.message}`);
+        setError(errorData.detail || errorData.message || "Registration failed.");
       }
     } catch (error) {
       console.error("Error during sign up:", error);
-      alert("An error occurred. Please try again.");
+      setError("An error occurred. Please try again.");
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    if (!otp) {
+      setError("OTP is required");
+      return;
+    }
+
+    try {
+      const data = new FormData();
+      data.append("email", formData.email);
+      data.append("otp", otp);
+
+      const response = await fetch("http://localhost:8081/auth/verify-otp", {
+        method: "POST",
+        body: data,
+      });
+
+      if (response.ok) {
+        alert("Email verified successfully!");
+        router.push("/Login");
+      } else {
+        const errorData = await response.json();
+        setError(errorData.detail || errorData.message || "OTP verification failed.");
+      }
+    } catch (error) {
+      console.error("Error during OTP verification:", error);
+      setError("An error occurred during verification. Please try again.");
     }
   };
 
@@ -133,133 +164,163 @@ const SignUpPage = () => {
     <div className={styles1.mainContent}>
       <p className={styles.subtitle}>Welcome to MockPie!</p>
       <div className={styles1.SignUpBox}>
-        <div className={styles1.names}>
-          <div className={styles.inputGroup}>
-            <label>First name</label>
-            <input
-              type="text"
-              name="firstName"
-              value={formData.firstName}
-              onChange={handleChange}
-              className={styles.input}
-            />
-            {formErrors.firstName && <div style={{ color: 'red', fontSize: '0.9em' }}>{formErrors.firstName}</div>}
-          </div>
-          <div className={styles.inputGroup}>
-            <label>Last name</label>
-            <input
-              type="text"
-              name="lastName"
-              value={formData.lastName}
-              onChange={handleChange}
-              className={styles.input}
-            />
-            {formErrors.lastName && <div style={{ color: 'red', fontSize: '0.9em' }}>{formErrors.lastName}</div>}
-          </div>
-        </div>
-        <div className={styles.inputGroup}>
-          <label>Phone number</label>
-          <input
-            type="text"
-            name="phoneNumber"
-            value={formData.phoneNumber}
-            onChange={handleChange}
-            className={styles.input}
-          />
-          {formErrors.phoneNumber && <div style={{ color: 'red', fontSize: '0.9em' }}>{formErrors.phoneNumber}</div>}
-        </div>
-        <div className={styles.inputGroup}>
-          <label>Email</label>
-          <input
-            type="text"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            className={styles.input}
-          />
-          {formErrors.email && <div style={{ color: 'red', fontSize: '0.9em' }}>{formErrors.email}</div>}
-        </div>
-        <div className={styles.inputGroup}>
-          <label>Password</label>
-          <div style={{ position: 'relative' }}>
-            <input
-              type={showPassword ? "text" : "password"}
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              className={styles.input}
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword((prev) => !prev)}
-              style={{
-                position: 'absolute',
-                right: 10,
-                top: '50%',
-                transform: 'translateY(-50%)',
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                fontSize: '1.2em',
-                color: '#888',
-                padding: 0,
-              }}
-              tabIndex={-1}
-            >
-              {showPassword ? <FiEyeOff /> : <FiEye />}
+        {step === 1 ? (
+          <>
+            <div className={styles1.names}>
+              <div className={styles.inputGroup}>
+                <label>First name</label>
+                <input
+                  type="text"
+                  name="firstName"
+                  value={formData.firstName}
+                  onChange={handleChange}
+                  className={styles.input}
+                />
+                {formErrors.firstName && <div style={{ color: 'red', fontSize: '0.9em' }}>{formErrors.firstName}</div>}
+              </div>
+              <div className={styles.inputGroup}>
+                <label>Last name</label>
+                <input
+                  type="text"
+                  name="lastName"
+                  value={formData.lastName}
+                  onChange={handleChange}
+                  className={styles.input}
+                />
+                {formErrors.lastName && <div style={{ color: 'red', fontSize: '0.9em' }}>{formErrors.lastName}</div>}
+              </div>
+            </div>
+            <div className={styles.inputGroup}>
+              <label>Phone number</label>
+              <input
+                type="text"
+                name="phoneNumber"
+                value={formData.phoneNumber}
+                onChange={handleChange}
+                className={styles.input}
+              />
+              {formErrors.phoneNumber && <div style={{ color: 'red', fontSize: '0.9em' }}>{formErrors.phoneNumber}</div>}
+            </div>
+            <div className={styles.inputGroup}>
+              <label>Email</label>
+              <input
+                type="text"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                className={styles.input}
+              />
+              {formErrors.email && <div style={{ color: 'red', fontSize: '0.9em' }}>{formErrors.email}</div>}
+            </div>
+            <div className={styles.inputGroup}>
+              <label>Password</label>
+              <div style={{ position: 'relative' }}>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  className={styles.input}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  style={{
+                    position: 'absolute',
+                    right: 10,
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontSize: '1.2em',
+                    color: '#888',
+                    padding: 0,
+                  }}
+                  tabIndex={-1}
+                >
+                  {showPassword ? <FiEyeOff /> : <FiEye />}
+                </button>
+              </div>
+              {formErrors.password && <div style={{ color: 'red', fontSize: '0.9em' }}>{formErrors.password}</div>}
+            </div>
+            <div className={styles.inputGroup}>
+              <label>Confirm password</label>
+              <div style={{ position: 'relative' }}>
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  name="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  className={styles.input}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword((prev) => !prev)}
+                  style={{
+                    position: 'absolute',
+                    right: 10,
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontSize: '1.2em',
+                    color: '#888',
+                    padding: 0,
+                  }}
+                  tabIndex={-1}
+                >
+                  {showConfirmPassword ? <FiEyeOff /> : <FiEye />}
+                </button>
+              </div>
+              {formErrors.confirmPassword && <div style={{ color: 'red', fontSize: '0.9em' }}>{formErrors.confirmPassword}</div>}
+            </div>
+            <div className={styles.inputGroup}>
+              <label>Gender</label>
+              <select
+                name="gender"
+                value={formData.gender}
+                onChange={handleChange}
+                className={styles1.genderSelect}
+                style={{
+                  color: formData.gender === "" ? '#888' : 'white',
+                  backgroundColor: 'transparent'
+                }}
+              >
+                <option value="" disabled style={{ color: 'black' }}>Select your gender</option>
+                <option value="male" style={{ color: 'black' }}>Male</option>
+                <option value="female" style={{ color: 'black' }}>Female</option>
+                <option value="prefer_not_to_say" style={{ color: 'black' }}>Prefer not to say</option>
+              </select>
+              {formErrors.gender && <div style={{ color: 'red', fontSize: '0.9em' }}>{formErrors.gender}</div>}
+            </div>
+            {error && <div style={{ color: 'red', marginBottom: 8 }}>{error}</div>}
+            <button onClick={handleSubmit} className={styles.signInButton}>
+              Sign up
             </button>
-          </div>
-          {formErrors.password && <div style={{ color: 'red', fontSize: '0.9em' }}>{formErrors.password}</div>}
-        </div>
-        <div className={styles.inputGroup}>
-          <label>Confirm password</label>
-          <div style={{ position: 'relative' }}>
-            <input
-              type={showConfirmPassword ? "text" : "password"}
-              name="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              className={styles.input}
-            />
-            <button
-              type="button"
-              onClick={() => setShowConfirmPassword((prev) => !prev)}
-              style={{
-                position: 'absolute',
-                right: 10,
-                top: '50%',
-                transform: 'translateY(-50%)',
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                fontSize: '1.2em',
-                color: '#888',
-                padding: 0,
-              }}
-              tabIndex={-1}
-            >
-              {showConfirmPassword ? <FiEyeOff /> : <FiEye />}
+          </>
+        ) : (
+          <>
+            <div style={{ marginBottom: 10, color: 'green', fontWeight: 'bold' }}>
+              A verification code has been sent to your email.
+            </div>
+            <div className={styles.inputGroup}>
+              <label>Enter Verification Code</label>
+              <input
+                type="text"
+                className={styles.input}
+                value={otp}
+                onChange={e => setOtp(e.target.value)}
+                placeholder="Enter the code sent to your email"
+              />
+            </div>
+            {error && <div style={{ color: 'red', marginBottom: 8 }}>{error}</div>}
+            <button onClick={handleVerifyOtp} className={styles.signInButton}>
+              Verify Email
             </button>
-          </div>
-          {formErrors.confirmPassword && <div style={{ color: 'red', fontSize: '0.9em' }}>{formErrors.confirmPassword}</div>}
-        </div>
-        <div className={styles.inputGroup}>
-          <label>Gender</label>
-          <select
-            name="gender"
-            value={formData.gender}
-            onChange={handleChange}
-            className={styles.input}
-          >
-            <option value="male">Male</option>
-            <option value="female">Female</option>
-            <option value="prefer_not_to_say">Prefer not to say</option>
-          </select>
-          {formErrors.gender && <div style={{ color: 'red', fontSize: '0.9em' }}>{formErrors.gender}</div>}
-        </div>
-        <button onClick={handleSubmit} className={styles.signInButton}>
-          Sign up
-        </button>
+          </>
+        )}
 
         <div className={styles.footerText}>
           <div className={styles1.footerText}>
@@ -270,16 +331,20 @@ const SignUpPage = () => {
               </Link>
             </p>
           </div>
-          <div className={styles1.or}>- OR -</div>
-          <div
-            className={styles.link}
-            onClick={() => signIn("google")} // Trigger Google OAuth
-          >
-            <div className={styles1.iconGoogle}>
-              <FcGoogle />
-            </div>
-            Sign up with Google
-          </div>
+          {step === 1 && (
+            <>
+              <div className={styles1.or}>- OR -</div>
+              <div
+                className={styles.link}
+                onClick={() => signIn("google")}
+              >
+                <div className={styles1.iconGoogle}>
+                  <FcGoogle />
+                </div>
+                Sign up with Google
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>
