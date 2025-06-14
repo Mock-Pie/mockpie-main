@@ -35,9 +35,9 @@ services:
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/postgres
       - CORS_ORIGINS=http://localhost:3000,http://frontend:3000,http://react_frontend:3000,*
       - PYTHONDONTWRITEBYTECODE=1
-      - PYTHONUNBUFFERED=1
+      - PYTHONUNBUFFERED=1    
     volumes:
-      - ./backend:/backend
+      - ./:/app  # Mount entire project so backend module is available
     restart: unless-stopped
   frontend:
     build:
