@@ -4,6 +4,7 @@ from redis.connection import ConnectionPool
 from datetime import timedelta, datetime
 from typing import Optional, Any, Dict, Union
 import time
+from backend.config import settings
 
 class RedisClient:
      # Singleton instance
@@ -13,10 +14,10 @@ class RedisClient:
         if cls._instance is None:
             cls._instance = super(RedisClient, cls).__new__(cls)
             # Initialize the Redis connection only once
-            host = kwargs.get('host', 'redis')
-            port = kwargs.get('port', 6379)
-            db = kwargs.get('db', 0)
-            password = kwargs.get('password', None)
+            host = kwargs.get('host', settings.redis_host)
+            port = kwargs.get('port', settings.redis_port)
+            db = kwargs.get('db', settings.redis_db)
+            password = kwargs.get('password', settings.redis_password)
             
             # Create a connection pool
             pool = ConnectionPool(
@@ -27,12 +28,11 @@ class RedisClient:
                 max_connections=10,
                 decode_responses=True
             )
-            
-            # Use the connection pool
+              # Use the connection pool
             cls._instance.redis = Redis(connection_pool=pool)
         return cls._instance
     
-    def __init__(self, host='redis', port=6379, db=0, password=None):
+    def __init__(self, host=None, port=None, db=None, password=None):
         # This will only be called once for the singleton instance
         # The actual Redis connection is already set up in __new__
         pass

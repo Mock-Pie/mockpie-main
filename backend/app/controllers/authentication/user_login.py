@@ -56,8 +56,7 @@ class LoginUser:
                 detail=ErrorMessage.INVALID_CREDENTIALS.value,
                 headers={"WWW-Authenticate": "Bearer"},
             )
-        
-        # Generate tokens
+          # Generate tokens
         access_token_expires = timedelta(minutes=settings.access_token_expire_minutes)
         access_token = TokenHandler.create_access_token(
             data={"sub": user.email}, expires_delta=access_token_expires
@@ -81,13 +80,15 @@ class LoginUser:
         except Exception as e:
             # Log but continue - JWT tokens still work without Redis
             print(f"Error storing tokens in Redis: {e}")
-        
+            print(f"Redis type: {type(redis)}")  # Debug info
         # Return response
         return {
             "access_token": access_token,
             "refresh_token": refresh_token,
             "user": {
                 "id": user.id,
+                "first_name": user.first_name,
+                "last_name": user.last_name,
                 "username": user.username,
                 "email": user.email,
                 "phone_number": user.phone_number,
