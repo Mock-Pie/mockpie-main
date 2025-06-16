@@ -4,13 +4,13 @@ import styles from "../../Login/page.module.css";
 import styles1 from "../../SignUp/page.module.css";
 import Link from 'next/link';
 
-const ForgotPasswordForm = () => {
-  const [step, setStep] = useState(1);
+const ForgotPasswordForm = ({ step, setStep }: { step: number, setStep: (s: number) => void }) => {
   const [emailOrUsername, setEmailOrUsername] = useState("");
   const [otp, setOtp] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
+  const [showSuccess, setShowSuccess] = useState(false);
 
   // Request OTP
   const handleRequestOtp = async (e: React.FormEvent) => {
@@ -75,7 +75,7 @@ const ForgotPasswordForm = () => {
         body: data,
       });
       if (response.ok) {
-        window.location.href = "/Login";
+        setShowSuccess(true);
       } else {
         const errorData = await response.json();
         setError(errorData.detail || errorData.message || "Failed to reset password");
@@ -87,7 +87,56 @@ const ForgotPasswordForm = () => {
 
   return (
     <div className={styles.mainContent}>
-
+      {showSuccess && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          background: 'rgba(0,0,0,0.2)',
+          zIndex: 1000,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}>
+          <div style={{
+            background: '#fff',
+            borderRadius: 20,
+            boxShadow: '0 4px 24px rgba(0,0,0,0.12)',
+            padding: '40px 32px',
+            minWidth: 350,
+            textAlign: 'center',
+            position: 'relative',
+          }}>
+            <div style={{ fontSize: 90, color: 'limegreen', marginBottom: 10 }}>
+              &#10003;
+            </div>
+            <div style={{ fontWeight: 700, fontSize: 24, marginBottom: 8 }}>
+              Password Changed Successfully!
+            </div>
+            <div style={{ color: '#1abc1a', fontWeight: 500, marginBottom: 24 }}>
+              Proceed to log in
+            </div>
+            <button
+              onClick={() => window.location.href = '/Login'}
+              style={{
+                background: 'linear-gradient(90deg, #a8430e, #b86b2a)',
+                color: '#fff',
+                border: 'none',
+                borderRadius: 8,
+                padding: '12px 32px',
+                fontWeight: 600,
+                fontSize: 18,
+                cursor: 'pointer',
+                marginTop: 8,
+              }}
+            >
+              Go to Login
+            </button>
+          </div>
+        </div>
+      )}
       <div className={styles.loginBox}>
         {step === 1 && (
           <form onSubmit={handleRequestOtp}>
