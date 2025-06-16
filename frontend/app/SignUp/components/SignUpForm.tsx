@@ -14,6 +14,7 @@ const SignUpPage = () => {
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
+    username: "",
     phoneNumber: "",
     email: "",
     password: "",
@@ -24,6 +25,7 @@ const SignUpPage = () => {
   const [formErrors, setFormErrors] = useState({
     firstName: "",
     lastName: "",
+    username: "",
     phoneNumber: "",
     email: "",
     password: "",
@@ -45,6 +47,11 @@ const SignUpPage = () => {
         if (!value) return "Last name is required.";
         if (!/^[A-Za-z]+$/.test(value)) return "Last name must contain only letters.";
         if (value.length < 2) return "Last name must be at least 2 characters.";
+        return "";
+      case "username":
+        if (!value) return "Username is required.";
+        if (value.length < 3) return "Username must be at least 3 characters.";
+        if (!/^[a-zA-Z0-9_]+$/.test(value)) return "Username can only contain letters, numbers, and underscores.";
         return "";
       case "phoneNumber":
         if (!value) return "Phone number is required.";
@@ -101,13 +108,11 @@ const SignUpPage = () => {
       return;
     }
 
-    // Combine first and last name for username
-    const username = `${formData.firstName} ${formData.lastName}`.trim();
-
-    // Prepare FormData for x-www-form-urlencoded or multipart/form-data
     const data = new FormData();
+    data.append("first_name", formData.firstName);
+    data.append("last_name", formData.lastName);
     data.append("email", formData.email);
-    data.append("username", username);
+    data.append("username", formData.username);
     data.append("phone_number", formData.phoneNumber);
     data.append("password", formData.password);
     data.append("password_confirmation", formData.confirmPassword);
@@ -123,7 +128,19 @@ const SignUpPage = () => {
         setStep(2);
       } else {
         const errorData = await response.json();
-        setError(errorData.detail || errorData.message || "Registration failed.");
+        let errorMessage = "Registration failed.";
+        
+        if (errorData.detail) {
+          if (typeof errorData.detail === 'object') {
+            errorMessage = JSON.stringify(errorData.detail);
+          } else {
+            errorMessage = errorData.detail;
+          }
+        } else if (errorData.message) {
+          errorMessage = errorData.message;
+        }
+        
+        setError(errorMessage);
       }
     } catch (error) {
       console.error("Error during sign up:", error);
@@ -152,7 +169,19 @@ const SignUpPage = () => {
         router.push("/Login");
       } else {
         const errorData = await response.json();
-        setError(errorData.detail || errorData.message || "OTP verification failed.");
+        let errorMessage = "OTP verification failed.";
+        
+        if (errorData.detail) {
+          if (typeof errorData.detail === 'object') {
+            errorMessage = JSON.stringify(errorData.detail);
+          } else {
+            errorMessage = errorData.detail;
+          }
+        } else if (errorData.message) {
+          errorMessage = errorData.message;
+        }
+        
+        setError(errorMessage);
       }
     } catch (error) {
       console.error("Error during OTP verification:", error);
@@ -191,6 +220,18 @@ const SignUpPage = () => {
               </div>
             </div>
             <div className={styles.inputGroup}>
+              <label>Username</label>
+              <input
+                type="text"
+                name="username"
+                value={formData.username}
+                onChange={handleChange}
+                className={styles.input}
+                placeholder="Choose a username"
+              />
+              {formErrors.username && <div style={{ color: 'red', fontSize: '0.9em' }}>{formErrors.username}</div>}
+            </div>
+            <div className={styles.inputGroup}>
               <label>Phone number</label>
               <input
                 type="text"
@@ -198,6 +239,7 @@ const SignUpPage = () => {
                 value={formData.phoneNumber}
                 onChange={handleChange}
                 className={styles.input}
+                placeholder="+2010XXXXXXXX"
               />
               {formErrors.phoneNumber && <div style={{ color: 'red', fontSize: '0.9em' }}>{formErrors.phoneNumber}</div>}
             </div>
@@ -209,6 +251,7 @@ const SignUpPage = () => {
                 value={formData.email}
                 onChange={handleChange}
                 className={styles.input}
+                placeholder="your@email.com"
               />
               {formErrors.email && <div style={{ color: 'red', fontSize: '0.9em' }}>{formErrors.email}</div>}
             </div>
@@ -221,6 +264,7 @@ const SignUpPage = () => {
                   value={formData.password}
                   onChange={handleChange}
                   className={styles.input}
+                  placeholder="Enter your password"
                 />
                 <button
                   type="button"
@@ -253,6 +297,7 @@ const SignUpPage = () => {
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   className={styles.input}
+                  placeholder="Confirm your password"
                 />
                 <button
                   type="button"
@@ -295,7 +340,25 @@ const SignUpPage = () => {
               </select>
               {formErrors.gender && <div style={{ color: 'red', fontSize: '0.9em' }}>{formErrors.gender}</div>}
             </div>
-            {error && <div style={{ color: 'red', marginBottom: 8 }}>{error}</div>}
+            {error && (
+              <div style={{ color: 'red', marginBottom: 8 }}>
+                {(() => {
+                  try {
+                    const arr = JSON.parse(error);
+                    if (Array.isArray(arr)) {
+                      return arr.map((e: any, i: number) =>
+                        <div key={i}>
+                          {e.loc?.[1] ? <b>{e.loc[1]}: </b> : null}{e.msg}
+                        </div>
+                      );
+                    }
+                  } catch {
+                    return error;
+                  }
+                  return error;
+                })()}
+              </div>
+            )}
             <button onClick={handleSubmit} className={styles.signInButton}>
               Sign up
             </button>
@@ -315,7 +378,25 @@ const SignUpPage = () => {
                 placeholder="Enter the code sent to your email"
               />
             </div>
-            {error && <div style={{ color: 'red', marginBottom: 8 }}>{error}</div>}
+            {error && (
+              <div style={{ color: 'red', marginBottom: 8 }}>
+                {(() => {
+                  try {
+                    const arr = JSON.parse(error);
+                    if (Array.isArray(arr)) {
+                      return arr.map((e: any, i: number) =>
+                        <div key={i}>
+                          {e.loc?.[1] ? <b>{e.loc[1]}: </b> : null}{e.msg}
+                        </div>
+                      );
+                    }
+                  } catch {
+                    return error;
+                  }
+                  return error;
+                })()}
+              </div>
+            )}
             <button onClick={handleVerifyOtp} className={styles.signInButton}>
               Verify Email
             </button>
