@@ -146,8 +146,9 @@ class RegisterUser():
             )
         except Exception as e:
             # Log but continue - JWT tokens still work without Redis
-            print(f"Error storing tokens in Redis during registration: {e}")        
-            return {
+            print(f"Error storing tokens in Redis during registration: {e}")
+        
+        return {
             "access_token": access_token,
             "refresh_token": refresh_token,
             "user": {
