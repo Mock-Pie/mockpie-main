@@ -15,11 +15,11 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Create all tables in the database
-try:
-    logger.info("Creating all tables...")
-    init_db()
-except Exception as e:
-    logger.error(f"Failed to create database tables: {e}")
+# try:
+#     logger.info("Creating all tables...")
+#     # init_db()
+# except Exception as e:
+#     logger.error(f"Failed to create database tables: {e}")
 
 app = FastAPI(
     title="MockPie API",
