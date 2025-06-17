@@ -69,3 +69,16 @@ async def global_exception_handler(request, exc):
         content={"detail": "Internal server error", "message": error_detail}
     )
 
+# Routes
+# @app.post("/auth/register", response_model=UserAuthResponse, status_code=status.HTTP_201_CREATED)
+# async def register_user(
+#     email: EmailStr = Form(...),
+#     username: str = Form(...),
+#     phone_number: str = Form(...),
+#     password: str = Form(...),
+#     password_confirmation: str = Form(...),
+#     gender: Gender = Form(...),
+#     db: Session = Depends(get_db)
+# ):
+#     return RegisterUser.register_user(email=email, username=username, phone_number=phone_number, password=password, password_confirmation=password_confirmation,gender=gender, db=db)
+    
