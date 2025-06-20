@@ -49,8 +49,15 @@ class LoginUser:
         
         # print(match_plain_and_hashed_passwords(user, password), password, user.password)
         
+        if user.email_verified_at is None:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail=ErrorMessage.EMAIL_NOT_VERIFIED.value,
+                headers={"WWW-Authenticate": "Bearer"}
+            )
+        
         # Check if user exists and password matches
-        if not user or not match_plain_and_hashed_passwords(user, password) or user.email_verified_at is None:
+        if not user or not match_plain_and_hashed_passwords(user, password):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail=ErrorMessage.INVALID_CREDENTIALS.value,

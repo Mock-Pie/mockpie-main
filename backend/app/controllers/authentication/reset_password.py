@@ -33,12 +33,7 @@ class ResetPassword:
 
         # Find user by email
         user = get_user_by_email(db, email)
-        
-        # return {
-        #     'old' : EncryptionHandler.get_password_hash(user._password),
-        #     'new' : EncryptionHandler.get_password_hash(new_password)
-        # }
-
+    
         if not user:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -56,7 +51,7 @@ class ResetPassword:
         if datetime.now() > verification_expiry:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Session expired. Please request a new password reset."
+                detail="Session expired. Please request a new password reset or re-verify your email."
             )
 
         # Add debug before password update

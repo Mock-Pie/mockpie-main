@@ -7,7 +7,7 @@ import time
 from backend.config import settings
 
 class RedisClient:
-     # Singleton instance
+    # Singleton instance
     _instance = None
     
     def __new__(cls, *args, **kwargs):
@@ -77,10 +77,13 @@ class RedisClient:
         return None
         
     def validate_access_token(self, user_id: Union[int, Any], token: str) -> bool:
+        print(user_id, token)
         """Validate if access token matches stored token"""
-        user_id_int = self._ensure_int(user_id)
-        stored_token = self.get_access_token(user_id_int)
+        # user_id_int = self._ensure_int(user_id)
+        stored_token = self.get_access_token(user_id)
+        print(stored_token, token)
         return stored_token == token
+    
     def validate_refresh_token(self, user_id: Union[int, Any], token: str) -> bool:
         """Validate if refresh token matches stored token"""
         user_id_int = self._ensure_int(user_id)
