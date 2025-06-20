@@ -10,9 +10,12 @@ class UserBase(BaseModel):
     gender: Gender
 
 class UserUpdate(BaseModel):
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
     username: Optional[str] = None
     email: Optional[EmailStr] = None
     phone_number: Optional[str] = None
+    gender: Optional[Gender] = None
     password: Optional[str] = None
     
 class UserRegistration(BaseModel):
