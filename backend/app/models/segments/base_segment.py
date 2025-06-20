@@ -1,9 +1,11 @@
-from database.database import Base
+from backend.database.database import Base
 from sqlalchemy import Column, Integer, Float
 from sqlalchemy.ext.declarative import declared_attr
 
-class BaseSegment:
+class BaseSegment(Base):
     """Abstract base class for all segment models"""
+    
+    __abstract__ = True  # This tells SQLAlchemy this is an abstract base class
     
     id = Column(Integer, primary_key=True, index=True)
     

@@ -1,9 +1,9 @@
 from sqlalchemy import Column, Float, String, Text
 from sqlalchemy.orm import relationship
-from database.database import Base
+from backend.database.database import Base
 from .base_segment import BaseSegment
 
-class VoiceSegment(Base, BaseSegment):
+class VoiceSegment(BaseSegment):
     __tablename__ = "voice_segments"
     
     # TODO: Think about more fields

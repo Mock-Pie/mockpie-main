@@ -10,6 +10,14 @@ from backend.database.database import init_db
 from backend.app.middleware.redis_middleware import RedisMiddleware
 from backend.app.routers import auth, health, presentations, utils
 
+# Import all models to ensure they are registered with SQLAlchemy
+from backend.app.models.user.user import User
+from backend.app.models.presentation.presentation import Presentation
+from backend.app.models.analysis.voice_analysis import VoiceAnalysis
+from backend.app.models.analysis.body_analysis import BodyAnalysis
+from backend.app.models.segments.voice_segment import VoiceSegment
+from backend.app.models.segments.body_segment import BodySegment
+
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
