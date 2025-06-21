@@ -4,6 +4,7 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { FaExclamationCircle, FaExclamationTriangle, FaCheck, FaTimes } from "react-icons/fa";
 import styles from "../../Login/page.module.css";
+import styles1 from "../page.module.css";
 
 const ResetPasswordForm = () => {
   const searchParams = useSearchParams();
@@ -169,21 +170,21 @@ const ResetPasswordForm = () => {
 
         {/* Password Validation Checklist */}
         {showValidation && (
-          <div className={styles['validation-checklist']}>
-            <div className={styles['validation-item']}>
-              {validationCriteria.length ? <FaCheck className={styles['check-icon']} /> : <FaTimes className={styles['times-icon']} />}
+          <div className={styles1['validation-checklist']}>
+            <div className={styles1['validation-item']}>
+              {validationCriteria.length ? <FaCheck className={styles1['check-icon']} /> : <FaTimes className={styles1['times-icon']} />}
               <span>At least 8 characters</span>
             </div>
-            <div className={styles['validation-item']}>
-              {validationCriteria.uppercase ? <FaCheck className={styles['check-icon']} /> : <FaTimes className={styles['times-icon']} />}
+            <div className={styles1['validation-item']}>
+              {validationCriteria.uppercase ? <FaCheck className={styles1['check-icon']} /> : <FaTimes className={styles1['times-icon']} />}
               <span>One uppercase letter</span>
             </div>
-            <div className={styles['validation-item']}>
-              {validationCriteria.number ? <FaCheck className={styles['check-icon']} /> : <FaTimes className={styles['times-icon']} />}
+            <div className={styles1['validation-item']}>
+              {validationCriteria.number ? <FaCheck className={styles1['check-icon']} /> : <FaTimes className={styles1['times-icon']} />}
               <span>One number</span>
             </div>
-            <div className={styles['validation-item']}>
-              {validationCriteria.special ? <FaCheck className={styles['check-icon']} /> : <FaTimes className={styles['times-icon']} />}
+            <div className={styles1['validation-item']}>
+              {validationCriteria.special ? <FaCheck className={styles1['check-icon']} /> : <FaTimes className={styles1['times-icon']} />}
               <span>One special character</span>
             </div>
           </div>

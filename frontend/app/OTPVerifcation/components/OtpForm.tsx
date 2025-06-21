@@ -2,6 +2,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import styles from "../../Login/page.module.css";
+import styles1 from "../page.module.css";
 import UserService from "../../services/userService";
 
 const OTPForm = () => {
@@ -338,7 +339,7 @@ const OTPForm = () => {
       <form onSubmit={handleVerifyOtp} noValidate>
         <div className={styles['form-group']}>
           <label>Enter 6-digit code</label>
-          <div className={styles['otp-container']} onPaste={handlePaste}>
+          <div className={styles1['otp-container']} onPaste={handlePaste}>
             {otp.map((digit, idx) => (
               <input
                 key={idx}
@@ -348,7 +349,7 @@ const OTPForm = () => {
                 maxLength={1}
                 value={digit}
                 onChange={e => handleOtpChange(idx, e.target.value)}
-                className={styles['otp-input']}
+                className={styles1['otp-input']}
                 required
                 disabled={loading}
               />
@@ -363,7 +364,7 @@ const OTPForm = () => {
         )}
 
         {resendMessage && (
-          <div className={styles['success-message']} style={{ marginBottom: '16px' }}>
+          <div className={styles1['success-message']} style={{ marginBottom: '16px' }}>
             <span>{resendMessage}</span>
           </div>
         )}
@@ -389,7 +390,7 @@ const OTPForm = () => {
             type="button"
             onClick={handleResendOtp}
             disabled={resendCooldown > 0}
-            className={styles['link-button']}
+            className={styles1['link-button']}
           >
             Resend{resendCooldown > 0 ? ` (${resendCooldown}s)` : ''}
           </button>

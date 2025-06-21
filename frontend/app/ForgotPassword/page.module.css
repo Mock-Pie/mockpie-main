@@ -45,19 +45,35 @@
 
 /* Form Card - Used by: Login, SignUp, ForgotPassword, ResetPassword, OTPVerification */
 .form-card {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(20px);
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(25px) saturate(180%);
+    -webkit-backdrop-filter: blur(25px) saturate(180%);
     border-radius: 24px;
     padding: 40px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     position: relative;
     overflow: hidden;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.3),
+        0 0 0 1px rgba(255, 255, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    animation: formFloat 8s ease-in-out infinite;
+}
+
+@keyframes formFloat {
+    0%, 100% { transform: translateY(0px) rotateX(0deg); }
+    50% { transform: translateY(-8px) rotateX(1deg); }
 }
 
 /* Form Card Hover - Used by: Login, SignUp, ForgotPassword, ResetPassword, OTPVerification */
 .form-card:hover {
-    transform: translateY(-5px);
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.4),
+        0 0 0 1px rgba(255, 255, 255, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.12);
 }
 
 /* Form Card Before Animation - Used by: Login, SignUp, ForgotPassword, ResetPassword, OTPVerification */
@@ -68,8 +84,9 @@
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.1), transparent);
-    transition: left 0.5s;
+    background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.15), transparent);
+    transition: left 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: -1;
 }
 
 /* Form Card Hover Animation - Used by: Login, SignUp, ForgotPassword, ResetPassword, OTPVerification */
@@ -77,10 +94,33 @@
     left: 100%;
 }
 
+/* Form Card After Glow Effect - Used by: Login, SignUp, ForgotPassword, ResetPassword, OTPVerification */
+.form-card::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, 
+        rgba(255, 215, 0, 0.1), 
+        rgba(255, 255, 255, 0.1), 
+        rgba(255, 215, 0, 0.1));
+    border-radius: 26px;
+    z-index: -2;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.form-card:hover::after {
+    opacity: 1;
+}
+
 /* Header - Used by: Login, SignUp, ForgotPassword, ResetPassword, OTPVerification */
 .header {
     text-align: center;
     margin-bottom: 40px;
+    position: relative;
 }
 
 /* Logo - Used by: Login, SignUp, ForgotPassword, ResetPassword, OTPVerification */
@@ -96,6 +136,21 @@
     font-size: 24px;
     font-weight: 700;
     color: var(--raisin-black);
+    box-shadow: 
+        0 8px 20px rgba(255, 215, 0, 0.3),
+        0 0 0 1px rgba(255, 215, 0, 0.2);
+    transition: all 0.3s ease;
+    animation: logoGlow 4s ease-in-out infinite;
+}
+
+@keyframes logoGlow {
+    0%, 100% { box-shadow: 0 8px 20px rgba(255, 215, 0, 0.3), 0 0 0 1px rgba(255, 215, 0, 0.2); }
+    50% { box-shadow: 0 12px 30px rgba(255, 215, 0, 0.5), 0 0 0 2px rgba(255, 215, 0, 0.3); }
+}
+
+.logo:hover {
+    transform: scale(1.1) rotate(5deg);
+    box-shadow: 0 12px 30px rgba(255, 215, 0, 0.5), 0 0 0 2px rgba(255, 215, 0, 0.3);
 }
 
 /* Welcome Text - Used by: Login, SignUp, ForgotPassword, ResetPassword, OTPVerification */
@@ -108,6 +163,13 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    animation: textGlow 3s ease-in-out infinite;
+}
+
+@keyframes textGlow {
+    0%, 100% { filter: brightness(1); }
+    50% { filter: brightness(1.1); }
 }
 
 /* Subtitle - Used by: Login, SignUp, ForgotPassword, ResetPassword, OTPVerification */
@@ -115,12 +177,25 @@
     color: var(--light-grey);
     font-size: 16px;
     font-weight: 400;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 /* Form Group - Used by: Login, SignUp, ForgotPassword, ResetPassword, OTPVerification */
 .form-group {
     margin-bottom: 24px;
     position: relative;
+    animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* Form Group Label - Used by: Login, SignUp, ForgotPassword, ResetPassword, OTPVerification */
@@ -130,57 +205,53 @@
     color: var(--font-yellow);
     font-weight: 500;
     font-size: 14px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 /* Input Container - Used by: Login, SignUp, ForgotPassword, ResetPassword, OTPVerification */
 .input-container {
     position: relative;
+    transition: transform 0.3s ease;
+}
+
+.input-container:hover {
+    transform: scale(1.02);
 }
 
 /* Form Input - Used by: Login, SignUp, ForgotPassword, ResetPassword, OTPVerification */
 .form-input {
     width: 100%;
     padding: 16px 20px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 2px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.08);
+    border: 2px solid rgba(255, 255, 255, 0.15);
     border-radius: 12px;
     color: var(--white);
     font-size: 16px;
     font-family: 'Poppins', sans-serif;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 
+        0 4px 12px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 /* Form Input Focus - Used by: Login, SignUp, ForgotPassword, ResetPassword, OTPVerification */
 .form-input:focus {
     outline: none;
     border-color: var(--naples-yellow);
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.12);
+    box-shadow: 
+        0 8px 20px rgba(255, 215, 0, 0.2),
+        0 0 0 3px rgba(255, 215, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
 }
 
 /* Form Input Placeholder - Used by: Login, SignUp, ForgotPassword, ResetPassword, OTPVerification */
 .form-input::placeholder {
     color: var(--light-grey);
     opacity: 0.7;
-}
-
-/* Password Toggle - Used by: Login, SignUp, ResetPassword */
-.password-toggle {
-    position: absolute;
-    right: 16px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    color: var(--light-grey);
-    cursor: pointer;
-    font-size: 18px;
-    transition: color 0.3s ease;
-}
-
-/* Password Toggle Hover - Used by: Login, SignUp, ResetPassword */
-.password-toggle:hover {
-    color: var(--naples-yellow);
 }
 
 /* Error Message - Used by: Login, SignUp, ForgotPassword, ResetPassword, OTPVerification */
@@ -191,6 +262,18 @@
     display: flex;
     align-items: center;
     gap: 8px;
+    background: rgba(255, 107, 107, 0.1);
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 107, 107, 0.2);
+    backdrop-filter: blur(5px);
+    animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
 }
 
 /* Submit Button - Used by: Login, SignUp, ForgotPassword, ResetPassword, OTPVerification */
@@ -205,23 +288,31 @@
     font-weight: 600;
     font-family: 'Poppins', sans-serif;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
+    box-shadow: 
+        0 8px 20px rgba(255, 215, 0, 0.3),
+        0 0 0 1px rgba(255, 215, 0, 0.2);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 /* Submit Button Hover - Used by: Login, SignUp, ForgotPassword, ResetPassword, OTPVerification */
 .submit-btn:hover {
-    transform: translateY(-2px);
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 
+        0 12px 30px rgba(255, 215, 0, 0.4),
+        0 0 0 2px rgba(255, 215, 0, 0.3);
+    background: linear-gradient(135deg, #FFE066, #E6B800);
 }
 
 /* Submit Button Active - Used by: Login, SignUp, ForgotPassword, ResetPassword, OTPVerification */
 .submit-btn:active {
-    transform: translateY(0);
+    transform: translateY(-1px) scale(0.98);
 }
 
 /* Submit Button Disabled - Used by: Login, SignUp, ForgotPassword, ResetPassword, OTPVerification */
@@ -229,58 +320,7 @@
     opacity: 0.7;
     cursor: not-allowed;
     transform: none;
-}
-
-/* ===== LOGIN & SIGNUP SPECIFIC STYLES ===== */
-
-/* Divider - Used by: Login, SignUp */
-.divider {
-    display: flex;
-    align-items: center;
-    margin: 32px 0;
-    color: var(--light-grey);
-    font-size: 14px;
-}
-
-/* Divider Before/After - Used by: Login, SignUp */
-.divider::before,
-.divider::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: rgba(255, 255, 255, 0.1);
-}
-
-/* Divider Span - Used by: Login, SignUp */
-.divider span {
-    padding: 0 16px;
-}
-
-/* Google Button - Used by: Login, SignUp */
-.google-btn {
-    width: 100%;
-    padding: 16px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 2px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    color: var(--white);
-    font-size: 16px;
-    font-weight: 500;
-    font-family: 'Poppins', sans-serif;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    margin-bottom: 24px;
-}
-
-/* Google Button Hover - Used by: Login, SignUp */
-.google-btn:hover {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 255, 255, 0.2);
-    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 /* ===== COMMON FOOTER STYLES ===== */
@@ -290,6 +330,7 @@
     text-align: center;
     color: var(--light-grey);
     font-size: 14px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 /* Footer Links Anchor - Used by: Login, SignUp, ForgotPassword, ResetPassword, OTPVerification */
@@ -297,34 +338,29 @@
     color: var(--naples-yellow);
     text-decoration: none;
     font-weight: 500;
-    transition: color 0.3s ease;
+    transition: all 0.3s ease;
+    position: relative;
 }
 
 /* Footer Links Anchor Hover - Used by: Login, SignUp, ForgotPassword, ResetPassword, OTPVerification */
 .footer-links a:hover {
     color: var(--white);
+    text-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
 }
 
-/* ===== LOGIN SPECIFIC STYLES ===== */
-
-/* Forgot Password - Used by: Login */
-.forgot-password {
-    text-align: center;
-    margin-bottom: 16px;
+.footer-links a::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 1px;
+    background: var(--naples-yellow);
+    transition: width 0.3s ease;
 }
 
-/* Forgot Password Anchor - Used by: Login */
-.forgot-password a {
-    color: var(--naples-yellow);
-    text-decoration: none;
-    font-size: 14px;
-    font-weight: 500;
-    transition: color 0.3s ease;
-}
-
-/* Forgot Password Anchor Hover - Used by: Login */
-.forgot-password a:hover {
-    color: var(--white);
+.footer-links a:hover::after {
+    width: 100%;
 }
 
 /* ===== RESPONSIVE DESIGN (Used by all pages) ===== */
@@ -334,11 +370,14 @@
     .container {
         padding: 16px;
         max-width: 100%;
+        min-width: auto;
+        animation: none;
     }
 
     .form-card {
         padding: 30px 24px;
         border-radius: 20px;
+        animation: none;
     }
 
     .welcome-text {
@@ -392,4 +431,4 @@
 /* Spin Keyframes - Used by: Login, SignUp, ForgotPassword, ResetPassword, OTPVerification */
 @keyframes spin {
     to { transform: rotate(360deg); }
-}
+} 
