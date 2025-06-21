@@ -50,16 +50,25 @@
   height: 60px;
   border-radius: 50%;
   overflow: hidden;
-  background-color: var(--light-grey);
+  background: linear-gradient(135deg, var(--naples-yellow), #FFD700);
   display: flex;
   align-items: center;
   justify-content: center;
+  border: 2px solid rgba(255, 255, 255, 0.2);
 }
 
 .profileImage img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.initials {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--white);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  user-select: none;
 }
 
 .profileInfo {
@@ -116,6 +125,21 @@
 .formGroup label {
   font-size: var(--text-sm);
   color: var(--white);
+}
+
+.errorText {
+  color: #ff4444;
+  font-size: 0.85em;
+  margin-top: 5px;
+  display: block;
+}
+
+.successText {
+  color: #4CAF50;
+  font-size: 0.85em;
+  margin-top: 5px;
+  display: block;
+  font-weight: 500;
 }
 
 .emailSection {
@@ -180,6 +204,52 @@
   text-decoration: underline;
 }
 
+/* Loading and Error states */
+.loadingMessage {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--light-grey);
+  font-size: var(--text-lg);
+}
+
+.errorMessage {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--light-grey);
+  font-size: var(--text-base);
+  background-color: rgba(255, 0, 0, 0.1);
+  border: 1px solid rgba(255, 0, 0, 0.3);
+  border-radius: 8px;
+  margin: 20px 0;
+}
+
+.retryButton {
+  background-color: var(--naples-yellow);
+  color: var(--white);
+  border: none;
+  border-radius: 5px;
+  padding: 8px 16px;
+  margin-top: 10px;
+  cursor: pointer;
+  font-size: var(--text-sm);
+  transition: all 0.3s ease;
+}
+
+.retryButton:hover {
+  background-color: var(--dark-yellow);
+}
+
+/* Disabled button styles */
+.saveButton:disabled {
+  background-color: var(--light-grey);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.saveButton:disabled:hover {
+  background-color: var(--light-grey);
+}
+
 /* Input field styling */
 .input, .select, .textarea {
     background-color: var(--white);
@@ -195,4 +265,126 @@
     outline: none;
     border-color: var(--naples-yellow);
     border-width: 2px;
+}
+
+/* Action buttons section */
+.actionButtons {
+  display: flex;
+  gap: 15px;
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  justify-content: flex-end;
+}
+
+.changePasswordButton {
+  background-color: var(--naples-yellow);
+  color: var(--white);
+  border: none;
+  border-radius: 5px;
+  padding: 8px 20px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.changePasswordButton:hover {
+  background-color: var(--dark-yellow);
+}
+
+.deleteAccountButton {
+  background-color: rgba(255, 0, 0, 0.1);
+  color: #ff4444;
+  border: 1px solid rgba(255, 0, 0, 0.3);
+  border-radius: 5px;
+  padding: 10px 20px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: var(--text-sm);
+}
+
+.deleteAccountButton:hover {
+  background-color: rgba(255, 0, 0, 0.2);
+  border-color: #ff4444;
+  color: #ff6666;
+}
+
+.emailVerificationContainer {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.emailVerificationContainer .input {
+  flex: 1;
+}
+
+.verifyButton {
+  background-color: rgba(76, 175, 80, 0.1);
+  color: #4CAF50;
+  border: 1px solid rgba(76, 175, 80, 0.3);
+  border-radius: 5px;
+  padding: 8px 16px;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.verifyButton:hover:not(:disabled) {
+  background-color: rgba(76, 175, 80, 0.2);
+  border-color: #4CAF50;
+}
+
+.verifyButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.otpContainer {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+  align-items: flex-start;
+}
+
+.otpInput {
+  flex: 1;
+  background-color: var(--white);
+  color: var(--raisin-black);
+  border: 1px solid var(--light-grey);
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: var(--text-base);
+  transition: border-color 0.3s ease;
+}
+
+.otpInput:focus {
+  outline: none;
+  border-color: var(--naples-yellow);
+  border-width: 2px;
+}
+
+.verifyOtpButton {
+  background-color: var(--naples-yellow);
+  color: var(--white);
+  border: none;
+  border-radius: 5px;
+  padding: 8px 16px;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.verifyOtpButton:hover:not(:disabled) {
+  background-color: var(--dark-yellow);
+}
+
+.verifyOtpButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }

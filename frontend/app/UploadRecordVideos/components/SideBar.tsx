@@ -5,7 +5,7 @@ import { AiOutlineAppstore, AiOutlineHome } from "react-icons/ai";
 import { IoSettingsOutline } from "react-icons/io5";
 import { TbLogout } from "react-icons/tb";
 import Link from "next/link"; // Import Link from Next.js
-import styles from "../../Login/page.module.css";
+import styles from "../page.module.css";
 import { VscCalendar } from "react-icons/vsc";
 import Image from "next/image";
 import { signOut } from "next-auth/react";
