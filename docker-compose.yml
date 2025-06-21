@@ -1,38 +1,37 @@
 services:
-  db:
-    image: postgres:15
-    container_name: postgres_db_dev
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: postgres
-    restart: unless-stopped
-    env_file: backend/.env
-    ports:
-      - "5433:5432"
-    volumes:
-      - postgres_data_dev:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
+  # db:
+  #   image: postgres:15
+  #   container_name: postgres_db_dev
+  #   environment:
+  #     POSTGRES_USER: postgres
+  #     POSTGRES_PASSWORD: postgres
+  #     POSTGRES_DB: postgres
+  #   restart: unless-stopped
+  #   env_file: backend/.env
+  #   ports:
+  #     - "5433:5432"
+  #   volumes:
+  #     - postgres_data_dev:/var/lib/postgresql/data
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U postgres"]
+  #     interval: 5s
+  #     timeout: 5s
+  #     retries: 5
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile.dev
     container_name: fastapi_backend_dev
     depends_on:
-      db:
-        condition: service_healthy
+      # db:
+      #   condition: service_healthy
       redis:
         condition: service_started
     env_file: backend/.env
     ports:
       - "8081:8000"
     environment:
-      - DATABASE_URL=postgresql://postgres:postgres@db:5432/postgres
+      - DATABASE_URL=postgresql://postgres:mockpie123@database-1.ct2myi22ccsm.eu-north-1.rds.amazonaws.com:5432/postgres
       - CORS_ORIGINS=http://localhost:3000,http://frontend:3000,http://react_frontend:3000,*
       - PYTHONDONTWRITEBYTECODE=1
       - PYTHONUNBUFFERED=1
@@ -42,6 +41,7 @@ services:
     volumes:
       - ./:/app  # Mount entire project so backend module is available
     restart: unless-stopped
+    
   frontend:
     build:
       context: ./frontend
@@ -85,6 +85,6 @@ services:
       retries: 5
 
 volumes:
-  postgres_data_dev:
+  # postgres_data_dev:
   redis_data_dev:
   frontend_node_modules_dev:
