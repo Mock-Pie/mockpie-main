@@ -99,7 +99,7 @@ async def verify_user_otp(
 
 @router.get("/me", response_model=UserResponse)
 async def get_current_user(current_user: User = Depends(TokenHandler.get_current_user)):
-    return UserResponse.from_orm(current_user)
+    return UserResponse.model_validate(current_user)
 
 
 @router.get("/profile", response_model=UserProfileResponse)
@@ -164,13 +164,14 @@ async def update_current_user(
                 detail="Phone number is already taken"
             )
         current_user.phone_number = user_update.phone_number
+    
     if user_update.gender is not None:
         current_user.gender = user_update.gender
     
     try:
         db.commit()
         db.refresh(current_user)
-        return UserResponse.from_orm(current_user)
+        return UserResponse.model_validate(current_user)
     except Exception as e:
         db.rollback()
         from fastapi import HTTPException
