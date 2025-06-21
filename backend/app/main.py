@@ -1,34 +1,37 @@
-from fastapi import FastAPI, HTTPException, status, Depends, Form
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.security import OAuth2PasswordBearer
-from pydantic import BaseModel, EmailStr
-from sqlalchemy.orm import Session
-from backend.database.database import get_db, engine, Base
-from backend.app.models.user.user import User
-from backend.app.enums.gender import Gender
-from backend.app.static.lang.error_messages.exception_responses import ErrorMessage
-from passlib.context import CryptContext
+from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 import logging
-from backend.app.controllers.authentication.user_registration import *
-from backend.app.schemas.user.user_schema import *
-from backend.app.utils.user_auth_response_wrapper import *
-from backend.app.utils.user_response import *
+import traceback
+import os
 
+from backend.database.database import init_db
+from backend.app.middleware.redis_middleware import RedisMiddleware
+from backend.app.routers import auth, health, presentations, utils
+
+# Import all models to ensure they are registered with SQLAlchemy
+from backend.app.models.user.user import User
+from backend.app.models.presentation.presentation import Presentation
+from backend.app.models.analysis.voice_analysis import VoiceAnalysis
+from backend.app.models.analysis.body_analysis import BodyAnalysis
+from backend.app.models.segments.voice_segment import VoiceSegment
+from backend.app.models.segments.body_segment import BodySegment
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Create all tables in the database
-try:
-    logger.info("Creating database tables...")
-    Base.metadata.create_all(bind=engine)
-    logger.info("Database tables created successfully")
-except Exception as e:
-    logger.error(f"Failed to create database tables: {e}")
+app = FastAPI(
+    title="MockPie API",
+    description="API for MockPie presentation analysis platform",
+    version="1.0.0"
+)
 
-app = FastAPI()
+# Add Redis middleware
+app.add_middleware(RedisMiddleware)
 
+# Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -37,17 +40,46 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Include routers
+app.include_router(auth.router)
+app.include_router(health.router)
+app.include_router(utils.router)
+app.include_router(presentations.router)
+
+# Mount static files for uploaded videos
+uploads_dir = "uploads"  # Relative to the app working directory
+if os.path.exists(uploads_dir):
+    app.mount("/uploads", StaticFiles(directory=uploads_dir), name="uploads")
+    logger.info(f"Mounted uploads directory: {os.path.abspath(uploads_dir)}")
+else:
+    logger.warning(f"Uploads directory not found: {os.path.abspath(uploads_dir)}")
+
+# Global exception handler
+@app.exception_handler(Exception)
+async def global_exception_handler(request, exc):
+    error_detail = str(exc)
+    error_trace = traceback.format_exc()
+    
+    # Log the full error
+    logger.error(f"Unhandled exception: {error_detail}")
+    logger.error(error_trace)
+    
+    # Return a cleaner response to the client
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Internal server error", "message": error_detail}
+    )
 
 # Routes
-@app.post("/auth/register", response_model=UserAuthResponse, status_code=status.HTTP_201_CREATED)
-async def register_user(
-    email: EmailStr = Form(...),
-    username: str = Form(...),
-    phone_number: str = Form(...),
-    password: str = Form(...),
-    password_confirmation: str = Form(...),
-    gender: Gender = Form(...),
-    db: Session = Depends(get_db)
-):
-    return RegisterUser.register_user(email=email, username=username, phone_number=phone_number, password=password, password_confirmation=password_confirmation,gender=gender, db=db)
+# @app.post("/auth/register", response_model=UserAuthResponse, status_code=status.HTTP_201_CREATED)
+# async def register_user(
+#     email: EmailStr = Form(...),
+#     username: str = Form(...),
+#     phone_number: str = Form(...),
+#     password: str = Form(...),
+#     password_confirmation: str = Form(...),
+#     gender: Gender = Form(...),
+#     db: Session = Depends(get_db)
+# ):
+#     return RegisterUser.register_user(email=email, username=username, phone_number=phone_number, password=password, password_confirmation=password_confirmation,gender=gender, db=db)
     

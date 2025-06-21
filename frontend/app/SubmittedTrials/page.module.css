@@ -30,8 +30,9 @@
 }
 
 .headerTitle {
+    font-family: var(--font-poppins), sans-serif;
+    font-weight: 400;
     font-size: 1.5rem;
-    font-weight: bold;
     color: var(--white);
 }
 
@@ -107,7 +108,9 @@
 .feedbackCell {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 0.5rem;
+    background-color: var(--raisin-black);
     padding: 0.5rem;
     border-radius: 4px;
 }
@@ -146,6 +149,15 @@
     opacity: 1;
 }
 
+.downloadButton {
+    background-color: var(--naples-yellow);
+    mask: url('/download-icon.svg') no-repeat center;
+}
+
+.deleteButton {
+    background-color: var(--brick);
+    mask: url('/trash-icon.svg') no-repeat center;
+}
 
 .videoThumbnail {
     position: relative;

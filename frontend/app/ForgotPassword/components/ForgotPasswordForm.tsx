@@ -1,40 +1,59 @@
-import React from 'react';
-import styles from "../../Login/page.module.css";
-import styles1 from "../../SignUp/page.module.css";
-import Link from 'next/link';
+"use client";
+import React, { useState } from 'react';
+import styles from "../../ForgotPassword/page.module.css";
 
 const ForgotPasswordForm = () => {
+  const [email, setEmail] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-    return (
-      <div className={styles.mainContent}>
-        <p className={styles.subtitle}>Welcome to MockPie!</p>
-        <div className={styles.loginBox}>
-          <div className={styles.inputGroup}>
-            <label >Email or Phone number</label>
-            <input type="text" className={styles.input} />
-          </div>
-          <div className={styles.inputGroup}>
-            <label>New pssword</label>
-            <input type="password" className={styles.input} />
-          </div>
-          <div className={styles.inputGroup}>
-            <label>Re-Enter password</label>
-            <input type="password" className={styles.input} />
-          </div>
-          <Link href="/Login">
-            <button className={styles.signInButton}>Save</button>
-          </Link>
-          <div className={styles.footerText}>
-            <p>
-                Don't have an account?{' '}
-                <Link href="/SignUp" className={styles1.link}>
-                    Sign up
-                </Link>
-            </p>
-          </div>
-        </div>
+  const handleRequestOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+    try {
+      const data = new FormData();
+      data.append("email", email);
+      const response = await fetch("http://localhost:8081/auth/forgot-password", {
+        method: "POST",
+        body: data,
+      });
+      if (response.ok) {
+        window.location.href = `/OTPVerifcation?email=${encodeURIComponent(email)}`;
+      } else {
+        const errorData = await response.json();
+        setError(errorData.detail || errorData.message || "User not found");
+      }
+    } catch (err) {
+      setError("Failed to send OTP. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleRequestOtp}>
+      <div style={{ marginBottom: 16 }}>
+        <label className={styles.label}>Email</label>
+        <input
+          type="text"
+          className={styles.input}
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          required
+          placeholder="Email"
+        />
       </div>
-    );
+      {error && <div className={styles.error}>{error}</div>}
+      <button
+        type="submit"
+        className={styles.button}
+        disabled={loading}
+      >
+        {loading ? 'Sending...' : 'Get OTP'}
+      </button>
+    </form>
+  );
 };
 
 export default ForgotPasswordForm;

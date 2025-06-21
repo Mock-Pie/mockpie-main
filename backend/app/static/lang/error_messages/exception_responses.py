@@ -22,6 +22,8 @@ class ErrorMessage(str, Enum):
     PHONE_TAKEN = "Phone number already registered"
     INVALID_PASSWORD = "Password does not meet security requirements"
     PASSWORD_MISMATCH = "Passwords do not match"
+    EMAIL_DOES_NOT_EXIST = "Email address does not exist"
+    EMAIL_NOT_VERIFIED = "Email address not verified"
     
     # Presentation related errors
     PRESENTATION_NOT_FOUND = "Presentation not found"
@@ -73,3 +75,6 @@ class ErrorMessage(str, Enum):
     ENDPOINT_NOT_FOUND = "API endpoint not found"
     METHOD_NOT_ALLOWED = "HTTP method not allowed for this endpoint"
     TOO_MANY_REQUESTS = "Too many requests"
+    
+    # Redis errors
+    REDIS_CONNECTION_ERROR = "Failed to connect to Redis"

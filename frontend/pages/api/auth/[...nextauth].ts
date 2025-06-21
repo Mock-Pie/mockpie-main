@@ -11,4 +11,18 @@ export default NextAuth({
   pages: {
     signIn: "/SignUp", // Redirect to your sign-up page
   },
+  callbacks: {
+    async signIn({ user, account, profile }) {
+      // Allow sign in
+      return true;
+    },
+    async redirect({ url, baseUrl }) {
+      // Redirect to dashboard after successful sign in
+      return `${baseUrl}/Dashboard`;
+    },
+    async session({ session, token }) {
+      return session;
+    },
+  },
+  secret: process.env.NEXTAUTH_SECRET,
 });

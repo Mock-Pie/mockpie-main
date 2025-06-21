@@ -1,9 +1,18 @@
 fastapi
 uvicorn
 sqlalchemy
-psycopg2
-passlib[bcrypt]
+psycopg2-binary
+passlib[bcrypt]==1.7.4
+bcrypt==4.0.1
 python-multipart # for decoding data
 python-jose[cryptography] # for creating JWT tokens
 pydantic
 pydantic[email]
+pydantic-settings>=2.0.0
+PyJWT>=2.0.0
+redis 
+fastapi-redis-cache
+watchfiles
+python-dotenv
+fastapi_mail
+alembic

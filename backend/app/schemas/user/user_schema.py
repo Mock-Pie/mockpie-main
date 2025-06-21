@@ -10,12 +10,17 @@ class UserBase(BaseModel):
     gender: Gender
 
 class UserUpdate(BaseModel):
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
     username: Optional[str] = None
     email: Optional[EmailStr] = None
     phone_number: Optional[str] = None
+    gender: Optional[Gender] = None
     password: Optional[str] = None
     
 class UserRegistration(BaseModel):
+    first_name: str = Field(..., min_length=2, max_length=50)
+    last_name: str = Field(..., min_length=2, max_length=50)
     email: EmailStr
     username: str = Field(..., min_length=3, max_length=50)
     phone_number: str = Field(..., pattern=r'^\+?[1-9]\d{1,14}$')
@@ -45,3 +50,26 @@ class UserLogin(BaseModel):
         if not any(c.isupper() for c in v):
             raise ValueError('Password must contain at least one uppercase letter')
         return v
+
+class UserResponse(BaseModel):
+    id: int
+    first_name: str
+    last_name: str
+    username: str
+    email: EmailStr
+    phone_number: str
+    gender: Gender
+    created_at: datetime
+    updated_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+class UserAuthResponse(BaseModel):
+    access_token: str
+    refresh_token: str
+    user: UserResponse
+    
+    class Config:
+        from_attributes = True
+

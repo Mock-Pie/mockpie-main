@@ -1,10 +1,12 @@
-from database.database import Base
+from backend.database.database import Base
 from sqlalchemy import Column, Integer, DateTime, ForeignKey
 from sqlalchemy.sql import func
 from sqlalchemy.ext.declarative import declared_attr
 
-class BaseAnalysis:
+class BaseAnalysis(Base):
     """Abstract base class for analysis models"""
+    
+    __abstract__ = True  # This tells SQLAlchemy this is an abstract base class
     
     id = Column(Integer, primary_key=True, index=True)
     

@@ -1,9 +1,9 @@
 from sqlalchemy import Column, Integer, Float, String, ForeignKey
 from sqlalchemy.orm import relationship
-from database.database import Base
+from backend.database.database import Base
 from .base_analysis import BaseAnalysis
 
-class VoiceAnalysis(Base, BaseAnalysis):
+class VoiceAnalysis(BaseAnalysis):
     __tablename__ = "voice_analyses" # don't change this, it's used in the segments model
     
     # Global metrics

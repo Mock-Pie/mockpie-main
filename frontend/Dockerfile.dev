@@ -1,0 +1,30 @@
+# Development Dockerfile for frontend
+FROM node:18-alpine
+
+# Install dumb-init for proper signal handling
+RUN apk add --no-cache dumb-init
+
+WORKDIR /app
+
+# Copy package files and install dependencies
+COPY package.json package-lock.json ./
+RUN npm install
+
+# Set environment variables for hot reload
+ENV CHOKIDAR_USEPOLLING=true
+ENV WATCHPACK_POLLING=true
+ENV HOST=0.0.0.0
+ENV PORT=3000
+
+# No need to copy source files - they will be mounted as volumes
+
+EXPOSE 3000
+
+# Use dumb-init to handle signals properly
+ENTRYPOINT ["dumb-init", "--"]
+
+# Start development server
+CMD ["npm", "run", "dev"]
+
+
+

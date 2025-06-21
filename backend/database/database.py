@@ -10,6 +10,15 @@ engine = create_engine(settings.database_url)
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 Base = declarative_base()
 
+def init_db():
+    """
+    Initialize the database by creating all tables.
+    
+    This function should be called at the start of the application to ensure
+    that all models are created in the database.
+    """
+    Base.metadata.create_all(bind=engine)
+
 def get_db() -> Generator:
     """
     Dependency function that yields a SQLAlchemy database session.

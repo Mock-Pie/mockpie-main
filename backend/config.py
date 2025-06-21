@@ -12,7 +12,15 @@ class Settings(BaseSettings):
     secret_key: str
     algorithm: str
     access_token_expire_minutes: int
-
+    refresh_token_expire_days: int
+    smtp_server: str
+    smtp_port: int
+    smtp_username: str
+    smtp_password: str
+    redis_host: str = "redis"
+    redis_port: int = 6379
+    redis_db: int = 0
+    redis_password: str = ''
     model_config = SettingsConfigDict(env_file=str(Path(__file__).parent / ".env"))
 
 settings = Settings()

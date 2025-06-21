@@ -1,10 +1,10 @@
 import React from 'react';
-import styles from "../page.module.css";
+import styles from "../../Login/page.module.css";
 
 const Header = () => {
     return (
         <div className={styles.titleSubtitleContainer}>
-            <h2 className={styles.title}>Sign In</h2>
+            <h2 className={styles.title}>OTP Verification</h2>
         </div>
     );
 };
