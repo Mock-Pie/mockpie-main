@@ -321,3 +321,110 @@
 @keyframes spin {
     to { transform: rotate(360deg); }
 }
+
+/* OTP Input Styles */
+.otp-container {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.otp-input {
+  width: 50px;
+  height: 50px;
+  border: 2px solid #e1e5e9;
+  border-radius: 12px;
+  text-align: center;
+  font-size: 20px;
+  font-weight: 600;
+  color: #2d3748;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  font-family: 'Poppins', sans-serif;
+}
+
+.otp-input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  transform: scale(1.05);
+}
+
+.otp-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Success Message Styles */
+.success-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: rgba(72, 187, 120, 0.1);
+  border: 1px solid rgba(72, 187, 120, 0.3);
+  border-radius: 8px;
+  color: #2f855a;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+
+/* Link Button Styles */
+.link-button {
+  background: none;
+  border: none;
+  color: #667eea;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: underline;
+  transition: color 0.3s ease;
+  font-family: 'Poppins', sans-serif;
+}
+
+.link-button:hover:not(:disabled) {
+  color: #5a67d8;
+}
+
+.link-button:disabled {
+  color: #a0aec0;
+  cursor: not-allowed;
+  text-decoration: none;
+}
+
+/* Validation Checklist Styles */
+.validation-checklist {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 8px;
+  backdrop-filter: blur(10px);
+}
+
+.validation-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  margin-bottom: 4px;
+  color: #4a5568;
+  font-family: 'Poppins', sans-serif;
+}
+
+.validation-item:last-child {
+  margin-bottom: 0;
+}
+
+.check-icon {
+  color: #48bb78;
+  font-size: 12px;
+}
+
+.times-icon {
+  color: #e53e3e;
+  font-size: 12px;
+}
