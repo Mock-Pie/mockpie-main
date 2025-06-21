@@ -50,8 +50,9 @@ body {
 
 body {
   color: var(--foreground);
-  background: var(--background);
   font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, var(--raisin-black) 0%, var(--chinese-black) 100%);
+  min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

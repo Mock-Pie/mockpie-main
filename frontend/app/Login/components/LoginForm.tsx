@@ -11,11 +11,11 @@ import styles from "../page.module.css";
 const LoginForm = () => {
     const router = useRouter();
     const [formData, setFormData] = useState({
-        email: "",
+        identifier: "",
         password: "",
     });
     const [formErrors, setFormErrors] = useState({
-        email: "",
+        identifier: "",
         password: "",
     });
     const [loading, setLoading] = useState(false);
@@ -25,10 +25,13 @@ const LoginForm = () => {
 
     const validateField = useCallback((name: string, value: string) => {
         switch (name) {
-            case "email":
-                if (!value.trim()) return "Email is required.";
-                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())) {
-                    return "Enter a valid email address.";
+            case "identifier":
+                if (!value.trim()) return "Email or username is required.";
+                // Allow both email format and username format (letters, numbers, underscores, 3+ chars)
+                const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+                const isUsername = /^[a-zA-Z0-9_]{3,}$/.test(value.trim());
+                if (!isEmail && !isUsername) {
+                    return "Enter a valid email address or username (3+ characters, letters, numbers, underscores only).";
                 }
                 return "";
             case "password":
@@ -57,12 +60,12 @@ const LoginForm = () => {
 
     const validateForm = useCallback(() => {
         const newErrors = {
-            email: validateField("email", formData.email),
+            identifier: validateField("identifier", formData.identifier),
             password: validateField("password", formData.password),
         };
         
         setFormErrors(newErrors);
-        return !newErrors.email && !newErrors.password;
+        return !newErrors.identifier && !newErrors.password;
     }, [formData, validateField]);
 
     const handleSubmit = useCallback(async (e: React.FormEvent) => {
@@ -82,7 +85,7 @@ const LoginForm = () => {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    email: formData.email.trim(),
+                    email: formData.identifier.trim(),
                     password: formData.password,
                 }),
             });
@@ -164,15 +167,15 @@ const LoginForm = () => {
 
                 <form onSubmit={handleSubmit} noValidate>
                     <div className={styles['form-group']}>
-                        <label htmlFor="email">Email</label>
+                        <label htmlFor="identifier">Email or Username</label>
                         <div className={styles['input-container']}>
                             <input
-                                type="email"
-                                id="email"
-                                name="email"
+                                type="text"
+                                id="identifier"
+                                name="identifier"
                                 className={styles['form-input']}
-                                placeholder="Enter your email"
-                                value={formData.email}
+                                placeholder="Enter your email or username"
+                                value={formData.identifier}
                                 onChange={handleInputChange}
                                 onFocus={handleFocus}
                                 onBlur={handleBlur}
@@ -181,10 +184,10 @@ const LoginForm = () => {
                                 autoComplete="email"
                             />
                         </div>
-                        {formErrors.email && (
+                        {formErrors.identifier && (
                             <div className={styles['error-message']}>
                                 <FaExclamationCircle />
-                                <span>{formErrors.email}</span>
+                                <span>{formErrors.identifier}</span>
                             </div>
                         )}
                     </div>
