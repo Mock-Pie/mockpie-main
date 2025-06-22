@@ -1,6 +1,21 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
 import { useRouter } from 'next/navigation';
+import { 
+    FiVideo, 
+    FiVideoOff, 
+    FiDownload, 
+    FiUploadCloud, 
+    FiPlay, 
+    FiCamera,
+    FiCheck,
+    FiX,
+    FiLoader,
+    FiClock,
+    FiEye,
+    FiFilm,
+    FiRadio
+} from "react-icons/fi";
 import styles from "../page.module.css";
 
 const Recording = () => {
@@ -9,9 +24,11 @@ const Recording = () => {
     const [videoURL, setVideoURL] = useState("");
     const [recordingTime, setRecordingTime] = useState(0);
     const [uploadStatus, setUploadStatus] = useState("");
+    const [isUploading, setIsUploading] = useState(false);
     const [videoDuration, setVideoDuration] = useState(0);
     const [showPreview, setShowPreview] = useState(true);
-    const [videoFormat, setVideoFormat] = useState<{mimeType: string, extension: string}>({mimeType: 'video/webm', extension: 'webm'});
+    const [cameraReady, setCameraReady] = useState(false);
+    const [videoFormat, setVideoFormat] = useState<{mimeType: string, extension: string}>({mimeType: 'video/mp4', extension: 'mp4'});
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const videoStreamRef = useRef<MediaStream | null>(null);
     const chunksRef = useRef<Blob[]>([]);
@@ -33,10 +50,12 @@ const Recording = () => {
                 if (videoPreviewRef.current) {
                     videoPreviewRef.current.srcObject = stream;
                     videoPreviewRef.current.play();
+                    setCameraReady(true);
                 }
             } catch (error) {
                 console.error("Error accessing media devices:", error);
                 alert("Error accessing camera/microphone. Please check permissions and ensure camera is not being used by another application.");
+                setCameraReady(false);
             }
         };
 
@@ -51,11 +70,11 @@ const Recording = () => {
 
     // Effect to handle preview switching
     useEffect(() => {
-        if (showPreview && videoStreamRef.current && videoPreviewRef.current) {
+        if (showPreview && videoStreamRef.current && videoPreviewRef.current && cameraReady) {
             videoPreviewRef.current.srcObject = videoStreamRef.current;
             videoPreviewRef.current.play().catch(console.error);
         }
-    }, [showPreview]);
+    }, [showPreview, cameraReady]);
 
     const startRecording = async () => {
         try {
@@ -67,31 +86,24 @@ const Recording = () => {
                 setUploadStatus("");
             }
 
-            // Ensure we have a camera stream with audio
-            if (!videoStreamRef.current) {
+            // Ensure we have a camera stream
+            if (!videoStreamRef.current || !cameraReady) {
                 const stream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { width: 1280, height: 720 }, 
-                    audio: { 
-                        echoCancellation: true,
-                        noiseSuppression: true,
-                        autoGainControl: true
-                    } 
+                    video: true, 
+                    audio: true
                 });
                 videoStreamRef.current = stream;
-            }
-
-            // Verify audio tracks are present
-            const audioTracks = videoStreamRef.current.getAudioTracks();
-            const videoTracks = videoStreamRef.current.getVideoTracks();
-            console.log(`Audio tracks: ${audioTracks.length}, Video tracks: ${videoTracks.length}`);
-            
-            if (audioTracks.length === 0) {
-                console.warn('No audio tracks found in stream!');
+                
+                if (videoPreviewRef.current) {
+                    videoPreviewRef.current.srcObject = stream;
+                    await videoPreviewRef.current.play();
+                    setCameraReady(true);
+                }
             }
 
             // Make sure the live preview is showing and playing
             setShowPreview(true);
-            if (videoPreviewRef.current) {
+            if (videoPreviewRef.current && videoStreamRef.current) {
                 videoPreviewRef.current.srcObject = videoStreamRef.current;
                 videoPreviewRef.current.play();
             }
@@ -99,28 +111,25 @@ const Recording = () => {
             // Create MediaRecorder with the detected format
             let mediaRecorder;
             try {
-                // Try with the detected format first
                 mediaRecorder = new MediaRecorder(videoStreamRef.current, {
                     mimeType: videoFormat.mimeType,
-                    videoBitsPerSecond: 2500000, // 2.5 Mbps for good quality
-                    audioBitsPerSecond: 128000   // 128 kbps for good audio quality
+                    videoBitsPerSecond: 2500000,
+                    audioBitsPerSecond: 128000
                 });
             } catch (error) {
                 console.warn(`Failed to create MediaRecorder with ${videoFormat.mimeType}, trying fallback...`);
-                // Fallback to generic format without codec specifications
                 const fallbackMimeType = videoFormat.mimeType.split(';')[0];
                 try {
                     mediaRecorder = new MediaRecorder(videoStreamRef.current, {
                         mimeType: fallbackMimeType
                     });
                 } catch (fallbackError) {
-                    // Final fallback - no options
                     mediaRecorder = new MediaRecorder(videoStreamRef.current);
                 }
             }
             
             mediaRecorderRef.current = mediaRecorder;
-            chunksRef.current = []; // Reset chunks array
+            chunksRef.current = [];
 
             mediaRecorder.ondataavailable = (event) => {
                 if (event.data.size > 0) {
@@ -132,9 +141,7 @@ const Recording = () => {
                 const blob = new Blob(chunksRef.current, { type: videoFormat.mimeType });
                 const url = URL.createObjectURL(blob);
                 setVideoURL(url);
-                setShowPreview(false); // Switch to recorded video view
-                
-                // Reset duration initially
+                setShowPreview(false);
                 setVideoDuration(0);
             };
 
@@ -170,7 +177,6 @@ const Recording = () => {
         setUploadStatus("");
         setRecordingTime(0);
         
-        // Restart the camera stream for live preview
         if (videoStreamRef.current && videoPreviewRef.current) {
             videoPreviewRef.current.srcObject = videoStreamRef.current;
             videoPreviewRef.current.play().catch(console.error);
@@ -192,34 +198,33 @@ const Recording = () => {
 
     const uploadVideo = async () => {
         if (!videoURL) {
-            alert("No video to upload. Please record a video first.");
+            setUploadStatus("No video to upload. Please record a video first.");
             return;
         }
 
-        // Check if user is authenticated
         const accessToken = localStorage.getItem("access_token");
         if (!accessToken) {
-            alert("Please log in to upload videos.");
-            // You might want to redirect to login page here
+            setUploadStatus("Please log in to upload videos.");
+            setTimeout(() => router.push("/Login"), 2000);
             return;
         }
 
         try {
-            setUploadStatus("Uploading...");
+            setIsUploading(true);
+            setUploadStatus("Preparing upload...");
 
-            // Convert the video blob to a file
             const response = await fetch(videoURL);
             const blob = await response.blob();
-            
-            // Create a file from the blob with clean MIME type (remove codec specs)
-            const cleanMimeType = videoFormat.mimeType.split(';')[0]; // Remove codec specifications
-            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-            const fileName = `recorded-video-${timestamp}.${videoFormat.extension}`;
-            const file = new File([blob], fileName, { type: cleanMimeType });
+
+            const file = new File([blob], `recording.${videoFormat.extension}`, {
+                type: videoFormat.mimeType,
+            });
 
             const formData = new FormData();
             formData.append("file", file);
-            formData.append("title", `Recorded Video ${new Date().toLocaleDateString()}`);
+            formData.append("title", `Recording ${new Date().toLocaleString()}`);
+
+            setUploadStatus("Uploading video...");
 
             const uploadResponse = await fetch("http://localhost:8081/presentations/upload", {
                 method: "POST",
@@ -231,10 +236,9 @@ const Recording = () => {
 
             if (uploadResponse.ok) {
                 const data = await uploadResponse.json();
-                setUploadStatus("Upload successful!");
+                setUploadStatus("Upload successful! Redirecting to dashboard...");
                 console.log("Upload response:", data);
                 
-                // Redirect to dashboard after successful upload
                 setTimeout(() => {
                     router.push("/Dashboard");
                 }, 2000);
@@ -243,7 +247,8 @@ const Recording = () => {
                 
                 if (uploadResponse.status === 401) {
                     localStorage.removeItem("access_token");
-                    alert("Session expired. Please log in again.");
+                    setUploadStatus("Session expired. Please log in again.");
+                    setTimeout(() => router.push("/Login"), 2000);
                 } else if (uploadResponse.status === 413) {
                     setUploadStatus("File too large. Maximum size is 100MB.");
                 } else if (uploadResponse.status === 415) {
@@ -255,13 +260,15 @@ const Recording = () => {
         } catch (error) {
             console.error("Error uploading video:", error);
             setUploadStatus("Network error. Please check your connection and try again.");
+        } finally {
+            setIsUploading(false);
         }
     };
 
     const formatTime = (time: number) => {
         const minutes = Math.floor(time / 60);
         const seconds = time % 60;
-        return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+        return `${minutes}:${seconds.toString().padStart(2, "0")}`;
     };
 
     const formatDuration = (duration: number) => {
@@ -269,208 +276,251 @@ const Recording = () => {
         if (!duration || !isFinite(duration) || isNaN(duration) || duration <= 0) {
             return "0:00";
         }
-        
         const minutes = Math.floor(duration / 60);
         const seconds = Math.floor(duration % 60);
-        return `${minutes}:${String(seconds).padStart(2, "0")}`;
+        return `${minutes}:${seconds.toString().padStart(2, "0")}`;
     };
 
-    // Detect best supported video format
+    const handleVideoLoadedMetadata = () => {
+        if (recordedVideoRef.current) {
+            const duration = recordedVideoRef.current.duration;
+            // Only set duration if it's a valid, finite number
+            if (duration && isFinite(duration) && !isNaN(duration) && duration > 0) {
+                setVideoDuration(duration);
+            } else {
+                setVideoDuration(0);
+            }
+        }
+    };
+
     const detectVideoFormat = () => {
-        const mp4Options = [
-            'video/mp4;codecs="avc1.42E01E,mp4a.40.2"', // H.264 + AAC audio
-            'video/mp4;codecs="avc1.42E01E"', // H.264 video only
-            'video/mp4', // Generic MP4
-        ];
-        
-        const webmOptions = [
-            'video/webm;codecs="vp9,opus"', // VP9 + Opus audio
-            'video/webm;codecs="vp8,opus"', // VP8 + Opus audio
-            'video/webm;codecs="vp9"', // VP9 video only
-            'video/webm;codecs="vp8"', // VP8 video only
-            'video/webm', // Generic WebM
+        const formats = [
+            { mimeType: 'video/mp4;codecs=h264', extension: 'mp4' },
+            { mimeType: 'video/mp4', extension: 'mp4' },
+            { mimeType: 'video/webm;codecs=vp9', extension: 'webm' },
+            { mimeType: 'video/webm;codecs=vp8', extension: 'webm' },
+            { mimeType: 'video/webm', extension: 'webm' },
         ];
 
-        // Try MP4 first (prioritizing ones with audio codecs)
-        for (const mimeType of mp4Options) {
-            if (MediaRecorder.isTypeSupported(mimeType)) {
-                console.log(`Detected supported format: ${mimeType}`);
-                return { mimeType, extension: 'mp4' };
+        for (const format of formats) {
+            if (MediaRecorder.isTypeSupported(format.mimeType)) {
+                return format;
             }
         }
 
-        // Fallback to WebM (prioritizing ones with audio codecs)
-        for (const mimeType of webmOptions) {
-            if (MediaRecorder.isTypeSupported(mimeType)) {
-                console.log(`Detected supported format: ${mimeType}`);
-                return { mimeType, extension: 'webm' };
-            }
-        }
+        return { mimeType: 'video/mp4', extension: 'mp4' };
+    };
 
-        // Final fallback
-        console.log('Using fallback format: video/webm');
-        return { mimeType: 'video/webm', extension: 'webm' };
+    const getUploadStatusClass = () => {
+        if (!uploadStatus) return "";
+        if (uploadStatus.includes("successful") || uploadStatus.includes("Redirecting")) return styles.uploadSuccess;
+        if (uploadStatus.includes("failed") || uploadStatus.includes("error") || uploadStatus.includes("expired")) return styles.uploadError;
+        if (uploadStatus.includes("Uploading") || uploadStatus.includes("Preparing")) return styles.uploadUploading;
+        return styles.uploadError;
+    };
+
+    const getStatusIcon = () => {
+        if (!uploadStatus) return null;
+        if (uploadStatus.includes("successful") || uploadStatus.includes("Redirecting")) return <FiCheck />;
+        if (uploadStatus.includes("failed") || uploadStatus.includes("error") || uploadStatus.includes("expired")) return <FiX />;
+        if (uploadStatus.includes("Uploading") || uploadStatus.includes("Preparing")) return <div className={styles.loadingSpinner}></div>;
+        return <FiX />;
     };
 
     return (
         <div className={styles.container}>
-            {/* Video Preview Section */}
-            <div className={styles.preview}>
-                {/* Live Camera Preview */}
-                {(showPreview || isRecording) && (
+            <div className={styles.studioContainer}>
+                {/* Video Preview Section */}
+                <div className={`${styles.preview} ${isRecording ? styles.recording : ''}`}>
                     <div className={styles.videoWrapper}>
-                        <video
-                            ref={videoPreviewRef}
-                            className={styles.videoPreview}
-                            autoPlay
-                            muted
-                        ></video>
+                        {/* Live Camera Preview */}
+                        {showPreview && (
+                            <>
+                                {cameraReady ? (
+                                    <video
+                                        ref={videoPreviewRef}
+                                        className={styles.videoPreview}
+                                        autoPlay
+                                        muted
+                                        playsInline
+                                    />
+                                ) : (
+                                    <div className={styles.cameraPlaceholder}>
+                                        <FiCamera className={styles.cameraIcon} />
+                                        <div className={styles.cameraText}>Setting up camera...</div>
+                                        <div className={styles.cameraSubtext}>Please allow camera and microphone access</div>
+                                        <button 
+                                            onClick={() => {
+                                                const initializeCamera = async () => {
+                                                    try {
+                                                        const format = detectVideoFormat();
+                                                        setVideoFormat(format);
+                                                        
+                                                        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                                                        videoStreamRef.current = stream;
+
+                                                        if (videoPreviewRef.current) {
+                                                            videoPreviewRef.current.srcObject = stream;
+                                                            videoPreviewRef.current.play();
+                                                        }
+                                                        setCameraReady(true);
+                                                    } catch (error) {
+                                                        console.error("Error accessing media devices:", error);
+                                                        alert("Error accessing camera/microphone. Please check permissions and ensure camera is not being used by another application.");
+                                                        setCameraReady(false);
+                                                    }
+                                                };
+                                                initializeCamera();
+                                            }}
+                                            style={{
+                                                marginTop: "16px",
+                                                padding: "8px 16px",
+                                                backgroundColor: "var(--naples-yellow)",
+                                                color: "var(--white)",
+                                                border: "none",
+                                                borderRadius: "8px",
+                                                cursor: "pointer",
+                                                fontSize: "14px",
+                                                fontWeight: "500"
+                                            }}
+                                        >
+                                            Retry Camera Setup
+                                        </button>
+                                    </div>
+                                )}
+                            </>
+                        )}
+
+                        {/* Recorded Video Playback */}
+                        {!showPreview && videoURL && (
+                            <video
+                                ref={recordedVideoRef}
+                                src={videoURL}
+                                className={styles.recordedVideo}
+                                controls
+                                onLoadedMetadata={handleVideoLoadedMetadata}
+                            />
+                        )}
+
+                        {/* Recording Timer */}
                         {isRecording && (
                             <div className={styles.timer}>
-                                🔴 {formatTime(recordingTime)}
+                                <div className={styles.recordingIndicator}></div>
+                                <FiClock />
+                                REC {formatTime(recordingTime)}
                             </div>
                         )}
-                        {!isRecording && videoURL && (
-                            <div style={{
-                                position: 'absolute',
-                                top: '10px',
-                                right: '10px',
-                                background: 'rgba(0,0,0,0.7)',
-                                color: 'white',
-                                padding: '5px 10px',
-                                borderRadius: '5px',
-                                fontSize: '12px'
-                            }}>
-                                Live Preview
-                            </div>
-                        )}
-                    </div>
-                )}
 
-                {/* Recorded Video Preview */}
-                {!showPreview && videoURL && (
-                    <div className={styles.videoWrapper}>
-                        <video
-                            ref={recordedVideoRef}
-                            src={videoURL}
-                            controls
-                            className={styles.recordedVideo}
-                            onLoadedMetadata={() => {
-                                if (recordedVideoRef.current) {
-                                    const duration = recordedVideoRef.current.duration;
-                                    // Only set duration if it's a valid finite number
-                                    if (isFinite(duration) && !isNaN(duration) && duration > 0) {
-                                        setVideoDuration(duration);
-                                    } else {
-                                        setVideoDuration(0);
-                                    }
-                                }
-                            }}
-                        ></video>
-                        <div style={{
-                            position: 'absolute',
-                            top: '10px',
-                            left: '10px',
-                            background: 'rgba(0,0,0,0.8)',
-                            color: 'white',
-                            padding: '5px 10px',
-                            borderRadius: '5px',
-                            fontSize: '12px'
-                        }}>
-                            📹 Recorded Video
-                            {videoDuration > 0 && isFinite(videoDuration) && !isNaN(videoDuration) && (
-                                <span style={{ marginLeft: '10px' }}>
-                                    Duration: {formatDuration(videoDuration)}
-                                </span>
+                        {/* Status Badge */}
+                        <div className={`${styles.statusBadge} ${showPreview ? styles.live : styles.recorded}`}>
+                            {showPreview ? (
+                                <>
+                                    <FiRadio />
+                                    LIVE
+                                </>
+                            ) : (
+                                <>
+                                    <FiFilm />
+                                    RECORDED
+                                </>
                             )}
                         </div>
                     </div>
-                )}
-            </div>
-
-            {/* Preview Toggle Buttons */}
-            {videoURL && !isRecording && (
-                <div style={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    gap: '10px',
-                    marginTop: '10px'
-                }}>
-                    <button 
-                        onClick={() => setShowPreview(true)}
-                        className={styles.actionButton}
-                        style={{
-                            backgroundColor: showPreview ? 'var(--naples-yellow)' : 'var(--charleston-green)',
-                            width: '120px',
-                            fontSize: '14px'
-                        }}
-                    >
-                        Live Preview
-                    </button>
-                    <button 
-                        onClick={() => setShowPreview(false)}
-                        className={styles.actionButton}
-                        style={{
-                            backgroundColor: !showPreview ? 'var(--naples-yellow)' : 'var(--charleston-green)',
-                            width: '120px',
-                            fontSize: '14px'
-                        }}
-                    >
-                        Recorded Video
-                    </button>
                 </div>
-            )}
 
-            {/* Main Action Buttons */}
-            <div className={styles.footer}>
-                {!isRecording ? (
-                    <button onClick={startRecording} className={styles.actionButton}>
-                        {videoURL ? "Record New Video" : "Start Recording"}
-                    </button>
-                ) : (
-                    <button onClick={stopRecording} className={styles.actionButton}>
-                        Stop Recording
-                    </button>
-                )}
-                
-                {videoURL && !isRecording && (
-                    <>
-                        <button onClick={downloadVideo} className={styles.actionButton}>
-                            Download Video
-                        </button>
-                        <button 
-                            onClick={uploadVideo} 
-                            className={styles.actionButton}
-                            disabled={uploadStatus.includes("Uploading")}
-                            style={{
-                                opacity: uploadStatus.includes("Uploading") ? 0.6 : 1,
-                                cursor: uploadStatus.includes("Uploading") ? 'not-allowed' : 'pointer'
-                            }}
-                        >
-                            {uploadStatus.includes("Uploading") ? "Uploading..." : "Upload Video"}
-                        </button>
-                    </>
-                )}
-            </div>
+                {/* Control Panel */}
+                <div className={styles.controlPanel}>
+                    {/* Preview Toggle Section */}
+                    {videoURL && (
+                        <div className={styles.toggleSection}>
+                            <div className={styles.toggleButtons}>
+                                <button
+                                    className={`${styles.toggleButton} ${showPreview ? styles.active : ''}`}
+                                    onClick={() => setShowPreview(true)}
+                                >
+                                    <FiEye />
+                                    Live Preview
+                                </button>
+                                <button
+                                    className={`${styles.toggleButton} ${!showPreview ? styles.active : ''}`}
+                                    onClick={() => setShowPreview(false)}
+                                >
+                                    <FiPlay />
+                                    Recorded Video
+                                </button>
+                            </div>
+                        </div>
+                    )}
 
-            {/* Upload Status */}
-            {uploadStatus && (
-                <div style={{
-                    marginTop: '15px',
-                    padding: '12px',
-                    borderRadius: '8px',
-                    textAlign: 'center',
-                    backgroundColor: uploadStatus.includes("successful") ? '#4CAF50' : 
-                                   uploadStatus.includes("failed") || uploadStatus.includes("error") ? '#f44336' :
-                                   '#2196F3',
-                    color: 'white',
-                    fontWeight: '500'
-                }}>
-                    {uploadStatus}
+                    {/* Upload Status */}
+                    {uploadStatus && (
+                        <div className={`${styles.uploadStatus} ${getUploadStatusClass()}`}>
+                            {getStatusIcon()}
+                            {uploadStatus}
+                        </div>
+                    )}
+
+                    {/* Action Buttons */}
+                    <div className={styles.footer}>
+                        {!isRecording && !videoURL && (
+                            <button
+                                onClick={startRecording}
+                                className={`${styles.actionButton} ${styles.recordButton}`}
+                                disabled={!cameraReady}
+                            >
+                                <FiVideo />
+                                Start Recording
+                            </button>
+                        )}
+
+                        {isRecording && (
+                            <button
+                                onClick={stopRecording}
+                                className={`${styles.actionButton} ${styles.stopButton} ${styles.recording}`}
+                            >
+                                <FiVideoOff />
+                                Stop Recording
+                            </button>
+                        )}
+
+                        {videoURL && !isRecording && (
+                            <>
+                                <button
+                                    onClick={recordNewVideo}
+                                    className={`${styles.actionButton} ${styles.newRecordingButton}`}
+                                >
+                                    <FiVideo />
+                                    New Recording
+                                </button>
+                                <button
+                                    onClick={downloadVideo}
+                                    className={`${styles.actionButton} ${styles.downloadButton}`}
+                                >
+                                    <FiDownload />
+                                    Download
+                                </button>
+                                <button
+                                    onClick={uploadVideo}
+                                    disabled={isUploading}
+                                    className={`${styles.actionButton} ${styles.uploadButton}`}
+                                >
+                                    {isUploading ? (
+                                        <>
+                                            <div className={styles.loadingSpinner}></div>
+                                            Uploading...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <FiUploadCloud />
+                                            Upload Video
+                                        </>
+                                    )}
+                                </button>
+                            </>
+                        )}
+                    </div>
                 </div>
-            )}
-
-
+            </div>
         </div>
     );
 };

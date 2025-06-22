@@ -79,15 +79,13 @@ const LoginForm = () => {
         setLoading(true);
         
         try {
+            const formDataToSend = new FormData();
+            formDataToSend.append("email", formData.identifier.trim());
+            formDataToSend.append("password", formData.password);
+
             const response = await fetch("http://localhost:8081/auth/login", {
                 method: "POST",
-                headers: { 
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    email: formData.identifier.trim(),
-                    password: formData.password,
-                }),
+                body: formDataToSend,
             });
             
             if (response.ok) {
