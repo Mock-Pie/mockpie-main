@@ -1,12 +1,12 @@
 "use client";
 import React from "react";
 import styles from "../Login/page.module.css";
-import OTPForm from "./components/OtpForm";
+import EmailVerificationForm from "./components/EmailVerificationForm";
 
 const OTPVerification = () => {
   return (
     <div className={styles.container}>
-      <OTPForm />
+      <EmailVerificationForm />
     </div>
   );
 };

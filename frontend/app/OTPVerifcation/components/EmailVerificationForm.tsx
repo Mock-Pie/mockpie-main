@@ -5,7 +5,7 @@ import { FaExclamationCircle, FaExclamationTriangle } from "react-icons/fa";
 import styles from "../../Login/page.module.css";
 import UserService from "../../services/userService";
 
-const OTPForm = () => {
+const EmailVerificationForm = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const emailFromParams = (searchParams && searchParams.get("email")) || "";
@@ -25,92 +25,27 @@ const OTPForm = () => {
     const pendingEmailChange = localStorage.getItem('pendingEmailChange');
     if (pendingEmailChange) {
       const data = JSON.parse(pendingEmailChange);
+      console.log('Email change flow - new email:', data.newEmail);
       setEmail(data.newEmail);
       setProfileData(data.profileData);
       setIsEmailChange(true);
       
-      // Automatically send OTP for email verification
+      // For email change, we need to send OTP via forgot-password endpoint
       sendOTPForEmailChange(data.newEmail);
     } else {
-      // Use email from URL params for forgot password flow
+      // Use email from URL params for registration flow
+      console.log('Registration flow - email from params:', emailFromParams);
       setEmail(emailFromParams);
       setIsEmailChange(false);
+      // For registration, OTP is already sent during registration process
+      // No need to send it again here
     }
   }, [emailFromParams]);
 
   const sendOTPForEmailChange = async (emailAddress: string) => {
     try {
       console.log('Sending OTP for email verification:', emailAddress);
-      
-      // First, try to clean up any existing temporary user with this email
-      await cleanupExistingTempUser(emailAddress);
-      
-      // Create a unique temporary user to trigger OTP sending
-      const timestamp = Date.now();
-      const randomId = Math.random().toString(36).substring(2, 10);
-      
-      const tempFormData = new FormData();
-      tempFormData.append('first_name', 'EmailVerify');
-      tempFormData.append('last_name', 'Temp'); 
-      tempFormData.append('email', emailAddress);
-      tempFormData.append('username', `verify_${timestamp}_${randomId}`);
-      tempFormData.append('phone_number', `+20155${timestamp.toString().slice(-7)}`);
-      tempFormData.append('password', 'TempPassword123!@#');
-      tempFormData.append('password_confirmation', 'TempPassword123!@#');
-      tempFormData.append('gender', 'prefer_not_to_say');
-
-      const response = await fetch("http://localhost:8081/auth/register", {
-        method: "POST",
-        body: tempFormData,
-      });
-
-      if (response.ok) {
-        console.log('OTP sent successfully via registration');
-        setError(''); // Clear any previous errors
-      } else {
-        const errorData = await response.json();
-        console.error('Registration failed:', errorData);
-        
-        // Check if it's because email already exists
-        if (errorData.detail && (errorData.detail.includes('already') || errorData.detail.includes('taken'))) {
-          // Try a different approach - use forgot password for existing emails
-          await tryForgotPasswordApproach(emailAddress);
-        } else {
-          setError(errorData.detail || 'Failed to send verification code. Please try again.');
-        }
-      }
-    } catch (error) {
-      console.error('Error in sendOTPForEmailChange:', error);
-      setError('Network error. Please check your connection and try again.');
-    }
-  };
-
-  const cleanupExistingTempUser = async (emailAddress: string) => {
-    try {
-      console.log('Cleaning up existing temporary user for:', emailAddress);
-      
-      const formData = new FormData();
-      formData.append('email', emailAddress);
-
-      const response = await fetch("http://localhost:8081/auth/cleanup-temp-user", {
-        method: "DELETE",
-        body: formData,
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        console.log('Cleanup result:', result.message);
-      } else {
-        console.log('Cleanup failed or not needed');
-      }
-    } catch (error) {
-      console.log('Cleanup error (not critical):', error);
-    }
-  };
-
-  const tryForgotPasswordApproach = async (emailAddress: string) => {
-    try {
-      console.log('Trying forgot password approach for existing email:', emailAddress);
+      console.log('Email being sent to backend:', emailAddress);
       
       const formData = new FormData();
       formData.append('email', emailAddress);
@@ -125,14 +60,12 @@ const OTPForm = () => {
         setError(''); // Clear any previous errors
       } else {
         const errorData = await response.json();
-        if (errorData.detail && errorData.detail.includes('does not exist')) {
-          setError('Unable to send verification code. Please try a different email address.');
-        } else {
-          setError(errorData.detail || 'Failed to send verification code. Please try again.');
-        }
+        console.error('Failed to send OTP:', errorData);
+        setError(errorData.detail || 'Failed to send verification code. Please try again.');
       }
     } catch (error) {
-      setError('Failed to send verification code. Please try again.');
+      console.error('Error in sendOTPForEmailChange:', error);
+      setError('Network error. Please check your connection and try again.');
     }
   };
 
@@ -156,20 +89,6 @@ const OTPForm = () => {
       inputRefs.current[index - 1]?.focus();
     }
   }, [otp]);
-
-  const handleFocus = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
-    const container = e.target.closest(`.${styles['input-container']}`) as HTMLElement & { style: CSSStyleDeclaration };
-    if (container) {
-      container.style.transform = 'scale(1.02)';
-    }
-  }, []);
-  
-  const handleBlur = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
-    const container = e.target.closest(`.${styles['input-container']}`) as HTMLElement & { style: CSSStyleDeclaration };
-    if (container) {
-      container.style.transform = 'scale(1)';
-    }
-  }, []);
 
   const handlePaste = (e: React.ClipboardEvent) => {
     e.preventDefault();
@@ -211,6 +130,9 @@ const OTPForm = () => {
       return;
     }
     
+    console.log('Verifying OTP for email:', email);
+    console.log('OTP value:', otpValue);
+    
     try {
       // Use the existing verify-otp endpoint for both flows
       const data = new FormData();
@@ -227,8 +149,8 @@ const OTPForm = () => {
           // Handle email change verification
           await handleEmailChangeVerification();
         } else {
-          // Handle forgot password verification or registration verification
-          window.location.href = `/ResetPassword?email=${encodeURIComponent(email)}`;
+          // Handle registration verification
+          router.push("/Login?message=Email verified successfully! Please login with your account.");
         }
       } else {
         const errorData = await response.json();
@@ -271,9 +193,6 @@ const OTPForm = () => {
       if (result.success) {
         console.log('Email update successful, updated user:', result.data);
         
-        // Clean up the temporary user by trying to delete it
-        await cleanupTempUser();
-        
         // Clear the pending email change data
         localStorage.removeItem('pendingEmailChange');
         
@@ -290,30 +209,6 @@ const OTPForm = () => {
     }
   };
 
-  const cleanupTempUser = async () => {
-    try {
-      console.log('Cleaning up temporary user after successful verification');
-      
-      const formData = new FormData();
-      formData.append('email', email);
-
-      const response = await fetch("http://localhost:8081/auth/cleanup-temp-user", {
-        method: "DELETE",
-        body: formData,
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        console.log('Post-verification cleanup:', result.message);
-      } else {
-        console.log('Post-verification cleanup failed or not needed');
-      }
-    } catch (error) {
-      // Silent fail - cleanup is not critical for user experience
-      console.log('Cleanup not needed or failed silently');
-    }
-  };
-
   const handleResendOtp = useCallback(async () => {
     if (resendCooldown > 0) return;
     
@@ -321,25 +216,12 @@ const OTPForm = () => {
     setResendMessage("");
     setResendCooldown(30);
     
+    console.log('Resending OTP for email:', email);
+    
     try {
       if (isEmailChange) {
         // Resend OTP for email change
         await sendOTPForEmailChange(email);
-      } else {
-        // Resend OTP for forgot password
-        const data = new FormData();
-        data.append("email", email);
-      
-        const response = await fetch("http://localhost:8081/auth/forgot-password", {
-          method: "POST",
-          body: data,
-        });
-        
-        if (!response.ok) {
-          const errorData = await response.json();
-          setError(errorData.detail || "Failed to resend OTP. Please try again.");
-          return;
-        }
       }
     } catch (error) {
       setError("Failed to resend OTP. Please try again.");
@@ -359,14 +241,14 @@ const OTPForm = () => {
     if (isEmailChange) {
       return `We sent a six digit code to ${email} to verify your new email address.`;
     }
-    return `We sent a six digit code to ${email}`;
+    return `We sent a six digit code to ${email} to verify your email address.`;
   };
 
   return (
     <div className={styles['form-card']}>
       <div className={styles.header}>
         <div className={styles.logo}>M</div>
-        <h1 className={styles['welcome-text']}>Enter Verification Code</h1>
+        <h1 className={styles['welcome-text']}>Verify Your Email</h1>
         <p className={styles.subtitle}>{getSubtitleText()}</p>
       </div>
 
@@ -384,8 +266,16 @@ const OTPForm = () => {
                 value={digit}
                 onChange={(e) => handleOtpChange(index, e.target.value)}
                 onKeyDown={(e) => handleOtpKeyDown(index, e)}
-                onFocus={handleFocus}
-                onBlur={handleBlur}
+                onFocus={(e) => {
+                  e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
+                  e.target.style.borderColor = 'var(--font-yellow)';
+                  e.target.style.transform = 'scale(1.05)';
+                }}
+                onBlur={(e) => {
+                  e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                  e.target.style.borderColor = 'var(--naples-yellow)';
+                  e.target.style.transform = 'scale(1)';
+                }}
                 className={styles['otp-input']}
                 style={{
                   width: '40px',
@@ -393,9 +283,13 @@ const OTPForm = () => {
                   textAlign: 'center',
                   fontSize: '18px',
                   fontWeight: 'bold',
-                  border: '2px solid #e1e5e9',
+                  border: '2px solid var(--naples-yellow)',
                   borderRadius: '8px',
-                  backgroundColor: '#f8f9fa'
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  color: 'var(--white)',
+                  outline: 'none',
+                  transition: 'all 0.2s ease',
+                  cursor: 'text'
                 }}
                 disabled={loading}
                 autoComplete="one-time-code"
@@ -440,13 +334,13 @@ const OTPForm = () => {
               Verifying...
             </>
           ) : (
-            'Verify Code'
+            'Verify Email'
           )}
         </button>
 
         <div style={{ textAlign: 'center', marginTop: '16px' }}>
           <span style={{ fontSize: '14px', color: '#666' }}>
-            Don't receive the OTP?{' '}
+            Don't receive the code?{' '}
           </span>
           <button
             type="button"
@@ -470,4 +364,4 @@ const OTPForm = () => {
   );
 };
 
-export default OTPForm;
+export default EmailVerificationForm; 

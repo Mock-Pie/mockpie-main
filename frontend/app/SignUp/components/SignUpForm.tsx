@@ -10,7 +10,6 @@ import styles from "../../Login/page.module.css";
 
 const SignUpForm = () => {
   const router = useRouter();
-  const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -21,7 +20,6 @@ const SignUpForm = () => {
     confirmPassword: "",
     gender: "",
   });
-  const [otp, setOtp] = useState("");
   const [formErrors, setFormErrors] = useState({
     firstName: "",
     lastName: "",
@@ -37,6 +35,7 @@ const SignUpForm = () => {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [apiError, setApiError] = useState("");
+  const [genderHovered, setGenderHovered] = useState(false);
 
   // Password validation criteria
   const passwordCriteria = {
@@ -212,7 +211,7 @@ const SignUpForm = () => {
       });
 
       if (response.ok) {
-        setStep(2);
+        router.push(`/OTPVerifcation?email=${encodeURIComponent(formData.email)}`);
       } else {
         const errorData = await response.json();
         let errorMessage = "Registration failed.";
@@ -235,54 +234,7 @@ const SignUpForm = () => {
     } finally {
       setLoading(false);
     }
-  }, [formData, validateForm]);
-
-  const handleVerifyOtp = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    setApiError("");
-    
-    if (!otp.trim()) {
-      setApiError("OTP is required");
-      return;
-    }
-
-    setLoading(true);
-    
-    try {
-      const data = new FormData();
-      data.append("email", formData.email);
-      data.append("otp", otp.trim());
-
-      const response = await fetch("http://localhost:8081/auth/verify-otp", {
-        method: "POST",
-        body: data,
-      });
-
-      if (response.ok) {
-        router.push("/Login");
-      } else {
-        const errorData = await response.json();
-        let errorMessage = "OTP verification failed.";
-        
-        if (errorData.detail) {
-          if (typeof errorData.detail === 'object') {
-            errorMessage = JSON.stringify(errorData.detail);
-          } else {
-            errorMessage = errorData.detail;
-          }
-        } else if (errorData.message) {
-          errorMessage = errorData.message;
-        }
-        
-        setApiError(errorMessage);
-      }
-    } catch (error) {
-      console.error("Error during OTP verification:", error);
-      setApiError("Network error. Please check your connection and try again.");
-    } finally {
-      setLoading(false);
-    }
-  }, [otp, formData.email, router]);
+  }, [formData, validateForm, router]);
 
   const handleGoogleSignIn = useCallback(async () => {
     setGoogleLoading(true);
@@ -320,74 +272,6 @@ const SignUpForm = () => {
       container.style.transform = 'scale(1)';
     }
   }, [styles]);
-
-  if (step === 2) {
-    return (
-      <div className={styles.container}>
-        <div className={styles['form-card']}>
-          <div className={styles.header}>
-            <div className={styles.logo}>M</div>
-            <h1 className={styles['welcome-text']}>Verify Your Email</h1>
-            <p className={styles.subtitle}>Enter the OTP sent to your email</p>
-          </div>
-
-          <form onSubmit={handleVerifyOtp} noValidate>
-            <div className={styles['form-group']}>
-              <label htmlFor="otp">OTP Code</label>
-              <div className={styles['input-container']}>
-                <input
-                  type="text"
-                  id="otp"
-                  name="otp"
-                  className={styles['form-input']}
-                  placeholder="Enter 6-digit OTP"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value)}
-                  onFocus={handleFocus}
-                  onBlur={handleBlur}
-                  required
-                  disabled={loading}
-                  maxLength={6}
-                />
-              </div>
-            </div>
-
-            {apiError && (
-              <div className={styles['error-message']} style={{ marginBottom: '16px' }}>
-                <FaExclamationTriangle />
-                <span>{apiError}</span>
-              </div>
-            )}
-
-            <button 
-              type="submit" 
-              className={styles['submit-btn']} 
-              disabled={loading}
-            >
-              {loading ? (
-                <>
-                  <div className={styles.loading}></div>
-                  Verifying...
-                </>
-              ) : (
-                'Verify Email'
-              )}
-            </button>
-
-            <div className={styles['footer-links']}>
-              Didn't receive the code? <button 
-                type="button" 
-                onClick={() => setStep(1)}
-                style={{ background: 'none', border: 'none', color: 'var(--naples-yellow)', cursor: 'pointer', textDecoration: 'underline' }}
-              >
-                Go back
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className={styles.container}>
@@ -538,11 +422,13 @@ const SignUpForm = () => {
                 onChange={handleInputChange}
                 required
                 disabled={loading || googleLoading}
+                onMouseEnter={() => setGenderHovered(true)}
+                onMouseLeave={() => setGenderHovered(false)}
               >
-                <option value="">Select gender</option>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-                <option value="other">Other</option>
+                <option value="" style={{ backgroundColor: 'white', color: 'black' }}>Select gender</option>
+                <option value="male" style={{ backgroundColor: 'white', color: 'black' }}>Male</option>
+                <option value="female" style={{ backgroundColor: 'white', color: 'black' }}>Female</option>
+                <option value="other" style={{ backgroundColor: 'white', color: 'black' }}>Other</option>
               </select>
             </div>
             {formErrors.gender && (

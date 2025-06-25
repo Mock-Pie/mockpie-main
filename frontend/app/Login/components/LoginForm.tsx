@@ -18,24 +18,19 @@ const LoginForm = () => {
         identifier: "",
         password: "",
     });
+    const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [googleLoading, setGoogleLoading] = useState(false);
     const [apiError, setApiError] = useState("");
-    const [showPassword, setShowPassword] = useState(false);
 
     const validateField = useCallback((name: string, value: string) => {
         switch (name) {
             case "identifier":
                 if (!value.trim()) return "Email is required.";
-                // Allow both email format and username format (letters, numbers, underscores, 3+ chars)
-                const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
-                if (!isEmail) {
-                    return "Enter a valid email address.";
-                }
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())) return "Invalid email address.";
                 return "";
             case "password":
                 if (!value.trim()) return "Password is required.";
-                if (value.length < 6) return "Password must be at least 6 characters.";
                 return "";
             default:
                 return "";
@@ -64,7 +59,7 @@ const LoginForm = () => {
         };
         
         setFormErrors(newErrors);
-        return !newErrors.identifier && !newErrors.password;
+        return Object.values(newErrors).every((error) => !error);
     }, [formData, validateField]);
 
     const handleSubmit = useCallback(async (e: React.FormEvent) => {

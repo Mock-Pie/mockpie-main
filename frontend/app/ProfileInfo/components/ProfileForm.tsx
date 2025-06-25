@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from '../page.module.css';
-
 import UserService, { User } from '../../services/userService';
 
 interface FormData {
@@ -39,6 +38,7 @@ const ProfileForm = () => {
     });
 
     const [formErrors, setFormErrors] = useState<FormErrors>({});
+    const [saving, setSaving] = useState(false);
 
     useEffect(() => {
         fetchUserData();
@@ -148,7 +148,7 @@ const ProfileForm = () => {
         }
 
         try {
-            setLoading(true);
+            setSaving(true);
             
             // Prepare update data excluding email and gender (they're not changeable)
             const updateData = {
@@ -174,7 +174,7 @@ const ProfileForm = () => {
             setError('Failed to update profile');
             console.error('Error updating profile:', err);
         } finally {
-            setLoading(false);
+            setSaving(false);
         }
     };
 
@@ -263,9 +263,9 @@ const ProfileForm = () => {
                 <button 
                     className={styles.saveButton}
                     onClick={handleSave}
-                    disabled={loading}
+                    disabled={saving}
                 >
-                    {loading ? 'Saving...' : 'Save'}
+                    {saving ? 'Saving...' : 'Save'}
                 </button>
             </div>
 
