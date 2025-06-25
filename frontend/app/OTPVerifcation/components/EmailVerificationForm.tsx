@@ -24,18 +24,61 @@ const EmailVerificationForm = () => {
     // Check if this is for email change verification
     const pendingEmailChange = localStorage.getItem('pendingEmailChange');
     if (pendingEmailChange) {
-      const data = JSON.parse(pendingEmailChange);
-      console.log('Email change flow - new email:', data.newEmail);
-      setEmail(data.newEmail);
-      setProfileData(data.profileData);
-      setIsEmailChange(true);
-      
-      // For email change, we need to send OTP via forgot-password endpoint
-      sendOTPForEmailChange(data.newEmail);
+      try {
+        const data = JSON.parse(pendingEmailChange);
+        console.log('Email change flow - new email:', data.newEmail);
+        
+        // Validate the email format before proceeding
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!data.newEmail || !emailRegex.test(data.newEmail)) {
+          console.error('Invalid email in localStorage, clearing corrupted data:', data.newEmail);
+          localStorage.removeItem('pendingEmailChange');
+          setError('Invalid email data found. Please try again.');
+          return;
+        }
+        
+        // Check if the email looks suspicious (contains numbers at the beginning)
+        if (data.newEmail.match(/^\d+/)) {
+          console.error('Suspicious email format detected, clearing data:', data.newEmail);
+          localStorage.removeItem('pendingEmailChange');
+          setError('Invalid email format detected. Please try again.');
+          return;
+        }
+        
+        setEmail(data.newEmail);
+        setProfileData(data.profileData);
+        setIsEmailChange(true);
+        
+        // For email change, we need to send OTP via forgot-password endpoint
+        sendOTPForEmailChange(data.newEmail);
+      } catch (error) {
+        console.error('Error parsing pendingEmailChange data:', error);
+        localStorage.removeItem('pendingEmailChange');
+        setError('Invalid data found. Please try again.');
+      }
     } else {
       // Use email from URL params for registration flow
-      console.log('Registration flow - email from params:', emailFromParams);
-      setEmail(emailFromParams);
+      console.log('Registration flow - email from params (raw):', emailFromParams);
+      
+      // Test URL encoding/decoding
+      console.log('=== URL Encoding Test ===');
+      console.log('Raw email from params:', emailFromParams);
+      console.log('Decoded email:', emailFromParams ? decodeURIComponent(emailFromParams) : "");
+      console.log('Double decoded:', emailFromParams ? decodeURIComponent(decodeURIComponent(emailFromParams)) : "");
+      
+      // Properly decode the email from URL parameters
+      const decodedEmail = emailFromParams ? decodeURIComponent(emailFromParams) : "";
+      console.log('Registration flow - email from params (decoded):', decodedEmail);
+      
+      // Validate that the decoded email looks like a valid email
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (decodedEmail && !emailRegex.test(decodedEmail)) {
+        console.error('Invalid email format after decoding:', decodedEmail);
+        setError('Invalid email format. Please try registering again.');
+        return;
+      }
+      
+      setEmail(decodedEmail);
       setIsEmailChange(false);
       // For registration, OTP is already sent during registration process
       // No need to send it again here
@@ -130,8 +173,13 @@ const EmailVerificationForm = () => {
       return;
     }
     
+    console.log('=== OTP Verification Debug ===');
+    console.log('Current email state:', email);
+    console.log('Email type:', typeof email);
+    console.log('Email length:', email.length);
     console.log('Verifying OTP for email:', email);
     console.log('OTP value:', otpValue);
+    console.log('Is email change flow:', isEmailChange);
     
     try {
       // Use the existing verify-otp endpoint for both flows
@@ -139,10 +187,15 @@ const EmailVerificationForm = () => {
       data.append("email", email);
       data.append("otp", otpValue);
       
+      console.log('FormData email being sent:', data.get('email'));
+      
       const response = await fetch("http://localhost:8081/auth/verify-otp", {
         method: "POST",
         body: data,
       });
+      
+      console.log('Response status:', response.status);
+      console.log('Response ok:', response.ok);
       
       if (response.ok) {
         if (isEmailChange) {
@@ -154,9 +207,11 @@ const EmailVerificationForm = () => {
         }
       } else {
         const errorData = await response.json();
+        console.log('Error response:', errorData);
         setError(errorData.detail || errorData.message || "Invalid OTP. Please try again.");
       }
     } catch (err) {
+      console.error('Network error in handleVerifyOtp:', err);
       setError("Network error. Please check your connection and try again.");
     } finally {
       setLoading(false);

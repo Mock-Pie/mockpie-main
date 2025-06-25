@@ -211,6 +211,11 @@ const SignUpForm = () => {
       });
 
       if (response.ok) {
+        console.log('=== Registration Success Debug ===');
+        console.log('Original email from form:', formData.email);
+        console.log('Email being redirected:', encodeURIComponent(formData.email));
+        console.log('Full redirect URL:', `/OTPVerifcation?email=${encodeURIComponent(formData.email)}`);
+        
         router.push(`/OTPVerifcation?email=${encodeURIComponent(formData.email)}`);
       } else {
         const errorData = await response.json();
