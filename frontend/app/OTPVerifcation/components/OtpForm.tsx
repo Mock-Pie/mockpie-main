@@ -1,8 +1,8 @@
 "use client";
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import { FaExclamationCircle, FaExclamationTriangle } from "react-icons/fa";
 import styles from "../../Login/page.module.css";
-import styles1 from "../page.module.css";
 import UserService from "../../services/userService";
 
 const OTPForm = () => {
@@ -136,18 +136,40 @@ const OTPForm = () => {
     }
   };
 
-  const handleOtpChange = (idx: number, value: string) => {
-    if (!/^[0-9]?$/.test(value)) return;
+  const handleOtpChange = useCallback((index: number, value: string) => {
+    if (!/^\d*$/.test(value)) return;
+    
     const newOtp = [...otp];
-    newOtp[idx] = value;
+    newOtp[index] = value.slice(-1);
     setOtp(newOtp);
-    if (value && idx < 5) {
-      inputRefs.current[idx + 1]?.focus();
+    
+    if (value && index < 5) {
+      inputRefs.current[index + 1]?.focus();
     }
-    if (!value && idx > 0) {
-      inputRefs.current[idx - 1]?.focus();
+    
+    if (error) setError("");
+    if (resendMessage) setResendMessage("");
+  }, [otp, error, resendMessage]);
+
+  const handleOtpKeyDown = useCallback((index: number, e: React.KeyboardEvent) => {
+    if (e.key === 'Backspace' && !otp[index] && index > 0) {
+      inputRefs.current[index - 1]?.focus();
     }
-  };
+  }, [otp]);
+
+  const handleFocus = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
+    const container = e.target.closest(`.${styles['input-container']}`) as HTMLElement & { style: CSSStyleDeclaration };
+    if (container) {
+      container.style.transform = 'scale(1.02)';
+    }
+  }, []);
+  
+  const handleBlur = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
+    const container = e.target.closest(`.${styles['input-container']}`) as HTMLElement & { style: CSSStyleDeclaration };
+    if (container) {
+      container.style.transform = 'scale(1)';
+    }
+  }, []);
 
   const handlePaste = (e: React.ClipboardEvent) => {
     e.preventDefault();
@@ -171,16 +193,20 @@ const OTPForm = () => {
       if (inputRefs.current[5]) {
         inputRefs.current[5].focus();
       }
+      
+      if (error) setError("");
+      if (resendMessage) setResendMessage("");
     }
   };
 
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setResendMessage("");
     setLoading(true);
     const otpValue = otp.join("");
     if (otpValue.length !== 6) {
-      setError("Please enter the 6-digit OTP");
+      setError("Please enter the complete 6-digit OTP");
       setLoading(false);
       return;
     }
@@ -201,15 +227,15 @@ const OTPForm = () => {
           // Handle email change verification
           await handleEmailChangeVerification();
         } else {
-          // Handle forgot password verification
+          // Handle forgot password verification or registration verification
           window.location.href = `/ResetPassword?email=${encodeURIComponent(email)}`;
         }
       } else {
         const errorData = await response.json();
-        setError(errorData.detail || errorData.message || "Invalid OTP");
+        setError(errorData.detail || errorData.message || "Invalid OTP. Please try again.");
       }
     } catch (err) {
-      setError("Failed to verify OTP. Please try again.");
+      setError("Network error. Please check your connection and try again.");
     } finally {
       setLoading(false);
     }
@@ -288,7 +314,9 @@ const OTPForm = () => {
     }
   };
 
-  const handleResendOtp = async () => {
+  const handleResendOtp = useCallback(async () => {
+    if (resendCooldown > 0) return;
+    
     setError("");
     setResendMessage("");
     setResendCooldown(30);
@@ -297,7 +325,6 @@ const OTPForm = () => {
       if (isEmailChange) {
         // Resend OTP for email change
         await sendOTPForEmailChange(email);
-        setResendMessage("OTP resent! Please check your email.");
       } else {
         // Resend OTP for forgot password
         const data = new FormData();
@@ -307,51 +334,71 @@ const OTPForm = () => {
           method: "POST",
           body: data,
         });
-        setResendMessage("OTP resent! Please check your email.");
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          setError(errorData.detail || "Failed to resend OTP. Please try again.");
+          return;
+        }
       }
-    } catch {
+    } catch (error) {
       setError("Failed to resend OTP. Please try again.");
+      return;
     }
     
+    // Countdown timer
     let seconds = 30;
     const interval = setInterval(() => {
       seconds -= 1;
       setResendCooldown(seconds);
       if (seconds <= 0) clearInterval(interval);
     }, 1000);
-  };
+  }, [email, resendCooldown, isEmailChange]);
 
   const getSubtitleText = () => {
     if (isEmailChange) {
       return `We sent a six digit code to ${email} to verify your new email address.`;
     }
-    return "We sent a six digit code to your email.";
+    return `We sent a six digit code to ${email}`;
   };
 
   return (
     <div className={styles['form-card']}>
       <div className={styles.header}>
         <div className={styles.logo}>M</div>
-        <h1 className={styles['welcome-text']}>Verify OTP</h1>
+        <h1 className={styles['welcome-text']}>Enter Verification Code</h1>
         <p className={styles.subtitle}>{getSubtitleText()}</p>
       </div>
 
       <form onSubmit={handleVerifyOtp} noValidate>
         <div className={styles['form-group']}>
           <label>Enter 6-digit code</label>
-          <div className={styles1['otp-container']} onPaste={handlePaste}>
-            {otp.map((digit, idx) => (
+          <div className={styles['otp-container']} style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '16px' }} onPaste={handlePaste}>
+            {otp.map((digit, index) => (
               <input
-                key={idx}
-                ref={el => { inputRefs.current[idx] = el; }}
+                key={index}
+                ref={(el) => { inputRefs.current[index] = el; }}
                 type="text"
                 inputMode="numeric"
                 maxLength={1}
                 value={digit}
-                onChange={e => handleOtpChange(idx, e.target.value)}
-                className={styles1['otp-input']}
-                required
+                onChange={(e) => handleOtpChange(index, e.target.value)}
+                onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                onFocus={handleFocus}
+                onBlur={handleBlur}
+                className={styles['otp-input']}
+                style={{
+                  width: '40px',
+                  height: '48px',
+                  textAlign: 'center',
+                  fontSize: '18px',
+                  fontWeight: 'bold',
+                  border: '2px solid #e1e5e9',
+                  borderRadius: '8px',
+                  backgroundColor: '#f8f9fa'
+                }}
                 disabled={loading}
+                autoComplete="one-time-code"
               />
             ))}
           </div>
@@ -359,12 +406,25 @@ const OTPForm = () => {
 
         {error && (
           <div className={styles['error-message']} style={{ marginBottom: '16px' }}>
+            <FaExclamationTriangle />
             <span>{error}</span>
           </div>
         )}
 
         {resendMessage && (
-          <div className={styles1['success-message']} style={{ marginBottom: '16px' }}>
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '8px',
+            padding: '12px 16px',
+            background: 'rgba(72, 187, 120, 0.1)',
+            border: '1px solid rgba(72, 187, 120, 0.3)',
+            borderRadius: '8px',
+            color: '#2f855a',
+            fontSize: '14px',
+            fontWeight: '500',
+            marginBottom: '16px'
+          }}>
             <span>{resendMessage}</span>
           </div>
         )}
@@ -380,19 +440,29 @@ const OTPForm = () => {
               Verifying...
             </>
           ) : (
-            'Verify OTP'
+            'Verify Code'
           )}
         </button>
 
-        <div className={styles['footer-links']} style={{ marginTop: '24px' }}>
-          Don't receive the OTP?{' '}
+        <div style={{ textAlign: 'center', marginTop: '16px' }}>
+          <span style={{ fontSize: '14px', color: '#666' }}>
+            Don't receive the OTP?{' '}
+          </span>
           <button
             type="button"
             onClick={handleResendOtp}
             disabled={resendCooldown > 0}
-            className={styles1['link-button']}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: resendCooldown > 0 ? '#999' : '#007bff',
+              cursor: resendCooldown > 0 ? 'not-allowed' : 'pointer',
+              textDecoration: 'underline',
+              fontSize: '14px',
+              fontWeight: '500'
+            }}
           >
-            Resend{resendCooldown > 0 ? ` (${resendCooldown}s)` : ''}
+            {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend Code'}
           </button>
         </div>
       </form>

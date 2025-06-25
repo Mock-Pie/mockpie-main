@@ -1,6 +1,6 @@
 /* ===== ANIMATED BACKGROUND FOR AUTHENTICATION PAGES ===== */
 
-/* Animated background elements for authentication pages */
+/* Static background elements for authentication pages */
 .container::before {
     content: '';
     position: fixed;
@@ -11,13 +11,7 @@
     background: radial-gradient(circle at 20% 20%, rgba(255, 215, 0, 0.1) 0%, transparent 50%),
                 radial-gradient(circle at 80% 80%, rgba(255, 215, 0, 0.05) 0%, transparent 50%),
                 radial-gradient(circle at 40% 40%, rgba(255, 255, 255, 0.02) 0%, transparent 50%);
-    animation: float 20s ease-in-out infinite;
     z-index: -1;
-}
-
-@keyframes float {
-    0%, 100% { transform: translateY(0px) rotate(0deg); }
-    50% { transform: translateY(-20px) rotate(180deg); }
 }
 
 /* ===== COMMON FORM STYLES (Used by Login, SignUp, ForgotPassword, ResetPassword, OTPVerification) ===== */
@@ -35,12 +29,6 @@
     align-items: center;
     justify-content: center;
     min-height: 100vh;
-    animation: floatContainer 6s ease-in-out infinite;
-}
-
-@keyframes floatContainer {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-10px); }
 }
 
 /* Form Card - Used by: Login, SignUp, ForgotPassword, ResetPassword, OTPVerification */
@@ -53,29 +41,16 @@
     position: relative;
     overflow: hidden;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    width: 500px;
+    max-width: 90vw;
 }
 
 /* Form Card Hover - Used by: Login, SignUp, ForgotPassword, ResetPassword, OTPVerification */
 .form-card:hover {
-    transform: translateY(-5px);
+    /* Hover effect removed to keep form fixed */
 }
 
-/* Form Card Before Animation - Used by: Login, SignUp, ForgotPassword, ResetPassword, OTPVerification */
-.form-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.1), transparent);
-    transition: left 0.5s;
-}
-
-/* Form Card Hover Animation - Used by: Login, SignUp, ForgotPassword, ResetPassword, OTPVerification */
-.form-card:hover::before {
-    left: 100%;
-}
+/* Form Card Before Animation - Removed shining effect */
 
 /* Header - Used by: Login, SignUp, ForgotPassword, ResetPassword, OTPVerification */
 .header {

@@ -26,12 +26,11 @@ const LoginForm = () => {
     const validateField = useCallback((name: string, value: string) => {
         switch (name) {
             case "identifier":
-                if (!value.trim()) return "Email or username is required.";
+                if (!value.trim()) return "Email is required.";
                 // Allow both email format and username format (letters, numbers, underscores, 3+ chars)
                 const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
-                const isUsername = /^[a-zA-Z0-9_]{3,}$/.test(value.trim());
-                if (!isEmail && !isUsername) {
-                    return "Enter a valid email address or username (3+ characters, letters, numbers, underscores only).";
+                if (!isEmail) {
+                    return "Enter a valid email address.";
                 }
                 return "";
             case "password":
@@ -103,7 +102,21 @@ const LoginForm = () => {
                 router.push("/Dashboard");
             } else {
                 const errorData = await response.json();
-                setApiError(errorData.detail || errorData.message || "Login failed. Please check your credentials.");
+                console.log("Login error response:", errorData);
+                
+                // Handle different error response formats
+                let errorMessage = "Login failed. Please check your credentials.";
+                
+                if (typeof errorData.detail === 'string') {
+                    errorMessage = errorData.detail;
+                } else if (Array.isArray(errorData.detail)) {
+                    // Handle validation errors from FastAPI/Pydantic
+                    errorMessage = errorData.detail.map((err: any) => err.msg || err.message).join(', ');
+                } else if (errorData.message) {
+                    errorMessage = errorData.message;
+                }
+                
+                setApiError(errorMessage);
             }
         } catch (error) {
             console.error("Login error:", error);
@@ -165,14 +178,14 @@ const LoginForm = () => {
 
                 <form onSubmit={handleSubmit} noValidate>
                     <div className={styles['form-group']}>
-                        <label htmlFor="identifier">Email or Username</label>
+                        <label htmlFor="identifier">Email</label>
                         <div className={styles['input-container']}>
                             <input
                                 type="text"
                                 id="identifier"
                                 name="identifier"
                                 className={styles['form-input']}
-                                placeholder="Enter your email or username"
+                                placeholder="Enter your email"
                                 value={formData.identifier}
                                 onChange={handleInputChange}
                                 onFocus={handleFocus}
