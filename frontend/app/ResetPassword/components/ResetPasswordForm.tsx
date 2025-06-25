@@ -3,6 +3,7 @@ import React, { useState, useCallback } from 'react';
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { FaExclamationCircle, FaExclamationTriangle, FaCheck, FaTimes } from "react-icons/fa";
+import { FiEye, FiEyeOff } from "react-icons/fi";
 import styles from "../../Login/page.module.css";
 import styles1 from "../page.module.css";
 
@@ -12,6 +13,8 @@ const ResetPasswordForm = () => {
   
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState("");
   const [passwordError, setPasswordError] = useState("");
@@ -31,7 +34,7 @@ const ResetPasswordForm = () => {
       length: password.length >= 8,
       uppercase: /[A-Z]/.test(password),
       number: /\d/.test(password),
-      special: /[!@#$%^&*(),.?":{}|<>]/.test(password)
+      special: /[!@#$%^&*(),.?":{}|<>+]/.test(password)
     };
     setValidationCriteria(criteria);
     return Object.values(criteria).every(Boolean);
@@ -146,7 +149,7 @@ const ResetPasswordForm = () => {
           <label htmlFor="password">New Password</label>
           <div className={styles['input-container']}>
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               id="password"
               name="password"
               className={styles['form-input']}
@@ -159,6 +162,15 @@ const ResetPasswordForm = () => {
               disabled={loading}
               autoComplete="new-password"
             />
+            <button 
+              type="button" 
+              className={styles['password-toggle']} 
+              onClick={() => setShowPassword(!showPassword)}
+              disabled={loading}
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? <FiEyeOff /> : <FiEye />}
+            </button>
           </div>
           {passwordError && (
             <div className={styles['error-message']}>
@@ -194,7 +206,7 @@ const ResetPasswordForm = () => {
           <label htmlFor="confirmPassword">Confirm Password</label>
           <div className={styles['input-container']}>
             <input
-              type="password"
+              type={showConfirmPassword ? "text" : "password"}
               id="confirmPassword"
               name="confirmPassword"
               className={styles['form-input']}
@@ -207,6 +219,15 @@ const ResetPasswordForm = () => {
               disabled={loading}
               autoComplete="new-password"
             />
+            <button 
+              type="button" 
+              className={styles['password-toggle']} 
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              disabled={loading}
+              aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+            >
+              {showConfirmPassword ? <FiEyeOff /> : <FiEye />}
+            </button>
           </div>
           {confirmPasswordError && (
             <div className={styles['error-message']}>
