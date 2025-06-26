@@ -65,8 +65,8 @@ const UploadRecordVideos = () => {
                     <div className={uploadStyles.footerContent}>
                         <div className={uploadStyles.footerSection}>
                             <h4 className={uploadStyles.sectionTitle}>🎥 Recording Tips</h4>
-                            <ul className={uploadStyles.footerList}>
-                                <li>Record in a quiet environment for best audio quality</li>
+                    <ul className={uploadStyles.footerList}>
+                        <li>Record in a quiet environment for best audio quality</li>
                                 <li>Ensure good lighting for clear video visibility</li>
                                 <li>Keep your camera steady or use a tripod</li>
                                 <li>Speak clearly and at a moderate pace</li>
@@ -78,11 +78,11 @@ const UploadRecordVideos = () => {
                             <h4 className={uploadStyles.sectionTitle}>📁 File Requirements</h4>
                             <ul className={uploadStyles.footerList}>
                                 <li>All video formats supported (MP4, AVI, MOV, WMV, etc.)</li>
-                                <li>Maximum file size: 500MB per video</li>
-                                <li>Recommended resolution: 1080p or higher</li>
+                        <li>Maximum file size: 500MB per video</li>
+                        <li>Recommended resolution: 1080p or higher</li>
                                 <li>Minimum duration: 10 seconds</li>
                                 <li>Maximum duration: 30 minutes</li>
-                            </ul>
+                    </ul>
                         </div>
                     </div>
 

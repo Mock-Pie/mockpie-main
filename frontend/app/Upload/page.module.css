@@ -1,3 +1,42 @@
+/* Container for the main page layout */
+.container {
+    display: flex;
+    height: 100vh;
+    background: linear-gradient(135deg, var(--raisin-black) 0%, #1a1a1a 100%);
+    color: var(--white);
+}
+
+/* Main content area */
+.mainContent {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 20px 40px;
+    overflow-y: auto;
+}
+
+/* Header styles - same as UploadRecordVideos */
+.header {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.title {
+    font-size: 3rem;
+    font-weight: 500;
+    margin-bottom: 10px;
+    background: linear-gradient(135deg, var(--white), var(--naples-yellow));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: var(--white); /* Fallback for browsers that don't support background-clip */
+}
+
+.subtitle {
+    color: var(--light-grey);
+    font-size: 1.2rem;
+}
+
 .UploadContainer {
     display: flex;
     flex-direction: column;
@@ -5,7 +44,6 @@
     justify-content: center;
     min-height: 100vh;
     width: 100%;
-    background: linear-gradient(135deg, var(--raisin-black) 0%, #1a1a1a 100%);
     color: var(--white);
     margin: 0;
     padding: 40px 20px;
@@ -278,6 +316,18 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
+    .mainContent {
+        padding: 20px;
+    }
+    
+    .title {
+        font-size: 2rem;
+    }
+    
+    .header {
+        margin-bottom: 40px;
+    }
+    
     .UploadContainer {
         padding: 20px 10px;
     }
@@ -313,7 +363,23 @@
     }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 576px) {
+    .mainContent {
+        padding: 15px;
+    }
+    
+    .title {
+        font-size: 1.8rem;
+    }
+    
+    .subtitle {
+        font-size: 1rem;
+    }
+    
+    .header {
+        margin-bottom: 30px;
+    }
+    
     .PreviewSquare {
         height: 250px;
     }

@@ -75,6 +75,16 @@
     background: rgba(0, 0, 0, 0.5);
 }
 
+.videoPreview.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.videoPreview.hidden {
+    opacity: 0;
+    visibility: hidden;
+}
+
 .cameraPlaceholder {
     display: flex;
     flex-direction: column;

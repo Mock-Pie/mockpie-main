@@ -28,6 +28,7 @@ const Recording = () => {
     const [videoDuration, setVideoDuration] = useState(0);
     const [showPreview, setShowPreview] = useState(true);
     const [cameraReady, setCameraReady] = useState(false);
+    const [isClient, setIsClient] = useState(false);
     const [videoFormat, setVideoFormat] = useState<{mimeType: string, extension: string}>({mimeType: 'video/mp4', extension: 'mp4'});
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const videoStreamRef = useRef<MediaStream | null>(null);
@@ -36,7 +37,14 @@ const Recording = () => {
     const recordedVideoRef = useRef<HTMLVideoElement | null>(null);
     const timerRef = useRef<NodeJS.Timeout | null>(null);
 
+    // Ensure we're on the client side
     useEffect(() => {
+        setIsClient(true);
+    }, []);
+
+    useEffect(() => {
+        if (!isClient) return; // Don't run on server side
+
         const initializeCamera = async () => {
             try {
                 // Detect best supported format
@@ -47,9 +55,22 @@ const Recording = () => {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
                 videoStreamRef.current = stream;
 
+                // Wait a bit to ensure the video element is ready
+                await new Promise(resolve => setTimeout(resolve, 100));
+
                 if (videoPreviewRef.current) {
                     videoPreviewRef.current.srcObject = stream;
-                    videoPreviewRef.current.play();
+                    
+                    // Wait for the video to be ready before playing
+                    await new Promise((resolve, reject) => {
+                        if (videoPreviewRef.current) {
+                            videoPreviewRef.current.onloadedmetadata = () => {
+                                videoPreviewRef.current?.play().then(resolve).catch(reject);
+                            };
+                            videoPreviewRef.current.onerror = reject;
+                        }
+                    });
+                    
                     setCameraReady(true);
                 }
             } catch (error) {
@@ -66,7 +87,7 @@ const Recording = () => {
                 videoStreamRef.current.getTracks().forEach((track) => track.stop());
             }
         };
-    }, []);
+    }, [isClient]);
 
     // Effect to handle preview switching
     useEffect(() => {
@@ -75,6 +96,16 @@ const Recording = () => {
             videoPreviewRef.current.play().catch(console.error);
         }
     }, [showPreview, cameraReady]);
+
+    // Cleanup effect to prevent memory leaks
+    useEffect(() => {
+        return () => {
+            // Clean up video URL when component unmounts
+            if (videoURL) {
+                URL.revokeObjectURL(videoURL);
+            }
+        };
+    }, [videoURL]);
 
     const startRecording = async () => {
         try {
@@ -138,11 +169,19 @@ const Recording = () => {
             };
 
             mediaRecorder.onstop = () => {
-                const blob = new Blob(chunksRef.current, { type: videoFormat.mimeType });
-                const url = URL.createObjectURL(blob);
-                setVideoURL(url);
-                setShowPreview(false);
-                setVideoDuration(0);
+                try {
+                    console.log("Recording stopped, creating video blob...");
+                    const blob = new Blob(chunksRef.current, { type: videoFormat.mimeType });
+                    const url = URL.createObjectURL(blob);
+                    console.log("Video URL created:", url);
+                    setVideoURL(url);
+                    setShowPreview(false);
+                    setVideoDuration(0);
+                    console.log("Video state updated successfully");
+                } catch (error) {
+                    console.error("Error in onstop handler:", error);
+                    setUploadStatus("Error processing recorded video. Please try again.");
+                }
             };
 
             mediaRecorder.start();
@@ -328,23 +367,21 @@ const Recording = () => {
     };
 
     return (
-        <div className={styles.container}>
+        <div className={styles.container} onSubmit={(e) => e.preventDefault()}>
             <div className={styles.studioContainer}>
                 {/* Video Preview Section */}
                 <div className={`${styles.preview} ${isRecording ? styles.recording : ''}`}>
                     <div className={styles.videoWrapper}>
                         {/* Live Camera Preview */}
-                        {showPreview && (
+                        {showPreview && isClient && (
                             <>
-                                {cameraReady ? (
-                                    <video
-                                        ref={videoPreviewRef}
-                                        className={styles.videoPreview}
-                                        autoPlay
-                                        muted
-                                        playsInline
-                                    />
-                                ) : (
+                                <video
+                                    ref={videoPreviewRef}
+                                    className={`${styles.videoPreview} ${cameraReady ? styles.visible : styles.hidden}`}
+                                    muted
+                                    playsInline
+                                />
+                                {!cameraReady && (
                                     <div className={styles.cameraPlaceholder}>
                                         <FiCamera className={styles.cameraIcon} />
                                         <div className={styles.cameraText}>Setting up camera...</div>
@@ -359,9 +396,21 @@ const Recording = () => {
                                                         const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
                                                         videoStreamRef.current = stream;
 
+                                                        // Wait a bit to ensure the video element is ready
+                                                        await new Promise(resolve => setTimeout(resolve, 100));
+
                                                         if (videoPreviewRef.current) {
                                                             videoPreviewRef.current.srcObject = stream;
-                                                            videoPreviewRef.current.play();
+                                                            
+                                                            // Wait for the video to be ready before playing
+                                                            await new Promise((resolve, reject) => {
+                                                                if (videoPreviewRef.current) {
+                                                                    videoPreviewRef.current.onloadedmetadata = () => {
+                                                                        videoPreviewRef.current?.play().then(resolve).catch(reject);
+                                                                    };
+                                                                    videoPreviewRef.current.onerror = reject;
+                                                                }
+                                                            });
                                                         }
                                                         setCameraReady(true);
                                                     } catch (error) {
@@ -389,6 +438,15 @@ const Recording = () => {
                                     </div>
                                 )}
                             </>
+                        )}
+
+                        {/* Show loading state on server side */}
+                        {showPreview && !isClient && (
+                            <div className={styles.cameraPlaceholder}>
+                                <FiCamera className={styles.cameraIcon} />
+                                <div className={styles.cameraText}>Loading...</div>
+                                <div className={styles.cameraSubtext}>Please wait while the camera initializes</div>
+                            </div>
                         )}
 
                         {/* Recorded Video Playback */}

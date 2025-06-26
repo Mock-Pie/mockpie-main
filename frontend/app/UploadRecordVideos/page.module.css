@@ -149,6 +149,12 @@
     left: 125%;
 }
 
+.logoutItem .tooltipContainer:hover .tooltip {
+    visibility: visible;
+    opacity: 1;
+    left: 125%;
+}
+
 .sidebar {
     width: 65px;
     background: linear-gradient(180deg, var(--chinese-black) 0%, var(--raisin-black) 100%);
@@ -159,6 +165,7 @@
     border-right: 1px solid rgba(255, 255, 255, 0.1);
     position: relative;
     box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
 }
 
 .logoContainer {
