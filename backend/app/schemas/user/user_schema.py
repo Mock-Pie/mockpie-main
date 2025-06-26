@@ -72,4 +72,9 @@ class UserAuthResponse(BaseModel):
     
     class Config:
         from_attributes = True
+        
+        
+class UserProfileResponse(UserResponse):    
+    class Config:
+        from_attributes = True
 
