@@ -15,6 +15,7 @@ from backend.app.models.presentation.presentation import Presentation
 from backend.app.utils.token_handler import TokenHandler
 from backend.app.utils.redis_client import RedisClient
 from backend.app.utils.redis_dependency import get_redis_client
+from backend.app.controllers.presentation.toggle_visibility import ToggleVisibility
 
 router = APIRouter(prefix="/presentations", tags=["presentations"])
 
@@ -370,3 +371,25 @@ async def delete_video(
         "message": "Video deleted successfully",
         "presentation_id": presentation_id
     }
+
+@router.patch("/{presentation_id}/toggle-visibility")
+async def toggle_presentation_visibility(
+    presentation_id: int,
+    current_user: User = Depends(TokenHandler.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Toggle the is_public field for a presentation
+    
+    Args:
+        presentation_id: ID of the presentation
+        current_user: Authenticated user
+        db: Database session
+        
+    Returns:
+        dict: Updated presentation visibility status
+        
+    Raises:
+        HTTPException: If presentation not found or access denied
+    """
+    return await ToggleVisibility.toggle_visibility(presentation_id, current_user, db)
