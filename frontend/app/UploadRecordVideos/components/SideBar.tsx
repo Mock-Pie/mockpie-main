@@ -1,17 +1,32 @@
 "use client";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { FiFileText, FiUser } from "react-icons/fi";
 import { AiOutlineAppstore, AiOutlineHome } from "react-icons/ai";
 import { IoSettingsOutline } from "react-icons/io5";
 import { TbLogout } from "react-icons/tb";
-import Link from "next/link"; // Import Link from Next.js
+import Link from "next/link";
 import styles from "../page.module.css";
 import { VscCalendar } from "react-icons/vsc";
 import Image from "next/image";
 import { signOut } from "next-auth/react";
+import { usePathname } from "next/navigation";
 
 const SideBar = () => {
+    const pathname = usePathname();
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+    const menuItems = [
+        { href: "/Dashboard", icon: AiOutlineHome, label: "Dashboard" },
+        { href: "/UploadRecordVideos", icon: AiOutlineAppstore, label: "Upload or Record" },
+        { href: "/SubmittedTrials", icon: FiFileText, label: "Submitted Trials" },
+        { href: "/Calendar", icon: VscCalendar, label: "Calendar" },
+        { href: "/ProfileInfo", icon: FiUser, label: "Profile" },
+    ];
+
     const handleLogout = async () => {
+        if (isLoggingOut) return; // Prevent multiple clicks
+        
+        setIsLoggingOut(true);
         try {
             // Get the access token from localStorage or sessionStorage
             const accessToken = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
@@ -50,58 +65,59 @@ const SideBar = () => {
             localStorage.clear();
             sessionStorage.clear();
             window.location.href = "/Login";
+        } finally {
+            setIsLoggingOut(false);
         }
     };
 
     return (
         <div className={styles.sidebar}>
-            <div className={styles.logo}>
-                <Image src="/Images/Logoo.png" alt="Logo" width={120} height={40} className={styles.logoImage} priority />
+            <div className={styles.logoContainer}>
+                <Image 
+                    src="/Images/Logoo.png" 
+                    alt="Logo" 
+                    width={120} 
+                    height={40} 
+                    className={styles.logoImage} 
+                    priority 
+                />
             </div>
-            <div className={styles.menu}>
-                <Link href="/Dashboard" className={styles.menuItem}>
-                    <div className={styles.tooltipContainer}>
-                        <AiOutlineHome className={styles.icon} />
-                        <span className={styles.tooltip}>Dashboard</span>
-                    </div>
-                </Link>
-                <Link href="/UploadRecordVideos" className={styles.menuItem}>
-                    <div className={styles.tooltipContainer}>
-                        <AiOutlineAppstore className={styles.icon} />
-                        <span className={styles.tooltip}>Upload or Record</span>
-                    </div>
-                </Link>
-                <Link href="/SubmittedTrials" className={styles.menuItem}>
-                    <div className={styles.tooltipContainer}>
-                        <FiFileText className={styles.icon} />
-                        <span className={styles.tooltip}>Submitted Trials</span>
-                    </div>
-                </Link>
-                <Link href="/Calendar" className={styles.menuItem}>
-                    <div className={styles.tooltipContainer}>
-                        <VscCalendar className={styles.icon} />
-                        <span className={styles.tooltip}>Calendar</span>
-                    </div>
-                </Link>
-                <Link href="/ProfileInfo" className={styles.menuItem}>
-                    <div className={styles.tooltipContainer}>
-                        <FiUser className={styles.icon} />
-                        <span className={styles.tooltip}>Profile</span>
-                    </div>
-                </Link>
-                {/* <div className={styles.menuItem}>
-                    <div className={styles.tooltipContainer}>
-                        <IoSettingsOutline className={styles.icon} />
-                        <span className={styles.tooltip}>Settings</span>
-                    </div>
-                </div> */}
-                <div className={styles.menuItem} onClick={handleLogout} style={{ cursor: 'pointer' }}>
-                    <div className={styles.tooltipContainer}>
-                        <TbLogout className={styles.icon} />
-                        <span className={styles.tooltip}>Logout</span>
+            
+            <nav className={styles.navigation}>
+                <div className={styles.menu}>
+                    {menuItems.map((item) => {
+                        const IconComponent = item.icon;
+                        const isActive = pathname === item.href;
+                        
+                        return (
+                            <Link 
+                                key={item.href} 
+                                href={item.href} 
+                                className={`${styles.menuItem} ${isActive ? styles.active : ''}`}
+                            >
+                                <div className={styles.tooltipContainer}>
+                                    <IconComponent className={styles.icon} />
+                                    <span className={styles.tooltip}>{item.label}</span>
+                                </div>
+                            </Link>
+                        );
+                    })}
+                </div>
+                
+                <div className={styles.logoutSection}>
+                    <div 
+                        className={`${styles.menuItem} ${styles.logoutItem} ${isLoggingOut ? styles.loggingOut : ''}`}
+                        onClick={handleLogout}
+                    >
+                        <div className={styles.tooltipContainer}>
+                            <TbLogout className={styles.icon} />
+                            <span className={styles.tooltip}>
+                                {isLoggingOut ? 'Logging out...' : 'Logout'}
+                            </span>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </nav>
         </div>
     );
 };
