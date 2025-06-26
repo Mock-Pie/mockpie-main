@@ -59,16 +59,54 @@ const UploadRecordVideos = () => {
                 {/* Footer */}
                 <div className={uploadStyles.footer}>
                     <h3 className={uploadStyles.footerTitle}>
-                        💡 Important Notes
+                        💡 Important Notes & Best Practices
                     </h3>
-                    <ul className={uploadStyles.footerList}>
-                        <li>Record in a quiet environment for best audio quality</li>
-                        <li>All video extensions are supported (MP4, AVI, MOV, etc.)</li>
-                        <li>Maximum file size: 500MB per video</li>
-                        <li>Recommended resolution: 1080p or higher</li>
-                        <li>Camera and microphone permissions required for recording</li>
-                        <li>Your videos are processed securely and privately</li>
-                    </ul>
+                    
+                    <div className={uploadStyles.footerContent}>
+                        <div className={uploadStyles.footerSection}>
+                            <h4 className={uploadStyles.sectionTitle}>🎥 Recording Tips</h4>
+                            <ul className={uploadStyles.footerList}>
+                                <li>Record in a quiet environment for best audio quality</li>
+                                <li>Ensure good lighting for clear video visibility</li>
+                                <li>Keep your camera steady or use a tripod</li>
+                                <li>Speak clearly and at a moderate pace</li>
+                                <li>Camera and microphone permissions required for recording</li>
+                            </ul>
+                        </div>
+
+                        <div className={uploadStyles.footerSection}>
+                            <h4 className={uploadStyles.sectionTitle}>📁 File Requirements</h4>
+                            <ul className={uploadStyles.footerList}>
+                                <li>All video formats supported (MP4, AVI, MOV, WMV, etc.)</li>
+                                <li>Maximum file size: 500MB per video</li>
+                                <li>Recommended resolution: 1080p or higher</li>
+                                <li>Minimum duration: 10 seconds</li>
+                                <li>Maximum duration: 30 minutes</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div className={uploadStyles.quickTips}>
+                        <h4 className={uploadStyles.tipsTitle}>💡 Quick Tips</h4>
+                        <div className={uploadStyles.tipsGrid}>
+                            <div className={uploadStyles.tipCard}>
+                                <span className={uploadStyles.tipIcon}>🎯</span>
+                                <span>Look directly at the camera for better engagement</span>
+                            </div>
+                            <div className={uploadStyles.tipCard}>
+                                <span className={uploadStyles.tipIcon}>🎙️</span>
+                                <span>Test your microphone before recording</span>
+                            </div>
+                            <div className={uploadStyles.tipCard}>
+                                <span className={uploadStyles.tipIcon}>⚡</span>
+                                <span>Close unnecessary apps for better performance</span>
+                            </div>
+                            <div className={uploadStyles.tipCard}>
+                                <span className={uploadStyles.tipIcon}>📱</span>
+                                <span>Use landscape mode for better video composition</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

@@ -4,6 +4,8 @@
     padding: 40px;
     display: flex;
     flex-direction: column;
+    overflow-y: auto;
+    min-height: 100vh;
 }
 
 .header {
@@ -50,25 +52,9 @@
     overflow: hidden;
 }
 
-.actionCard::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 214, 10, 0.1), transparent);
-    transition: left 0.5s ease;
-}
-
-.actionCard:hover::before {
-    left: 100%;
-}
-
 .actionCard:hover {
     transform: translateY(-5px);
     border-color: var(--naples-yellow);
-    box-shadow: 0 10px 30px rgba(255, 214, 10, 0.2);
 }
 
 .actionIcon {
@@ -87,7 +73,6 @@
 
 .actionCard:hover .actionIcon {
     transform: scale(1.1);
-    box-shadow: 0 5px 20px rgba(255, 214, 10, 0.3);
 }
 
 .actionTitle {
@@ -124,45 +109,132 @@
 .footer {
     margin-top: 60px;
     background: rgba(255, 255, 255, 0.05);
-    border-radius: 15px;
-    padding: 30px;
+    border-radius: 20px;
+    padding: 40px;
     backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .footerTitle {
-    font-size: 1.3rem;
+    font-size: 1.5rem;
     font-weight: 600;
     color: var(--naples-yellow);
-    margin-bottom: 15px;
+    margin-bottom: 30px;
     display: flex;
     align-items: center;
     gap: 10px;
+    text-align: center;
+    justify-content: center;
+}
+
+.footerContent {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    margin-bottom: 40px;
+}
+
+.footerSection {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 15px;
+    padding: 25px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
+}
+
+.footerSection:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 214, 10, 0.2);
+    transform: translateY(-2px);
+}
+
+.sectionTitle {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--naples-yellow);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .footerList {
     list-style: none;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 15px;
     padding: 0;
     margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
 .footerList li {
     display: flex;
-    align-items: center;
-    gap: 10px;
+    align-items: flex-start;
+    gap: 12px;
     color: var(--light-grey);
-    padding: 10px;
+    padding: 12px 15px;
     background: rgba(255, 255, 255, 0.05);
-    border-radius: 8px;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    transition: all 0.3s ease;
+}
+
+.footerList li:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateX(5px);
 }
 
 .footerList li::before {
     content: '✓';
     color: var(--aqua);
     font-weight: bold;
-    font-size: 1.1rem;
+    font-size: 1rem;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.quickTips {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 30px;
+}
+
+.tipsTitle {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--naples-yellow);
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.tipsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+}
+
+.tipCard {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 15px 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    color: var(--light-grey);
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.tipCard:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 214, 10, 0.2);
+    transform: translateY(-2px);
+}
+
+.tipIcon {
+    font-size: 1.2rem;
+    flex-shrink: 0;
 }
 
 /* Responsive Design */
@@ -181,6 +253,15 @@
 
     .actionCard {
         padding: 30px 20px;
+    }
+
+    .footerContent {
+        grid-template-columns: 1fr;
+        gap: 25px;
+    }
+
+    .tipsGrid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     }
 }
 
@@ -202,16 +283,27 @@
         padding: 30px 20px;
     }
 
-    .footerList {
+    .footer {
+        margin-top: 40px;
+        padding: 25px;
+    }
+
+    .footerContent {
         grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .footerSection {
+        padding: 20px;
+    }
+
+    .tipsGrid {
+        grid-template-columns: 1fr;
+        gap: 12px;
     }
 
     .header {
         margin-bottom: 40px;
-    }
-
-    .footer {
-        margin-top: 40px;
     }
 }
 
@@ -249,5 +341,38 @@
     .footer {
         margin-top: 30px;
         padding: 20px;
+    }
+
+    .footerTitle {
+        font-size: 1.3rem;
+        margin-bottom: 25px;
+    }
+
+    .footerContent {
+        gap: 15px;
+    }
+
+    .footerSection {
+        padding: 15px;
+    }
+
+    .sectionTitle {
+        font-size: 1.1rem;
+        margin-bottom: 15px;
+    }
+
+    .footerList li {
+        padding: 10px 12px;
+        font-size: 0.9rem;
+    }
+
+    .tipsTitle {
+        font-size: 1.2rem;
+        margin-bottom: 15px;
+    }
+
+    .tipCard {
+        padding: 12px 15px;
+        font-size: 0.85rem;
     }
 }

@@ -20,8 +20,6 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: radial-gradient(circle at 20% 80%, rgba(255, 206, 84, 0.05) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(255, 206, 84, 0.03) 0%, transparent 50%);
     pointer-events: none;
 }
 
@@ -46,7 +44,6 @@
     border-color: var(--white);
     background: rgba(255, 255, 255, 0.05);
     transform: translateY(-2px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
 }
 
 .PreviewSquare.dragOver {
@@ -143,7 +140,6 @@
     outline: none;
     border-color: var(--naples-yellow);
     background: rgba(255, 255, 255, 0.1);
-    box-shadow: 0 0 0 3px rgba(255, 206, 84, 0.1);
 }
 
 .TitleInput::placeholder {
@@ -191,12 +187,10 @@
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
-    box-shadow: 0 4px 15px rgba(255, 206, 84, 0.3);
 }
 
 .ChooseFileButton:hover, .UploadButton:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(255, 206, 84, 0.4);
     background: linear-gradient(135deg, #e6b800 0%, var(--naples-yellow) 100%);
 }
 
@@ -265,12 +259,6 @@
     background: linear-gradient(90deg, var(--naples-yellow), #e6b800);
     border-radius: 2px;
     transition: width 0.3s ease;
-    animation: shimmer 2s infinite;
-}
-
-@keyframes shimmer {
-    0% { background-position: -1000px 0; }
-    100% { background-position: 1000px 0; }
 }
 
 .LoadingSpinner {
