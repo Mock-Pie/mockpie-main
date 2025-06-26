@@ -22,6 +22,12 @@ const ResetPasswordForm = () => {
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
   const [showValidation, setShowValidation] = useState(false);
 
+  // Check if this is a change password flow
+  const isChangePasswordFlow = React.useMemo(() => {
+    const referrer = document.referrer;
+    return referrer.includes('/ChangePassword') || referrer.includes('/ProfileInfo');
+  }, []);
+
   // Password validation criteria
   const [validationCriteria, setValidationCriteria] = useState({
     length: false,
@@ -123,8 +129,17 @@ const ResetPasswordForm = () => {
       });
       
       if (response.ok) {
-        // Redirect to login page with success message
-        window.location.href = "/Login?message=Password reset successfully! Please login with your new password.";
+        // Check if this is a change password flow (user came from profile)
+        const referrer = document.referrer;
+        const isChangePasswordFlow = referrer.includes('/ChangePassword') || referrer.includes('/ProfileInfo');
+        
+        if (isChangePasswordFlow) {
+          // Redirect back to profile with success message
+          window.location.href = "/ProfileInfo?message=Password changed successfully!";
+        } else {
+          // Redirect to login page with success message (forgot password flow)
+          window.location.href = "/Login?message=Password reset successfully! Please login with your new password.";
+        }
       } else {
         const errorData = await response.json();
         let errorMessage = "Failed to reset password. Please try again.";
@@ -165,8 +180,15 @@ const ResetPasswordForm = () => {
     <div className={styles['form-card']}>
       <div className={styles.header}>
         <Image src="/Images/Logoo.png" alt="MockPie Logo" width={60} height={60} className={styles.logo} priority />
-        <h1 className={styles['welcome-text']}>Reset Password</h1>
-        <p className={styles.subtitle}>Enter your new password to reset your account</p>
+        <h1 className={styles['welcome-text']}>
+          {isChangePasswordFlow ? 'Change Password' : 'Reset Password'}
+        </h1>
+        <p className={styles.subtitle}>
+          {isChangePasswordFlow 
+            ? 'Enter your new password to update your account' 
+            : 'Enter your new password to reset your account'
+          }
+        </p>
       </div>
 
       <form onSubmit={handleResetPassword} noValidate>
@@ -277,15 +299,24 @@ const ResetPasswordForm = () => {
           {loading ? (
             <>
               <div className={styles.loading}></div>
-              Resetting Password...
+              {isChangePasswordFlow ? 'Changing Password...' : 'Resetting Password...'}
             </>
           ) : (
-            'Reset Password'
+            isChangePasswordFlow ? 'Change Password' : 'Reset Password'
           )}
         </button>
 
         <div className={styles['footer-links']} style={{ marginTop: '24px' }}>
-          Remember your password? <Link href="/Login">Sign in</Link>
+          {isChangePasswordFlow ? (
+            <>
+              <a href="/ProfileInfo" style={{ marginRight: '20px' }}>← Back to Profile</a>
+              Remember your password? <a href="/Login">Sign in</a>
+            </>
+          ) : (
+            <>
+              Remember your password? <a href="/Login">Sign in</a>
+            </>
+          )}
         </div>
       </form>
     </div>

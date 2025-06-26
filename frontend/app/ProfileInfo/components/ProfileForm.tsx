@@ -49,6 +49,15 @@ const ProfileForm = () => {
             localStorage.removeItem('profileUpdateSuccess');
             alert(successMessage);
         }
+        
+        // Check for success message from URL parameters (password change)
+        const urlParams = new URLSearchParams(window.location.search);
+        const message = urlParams.get('message');
+        if (message) {
+            alert(message);
+            // Clean up the URL
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
     }, []);
 
     const fetchUserData = async () => {
@@ -371,7 +380,7 @@ const ProfileForm = () => {
                 <div className={styles.actionButtons}>
                     <button 
                         className={styles.changePasswordButton}
-                        onClick={() => router.push('/change-password')}
+                        onClick={() => router.push('/ChangePassword')}
                     >
                         Change Password
                     </button>
