@@ -114,8 +114,8 @@ const ResetPasswordForm = () => {
     try {
       const data = new FormData();
       data.append("email", emailFromParams);
-      data.append("password", password);
-      data.append("password_confirmation", confirmPassword);
+      data.append("new_password", password);
+      data.append("confirm_password", confirmPassword);
       
       const response = await fetch("http://localhost:8081/auth/reset-password", {
         method: "POST",
@@ -127,7 +127,31 @@ const ResetPasswordForm = () => {
         window.location.href = "/Login?message=Password reset successfully! Please login with your new password.";
       } else {
         const errorData = await response.json();
-        setApiError(errorData.detail || errorData.message || "Failed to reset password. Please try again.");
+        let errorMessage = "Failed to reset password. Please try again.";
+        
+        if (errorData.detail) {
+          if (Array.isArray(errorData.detail)) {
+            // Handle validation error array
+            const errorMessages = errorData.detail.map((err: any) => {
+              if (err.msg) {
+                // Convert field names to more readable format
+                const fieldName = err.loc && err.loc.length > 1 ? err.loc[err.loc.length - 1] : 'field';
+                const readableField = fieldName.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
+                return `${readableField}: ${err.msg}`;
+              }
+              return err.msg || 'Validation error';
+            });
+            errorMessage = errorMessages.join(', ');
+          } else if (typeof errorData.detail === 'object') {
+            errorMessage = JSON.stringify(errorData.detail);
+          } else {
+            errorMessage = errorData.detail;
+          }
+        } else if (errorData.message) {
+          errorMessage = errorData.message;
+        }
+        
+        setApiError(errorMessage);
       }
     } catch (error) {
       console.error("Reset password error:", error);
