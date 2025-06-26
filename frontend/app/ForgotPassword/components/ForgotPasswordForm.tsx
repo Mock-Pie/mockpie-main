@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { FaExclamationCircle, FaExclamationTriangle } from "react-icons/fa";
 import styles from "../../Login/page.module.css";
+import Image from "next/image";
 
 const ForgotPasswordForm = () => {
   const router = useRouter();
@@ -87,7 +88,7 @@ const ForgotPasswordForm = () => {
   return (
     <div className={styles['form-card']}>
       <div className={styles.header}>
-        <div className={styles.logo}>M</div>
+        <Image src="/Images/Logoo.png" alt="MockPie Logo" width={60} height={60} className={styles.logo} priority />
         <h1 className={styles['welcome-text']}>Forgot Password?</h1>
         <p className={styles.subtitle}>Enter your email to reset your password</p>
       </div>

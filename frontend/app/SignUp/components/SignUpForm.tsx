@@ -7,6 +7,7 @@ import { FcGoogle } from "react-icons/fc";
 import { FaExclamationCircle, FaExclamationTriangle } from "react-icons/fa";
 import { signIn } from "next-auth/react";
 import styles from "../../Login/page.module.css";
+import Image from "next/image";
 
 const SignUpForm = () => {
   const router = useRouter();
@@ -282,7 +283,7 @@ const SignUpForm = () => {
     <div className={styles.container}>
       <div className={styles['form-card']}>
         <div className={styles.header}>
-          <div className={styles.logo}>M</div>
+          <Image src="/Images/Logoo.png" alt="MockPie Logo" width={60} height={60} className={styles.logo} priority />
           <h1 className={styles['welcome-text']}>Join MockPie!</h1>
           <p className={styles.subtitle}>Create your account</p>
         </div>
