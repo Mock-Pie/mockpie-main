@@ -12,6 +12,7 @@ class PresentationResponse(BaseModel):
     id: int
     title: str
     url: str
+    is_public: bool = False
     uploaded_at: datetime
     has_voice_analysis: bool = False
     has_body_analysis: bool = False

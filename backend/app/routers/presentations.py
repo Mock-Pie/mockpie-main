@@ -192,6 +192,7 @@ async def upload_video(
             user_id=current_user.id,
             title=video_title,
             url=file_url,
+            is_public=False,
             uploaded_at=datetime.now()
         )
         
@@ -206,6 +207,7 @@ async def upload_video(
             "filename": unique_filename,
             "original_filename": file.filename,
             "file_url": file_url,
+            'is_public': presentation.is_public,
             "file_size": file_size,
             "uploaded_at": presentation.uploaded_at.isoformat(),
             "content_type": file.content_type
@@ -256,6 +258,7 @@ async def list_user_videos(
                 "id": p.id,
                 "title": p.title,
                 "url": p.url,
+                "is_public": p.is_public,
                 "uploaded_at": p.uploaded_at.isoformat()
             }
             for p in presentations
