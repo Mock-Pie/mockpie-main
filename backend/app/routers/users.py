@@ -11,9 +11,7 @@ router = APIRouter(prefix="/users", tags=["user"])
 
 @router.get("/profile", response_model=UserProfileResponse)
 async def get_user_profile(current_user: User = Depends(TokenHandler.get_current_user), db: Session = Depends(get_db)):
-    # Load the user with presentations included to ensure all relationships are populated
     user_with_presentations = db.query(User).filter(User.id == current_user.id).first()
-    # Return as UserProfileResponse which includes presentations
     return user_with_presentations
 
 
