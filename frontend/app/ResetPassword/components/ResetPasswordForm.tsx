@@ -6,6 +6,7 @@ import { FaExclamationCircle, FaExclamationTriangle, FaCheck, FaTimes } from "re
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import styles from "../../Login/page.module.css";
 import styles1 from "../page.module.css";
+import Image from "next/image";
 
 const ResetPasswordForm = () => {
   const searchParams = useSearchParams();
@@ -139,7 +140,7 @@ const ResetPasswordForm = () => {
   return (
     <div className={styles['form-card']}>
       <div className={styles.header}>
-        <div className={styles.logo}>M</div>
+        <Image src="/Images/Logoo.png" alt="MockPie Logo" width={60} height={60} className={styles.logo} priority />
         <h1 className={styles['welcome-text']}>Reset Password</h1>
         <p className={styles.subtitle}>Enter your new password to reset your account</p>
       </div>

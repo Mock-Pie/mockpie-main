@@ -61,7 +61,7 @@
 /* Logo - Used by: Login, SignUp, ForgotPassword, ResetPassword, OTPVerification */
 .logo {
     width: 60px;
-    height: 60px;
+    height: 57px;
     display: flex;
     align-items: center;
     justify-content: center;

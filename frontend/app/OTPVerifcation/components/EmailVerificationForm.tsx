@@ -4,6 +4,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { FaExclamationCircle, FaExclamationTriangle } from "react-icons/fa";
 import styles from "../../Login/page.module.css";
 import UserService from "../../services/userService";
+import Image from "next/image";
 
 const EmailVerificationForm = () => {
   const router = useRouter();
@@ -302,7 +303,7 @@ const EmailVerificationForm = () => {
   return (
     <div className={styles['form-card']}>
       <div className={styles.header}>
-        <div className={styles.logo}>M</div>
+        <Image src="/Images/Logoo.png" alt="MockPie Logo" width={60} height={60} className={styles.logo} priority />
         <h1 className={styles['welcome-text']}>Verify Your Email</h1>
         <p className={styles.subtitle}>{getSubtitleText()}</p>
       </div>

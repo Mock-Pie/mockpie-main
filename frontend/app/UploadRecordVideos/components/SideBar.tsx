@@ -56,7 +56,7 @@ const SideBar = () => {
     return (
         <div className={styles.sidebar}>
             <div className={styles.logo}>
-                <Image src="/Images/logo.png" alt="Logo" width={120} height={40} className={styles.logoImage} priority />
+                <Image src="/Images/Logoo.png" alt="Logo" width={120} height={40} className={styles.logoImage} priority />
             </div>
             <div className={styles.menu}>
                 <Link href="/Dashboard" className={styles.menuItem}>
@@ -89,12 +89,12 @@ const SideBar = () => {
                         <span className={styles.tooltip}>Profile</span>
                     </div>
                 </Link>
-                <div className={styles.menuItem}>
+                {/* <div className={styles.menuItem}>
                     <div className={styles.tooltipContainer}>
                         <IoSettingsOutline className={styles.icon} />
                         <span className={styles.tooltip}>Settings</span>
                     </div>
-                </div>
+                </div> */}
                 <div className={styles.menuItem} onClick={handleLogout} style={{ cursor: 'pointer' }}>
                     <div className={styles.tooltipContainer}>
                         <TbLogout className={styles.icon} />
