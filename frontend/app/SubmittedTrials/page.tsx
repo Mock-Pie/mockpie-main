@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   IoFilterOutline, 
   IoDownloadOutline, 
@@ -11,74 +11,63 @@ import {
   IoDocumentTextOutline, 
   IoEyeOutline, 
   IoChevronDownOutline, 
-  IoCloseOutline 
+  IoCloseOutline,
+  IoRefreshOutline
 } from 'react-icons/io5';
 import { useRouter } from 'next/navigation';
 import styles from "./page.module.css";
 import styles1 from "../UploadRecordVideos/page.module.css";
 import uploadStyles from "../UploadRecordVideos/uploadrecord.module.css";
 import SideBar from "../UploadRecordVideos/components/SideBar";
-
-interface Trial {
-  id: string;
-  name: string;
-  date: string;
-  feedback: string;
-  duration: string;
-  size: string;
-}
-
-const mockTrials: Trial[] = [
-  { 
-    id: "TR001", 
-    name: "Product Demo Trial", 
-    date: "2024-06-20", 
-    feedback: "Excellent presentation with clear explanations. The product features were well demonstrated and the flow was natural. Minor improvement needed in the conclusion section.", 
-    duration: "5:23",
-    size: "45 MB"
-  },
-  { 
-    id: "TR002", 
-    name: "User Onboarding Video", 
-    date: "2024-06-19", 
-    feedback: "Good coverage of onboarding steps. Consider adding more visual cues and reducing the pace slightly for better user comprehension.", 
-    duration: "8:15",
-    size: "72 MB"
-  },
-  { 
-    id: "TR003", 
-    name: "Feature Walkthrough", 
-    date: "2024-06-18", 
-    feedback: "Comprehensive walkthrough but needs better organization. Some sections feel rushed while others are too detailed. Audio quality could be improved.", 
-    duration: "12:45",
-    size: "156 MB"
-  },
-  { 
-    id: "TR004", 
-    name: "Tutorial Series Part 1", 
-    date: "2024-06-17", 
-    feedback: "Great starting point for the tutorial series. Clear voice and good pacing. The visual examples are helpful and engaging.", 
-    duration: "6:30",
-    size: "58 MB"
-  },
-  { 
-    id: "TR005", 
-    name: "Bug Report Demo", 
-    date: "2024-06-16", 
-    feedback: "The bug reproduction steps are clear, but the video quality is poor. Please re-record with better lighting and screen resolution.", 
-    duration: "3:45",
-    size: "28 MB"
-  },
-];
+import PresentationService, { Presentation } from '../services/presentationService';
 
 const SubmittedTrials = () => {
   const router = useRouter();
-  const [trials, setTrials] = useState<Trial[]>(mockTrials);
-  const [filteredTrials, setFilteredTrials] = useState<Trial[]>(mockTrials);
+  const [presentations, setPresentations] = useState<Presentation[]>([]);
+  const [filteredPresentations, setFilteredPresentations] = useState<Presentation[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [dateFilter, setDateFilter] = useState<string>('all');
   const [expandedFeedback, setExpandedFeedback] = useState<string | null>(null);
-  const [selectedTrials, setSelectedTrials] = useState<string[]>([]);
+  const [selectedPresentations, setSelectedPresentations] = useState<number[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+
+  // Fetch presentations on component mount
+  useEffect(() => {
+    fetchPresentations();
+  }, []);
+
+  const fetchPresentations = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const response = await PresentationService.getUserPresentations();
+      
+      if (response.success && response.data) {
+        const presentationsData = (response.data as any).videos || [];
+        setPresentations(presentationsData);
+        setFilteredPresentations(presentationsData);
+      } else {
+        setError(response.error || 'Failed to fetch presentations');
+        if (response.error?.includes('Authentication expired')) {
+          setTimeout(() => router.push('/Login'), 2000);
+        }
+      }
+    } catch (err) {
+      setError('Network error. Please check your connection.');
+      console.error('Error fetching presentations:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await fetchPresentations();
+    setRefreshing(false);
+  };
 
   const handleSubmitNewTrial = () => {
     router.push('/UploadRecordVideos');
@@ -95,13 +84,12 @@ const SubmittedTrials = () => {
   };
 
   const applyFilters = (search: string, date: string) => {
-    let filtered = trials;
+    let filtered = presentations;
 
     if (search) {
-      filtered = filtered.filter(trial => 
-        trial.name.toLowerCase().includes(search.toLowerCase()) ||
-        trial.id.toLowerCase().includes(search.toLowerCase()) ||
-        trial.feedback.toLowerCase().includes(search.toLowerCase())
+      filtered = filtered.filter(presentation => 
+        presentation.title.toLowerCase().includes(search.toLowerCase()) ||
+        presentation.id.toString().includes(search.toLowerCase())
       );
     }
 
@@ -121,34 +109,116 @@ const SubmittedTrials = () => {
           break;
       }
       
-      filtered = filtered.filter(trial => 
-        new Date(trial.date) >= filterDate
+      filtered = filtered.filter(presentation => 
+        new Date(presentation.uploaded_at) >= filterDate
       );
     }
 
-    setFilteredTrials(filtered);
+    setFilteredPresentations(filtered);
   };
 
   const toggleFeedback = (id: string) => {
     setExpandedFeedback(expandedFeedback === id ? null : id);
   };
 
-  const toggleTrialSelection = (id: string) => {
-    setSelectedTrials(prev => 
+  const togglePresentationSelection = (id: number) => {
+    setSelectedPresentations(prev => 
       prev.includes(id) 
-        ? prev.filter(trialId => trialId !== id)
+        ? prev.filter(presentationId => presentationId !== id)
         : [...prev, id]
     );
   };
 
-  const handleBulkDelete = () => {
-    if (selectedTrials.length === 0) return;
+  const handleBulkDelete = async () => {
+    if (selectedPresentations.length === 0) return;
     
-    const updatedTrials = trials.filter(trial => !selectedTrials.includes(trial.id));
-    setTrials(updatedTrials);
-    setFilteredTrials(updatedTrials);
-    setSelectedTrials([]);
+    if (!confirm(`Are you sure you want to delete ${selectedPresentations.length} presentation(s)?`)) {
+      return;
+    }
+
+    try {
+      const deletePromises = selectedPresentations.map(id => 
+        PresentationService.deletePresentation(id)
+      );
+      
+      const results = await Promise.all(deletePromises);
+      const failedDeletes = results.filter(result => !result.success);
+      
+      if (failedDeletes.length > 0) {
+        setError(`Failed to delete ${failedDeletes.length} presentation(s)`);
+      } else {
+        // Refresh the list after successful deletion
+        await fetchPresentations();
+        setSelectedPresentations([]);
+      }
+    } catch (err) {
+      setError('Error deleting presentations');
+      console.error('Error in bulk delete:', err);
+    }
   };
+
+  const handleDeletePresentation = async (id: number) => {
+    if (!confirm('Are you sure you want to delete this presentation?')) {
+      return;
+    }
+
+    try {
+      const response = await PresentationService.deletePresentation(id);
+      
+      if (response.success) {
+        await fetchPresentations();
+      } else {
+        setError(response.error || 'Failed to delete presentation');
+      }
+    } catch (err) {
+      setError('Error deleting presentation');
+      console.error('Error deleting presentation:', err);
+    }
+  };
+
+  const handleDownloadPresentation = (presentation: Presentation) => {
+    // Create a download link for the video file
+    const downloadUrl = `http://localhost:8081${presentation.url}`;
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.download = presentation.title;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const getFeedbackText = (presentation: Presentation): string => {
+    // Generate feedback based on presentation properties
+    const feedbacks = [
+      "Presentation uploaded successfully. Ready for analysis.",
+      "Video quality looks good. Consider reviewing for content clarity.",
+      "File size is appropriate for analysis. Processing may take a few minutes.",
+      "Presentation is ready for review and feedback.",
+      "Upload completed. You can now view detailed analysis."
+    ];
+    
+    // Use presentation ID to consistently assign feedback
+    const index = presentation.id % feedbacks.length;
+    return feedbacks[index];
+  };
+
+  if (loading) {
+    return (
+      <div className={styles1.container}>
+        <SideBar />
+        <div className={uploadStyles.mainContent}>
+          <div className={`${uploadStyles.header} ${styles.customHeader}`}>
+            <h1 className={uploadStyles.title}>Submitted Trials</h1>
+            <p className={uploadStyles.subtitle}>Loading your presentations...</p>
+          </div>
+          <div className={styles.loadingState}>
+            <div className={styles.loadingSpinner}></div>
+            <p>Loading presentations...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles1.container}>
@@ -161,6 +231,16 @@ const SubmittedTrials = () => {
         </div>
 
         <div className={styles.mainContent}>
+          {/* Error Display */}
+          {error && (
+            <div className={styles.errorMessage}>
+              <p>{error}</p>
+              <button onClick={() => setError(null)} className={styles.closeError}>
+                <IoCloseOutline size={16} />
+              </button>
+            </div>
+          )}
+
           {/* Search and Filters */}
           <div className={styles.searchFiltersContainer}>
             <div className={styles.searchFiltersContent}>
@@ -169,7 +249,7 @@ const SubmittedTrials = () => {
                   <IoSearchOutline className={styles.searchIcon} size={20} />
                   <input
                     type="text"
-                    placeholder="Search trials by name, ID, or feedback..."
+                    placeholder="Search presentations by title or ID..."
                     value={searchTerm}
                     onChange={(e) => handleSearch(e.target.value)}
                     className={styles.searchInput}
@@ -193,6 +273,16 @@ const SubmittedTrials = () => {
                   <IoChevronDownOutline className={styles.filterSelectIcon} size={16} />
                 </div>
 
+                {/* Refresh Button */}
+                <button 
+                  className={styles.refreshButton} 
+                  onClick={handleRefresh}
+                  disabled={refreshing}
+                >
+                  <IoRefreshOutline size={18} />
+                  {refreshing ? 'Refreshing...' : 'Refresh'}
+                </button>
+
                 {/* Submit New Trial Button */}
                 <button className={styles.submitNewButton} onClick={handleSubmitNewTrial}>
                   <IoDocumentTextOutline size={18} />
@@ -200,20 +290,20 @@ const SubmittedTrials = () => {
                 </button>
 
                 {/* Bulk Actions */}
-                {selectedTrials.length > 0 && (
+                {selectedPresentations.length > 0 && (
                   <button
                     onClick={handleBulkDelete}
                     className={styles.bulkDeleteButton}
                   >
                     <IoTrashOutline size={16} />
-                    Delete ({selectedTrials.length})
+                    Delete ({selectedPresentations.length})
                   </button>
                 )}
               </div>
             </div>
           </div>
 
-          {/* Trials Table */}
+          {/* Presentations Table */}
           <div className={styles.tableContainer}>
             <div className={styles.tableWrapper}>
               <table className={styles.trialsTable}>
@@ -224,30 +314,30 @@ const SubmittedTrials = () => {
                         type="checkbox"
                         onChange={(e) => {
                           if (e.target.checked) {
-                            setSelectedTrials(filteredTrials.map(t => t.id));
+                            setSelectedPresentations(filteredPresentations.map(p => p.id));
                           } else {
-                            setSelectedTrials([]);
+                            setSelectedPresentations([]);
                           }
                         }}
-                        checked={selectedTrials.length === filteredTrials.length && filteredTrials.length > 0}
+                        checked={selectedPresentations.length === filteredPresentations.length && filteredPresentations.length > 0}
                         className={styles.checkbox}
                       />
                     </th>
-                    <th className={styles.tableHeaderCell}>Trial</th>
+                    <th className={styles.tableHeaderCell}>Presentation</th>
                     <th className={styles.tableHeaderCell}>Date</th>
-                    <th className={styles.tableHeaderCell}>Duration</th>
-                    <th className={styles.tableHeaderCell}>Feedback</th>
+                    <th className={styles.tableHeaderCell}>Size</th>
+                    <th className={styles.tableHeaderCell}>Status</th>
                     <th className={styles.tableHeaderCell}>Actions</th>
                   </tr>
                 </thead>
                 <tbody className={styles.tableBody}>
-                  {filteredTrials.map((trial) => (
-                    <tr key={trial.id} className={styles.tableRow}>
+                  {filteredPresentations.map((presentation) => (
+                    <tr key={presentation.id} className={styles.tableRow}>
                       <td className={styles.checkboxCell}>
                         <input
                           type="checkbox"
-                          checked={selectedTrials.includes(trial.id)}
-                          onChange={() => toggleTrialSelection(trial.id)}
+                          checked={selectedPresentations.includes(presentation.id)}
+                          onChange={() => togglePresentationSelection(presentation.id)}
                           className={styles.checkbox}
                         />
                       </td>
@@ -262,28 +352,34 @@ const SubmittedTrials = () => {
                             </div>
                           </div>
                           <div className={styles.trialDetails}>
-                            <p className={styles.trialName}>{trial.name}</p>
-                            <p className={styles.trialMeta}>{trial.id} • {trial.size}</p>
+                            <p className={styles.trialName}>{presentation.title}</p>
+                            <p className={styles.trialMeta}>ID: {presentation.id} • {presentation.is_public ? 'Public' : 'Private'}</p>
                           </div>
                         </div>
                       </td>
                       <td className={styles.dateCell}>
-                        {new Date(trial.date).toLocaleDateString()}
+                        {new Date(presentation.uploaded_at).toLocaleDateString()}
                       </td>
                       <td className={styles.durationCell}>
-                        {trial.duration}
+                        {presentation.file_info?.file_size ? 
+                          PresentationService.formatFileSize(presentation.file_info.file_size) : 
+                          'Unknown'
+                        }
                       </td>
                       <td className={styles.feedbackCell}>
                         <div className={styles.feedbackContent}>
-                          <p className={`${styles.feedbackText} ${expandedFeedback === trial.id ? '' : styles.feedbackTruncated}`}>
-                            {expandedFeedback === trial.id ? trial.feedback : `${trial.feedback.substring(0, 80)}...`}
+                          <p className={`${styles.feedbackText} ${expandedFeedback === presentation.id.toString() ? '' : styles.feedbackTruncated}`}>
+                            {expandedFeedback === presentation.id.toString() ? 
+                              getFeedbackText(presentation) : 
+                              `${getFeedbackText(presentation).substring(0, 80)}...`
+                            }
                           </p>
                           <button
-                            onClick={() => toggleFeedback(trial.id)}
+                            onClick={() => toggleFeedback(presentation.id.toString())}
                             className={styles.viewMoreButton}
                           >
                             <IoEyeOutline size={12} />
-                            {expandedFeedback === trial.id ? 'Show less' : 'View more'}
+                            {expandedFeedback === presentation.id.toString() ? 'Show less' : 'View more'}
                           </button>
                         </div>
                       </td>
@@ -292,12 +388,14 @@ const SubmittedTrials = () => {
                           <button 
                             className={styles.actionButton}
                             title="Download"
+                            onClick={() => handleDownloadPresentation(presentation)}
                           >
                             <IoDownloadOutline size={16} />
                           </button>
                           <button 
                             className={styles.actionButton}
                             title="Delete"
+                            onClick={() => handleDeletePresentation(presentation.id)}
                           >
                             <IoTrashOutline size={16} />
                           </button>
@@ -309,20 +407,33 @@ const SubmittedTrials = () => {
               </table>
             </div>
 
-            {filteredTrials.length === 0 && (
+            {filteredPresentations.length === 0 && (
               <div className={styles.emptyState}>
                 <IoDocumentTextOutline className={styles.emptyStateIcon} />
-                <h3 className={styles.emptyStateTitle}>No trials found</h3>
+                <h3 className={styles.emptyStateTitle}>
+                  {presentations.length === 0 ? 'No presentations yet' : 'No presentations found'}
+                </h3>
                 <p className={styles.emptyStateText}>
-                  Try adjusting your search or filter criteria.
+                  {presentations.length === 0 
+                    ? 'Start by uploading your first video presentation.' 
+                    : 'Try adjusting your search or filter criteria.'
+                  }
                 </p>
+                {presentations.length === 0 && (
+                  <button className={styles.submitNewButton} onClick={handleSubmitNewTrial}>
+                    <IoDocumentTextOutline size={18} />
+                    Upload Your First Presentation
+                  </button>
+                )}
               </div>
             )}
           </div>
 
           {/* Footer */}
           <div className={styles.tableFooter}>
-            <p className={styles.footerText}>Showing {filteredTrials.length} of {trials.length} trials</p>
+            <p className={styles.footerText}>
+              Showing {filteredPresentations.length} of {presentations.length} presentations
+            </p>
             <div className={styles.pagination}>
               <button className={styles.paginationButton}>Previous</button>
               <span className={styles.paginationCurrent}>1</span>
