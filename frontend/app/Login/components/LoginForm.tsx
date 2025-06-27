@@ -7,33 +7,31 @@ import { FcGoogle } from "react-icons/fc";
 import { FaExclamationCircle, FaExclamationTriangle } from "react-icons/fa";
 import { signIn } from "next-auth/react";
 import styles from "../page.module.css";
+import Image from "next/image";
 
 const LoginForm = () => {
     const router = useRouter();
     const [formData, setFormData] = useState({
-        email: "",
+        identifier: "",
         password: "",
     });
     const [formErrors, setFormErrors] = useState({
-        email: "",
+        identifier: "",
         password: "",
     });
+    const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [googleLoading, setGoogleLoading] = useState(false);
     const [apiError, setApiError] = useState("");
-    const [showPassword, setShowPassword] = useState(false);
 
     const validateField = useCallback((name: string, value: string) => {
         switch (name) {
-            case "email":
+            case "identifier":
                 if (!value.trim()) return "Email is required.";
-                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())) {
-                    return "Enter a valid email address.";
-                }
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())) return "Invalid email address.";
                 return "";
             case "password":
                 if (!value.trim()) return "Password is required.";
-                if (value.length < 6) return "Password must be at least 6 characters.";
                 return "";
             default:
                 return "";
@@ -57,12 +55,12 @@ const LoginForm = () => {
 
     const validateForm = useCallback(() => {
         const newErrors = {
-            email: validateField("email", formData.email),
+            identifier: validateField("identifier", formData.identifier),
             password: validateField("password", formData.password),
         };
         
         setFormErrors(newErrors);
-        return !newErrors.email && !newErrors.password;
+        return Object.values(newErrors).every((error) => !error);
     }, [formData, validateField]);
 
     const handleSubmit = useCallback(async (e: React.FormEvent) => {
@@ -76,15 +74,13 @@ const LoginForm = () => {
         setLoading(true);
         
         try {
+            const formDataToSend = new FormData();
+            formDataToSend.append("email", formData.identifier.trim());
+            formDataToSend.append("password", formData.password);
+
             const response = await fetch("http://localhost:8081/auth/login", {
                 method: "POST",
-                headers: { 
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    email: formData.email.trim(),
-                    password: formData.password,
-                }),
+                body: formDataToSend,
             });
             
             if (response.ok) {
@@ -102,7 +98,21 @@ const LoginForm = () => {
                 router.push("/Dashboard");
             } else {
                 const errorData = await response.json();
-                setApiError(errorData.detail || errorData.message || "Login failed. Please check your credentials.");
+                console.log("Login error response:", errorData);
+                
+                // Handle different error response formats
+                let errorMessage = "Login failed. Please check your credentials.";
+                
+                if (typeof errorData.detail === 'string') {
+                    errorMessage = errorData.detail;
+                } else if (Array.isArray(errorData.detail)) {
+                    // Handle validation errors from FastAPI/Pydantic
+                    errorMessage = errorData.detail.map((err: any) => err.msg || err.message).join(', ');
+                } else if (errorData.message) {
+                    errorMessage = errorData.message;
+                }
+                
+                setApiError(errorMessage);
             }
         } catch (error) {
             console.error("Login error:", error);
@@ -157,22 +167,22 @@ const LoginForm = () => {
         <div className={styles.container}>
             <div className={styles['form-card']}>
                 <div className={styles.header}>
-                    <div className={styles.logo}>M</div>
+                    <Image src="/Images/Logoo.png" alt="MockPie Logo" width={60} height={60} className={styles.logo} priority />
                     <h1 className={styles['welcome-text']}>Welcome to MockPie!</h1>
                     <p className={styles.subtitle}>Sign in to your account</p>
                 </div>
 
                 <form onSubmit={handleSubmit} noValidate>
                     <div className={styles['form-group']}>
-                        <label htmlFor="email">Email</label>
+                        <label htmlFor="identifier">Email</label>
                         <div className={styles['input-container']}>
                             <input
-                                type="email"
-                                id="email"
-                                name="email"
+                                type="text"
+                                id="identifier"
+                                name="identifier"
                                 className={styles['form-input']}
                                 placeholder="Enter your email"
-                                value={formData.email}
+                                value={formData.identifier}
                                 onChange={handleInputChange}
                                 onFocus={handleFocus}
                                 onBlur={handleBlur}
@@ -181,10 +191,10 @@ const LoginForm = () => {
                                 autoComplete="email"
                             />
                         </div>
-                        {formErrors.email && (
+                        {formErrors.identifier && (
                             <div className={styles['error-message']}>
                                 <FaExclamationCircle />
-                                <span>{formErrors.email}</span>
+                                <span>{formErrors.identifier}</span>
                             </div>
                         )}
                     </div>

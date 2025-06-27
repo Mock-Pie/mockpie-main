@@ -19,6 +19,7 @@ class User(Base):
     _password = Column("password", String, nullable=False)
     created_at = Column(DateTime, server_default=func.now(), nullable=False)
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
+    deleted_at = Column(DateTime, nullable=True)
     remember_token = Column(String, index=True, nullable=True, default="")
     otp = Column(String, nullable=True)
     otp_expired_at = Column(DateTime, nullable=True)

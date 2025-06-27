@@ -1,67 +1,74 @@
-.container {
+/* ===== ANIMATED BACKGROUND FOR AUTHENTICATION PAGES ===== */
+
+/* Static background elements for authentication pages */
+.container::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
     width: 100%;
-    max-width: 600px;
-    min-width: 400px;
-    padding: 20px;
-    position: relative;
-    z-index: 1;
-    margin: 0 auto;
+    height: 100%;
+    background: radial-gradient(circle at 20% 20%, rgba(255, 215, 0, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 215, 0, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(255, 255, 255, 0.02) 0%, transparent 50%);
+    z-index: -1;
 }
 
+/* ===== COMMON FORM STYLES (Used by Login, SignUp, ForgotPassword, ResetPassword, OTPVerification) ===== */
+
+/* Container - Used by: Login, SignUp, ForgotPassword, ResetPassword, OTPVerification */
+.container {
+    width: 100%;
+    max-width: 900px;
+    min-width: 600px;
+    padding: 20px;
+    position: relative;
+    z-index: 10;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+/* Form Card - Used by: Login, SignUp, ForgotPassword, ResetPassword, OTPVerification */
 .form-card {
     background: rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(20px);
     border-radius: 24px;
     padding: 40px;
     border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3),
-                0 0 0 1px rgba(255, 255, 255, 0.05);
     position: relative;
     overflow: hidden;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    width: 500px;
+    max-width: 90vw;
 }
 
+/* Form Card Hover - Used by: Login, SignUp, ForgotPassword, ResetPassword, OTPVerification */
 .form-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4),
-                0 0 0 1px rgba(255, 255, 255, 0.1);
+    /* Hover effect removed to keep form fixed */
 }
 
-.form-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.1), transparent);
-    transition: left 0.5s;
-}
+/* Form Card Before Animation - Removed shining effect */
 
-.form-card:hover::before {
-    left: 100%;
-}
-
+/* Header - Used by: Login, SignUp, ForgotPassword, ResetPassword, OTPVerification */
 .header {
     text-align: center;
     margin-bottom: 40px;
 }
 
+/* Logo - Used by: Login, SignUp, ForgotPassword, ResetPassword, OTPVerification */
 .logo {
     width: 60px;
-    height: 60px;
-    background: linear-gradient(135deg, var(--naples-yellow), var(--dark-yellow));
-    border-radius: 16px;
+    height: 57px;
     display: flex;
     align-items: center;
     justify-content: center;
     margin: 0 auto 20px;
-    font-size: 24px;
-    font-weight: 700;
-    color: var(--raisin-black);
-    box-shadow: 0 8px 20px rgba(255, 215, 0, 0.3);
 }
 
+/* Welcome Text - Used by: Login, SignUp, ForgotPassword, ResetPassword, OTPVerification */
 .welcome-text {
     font-size: 28px;
     font-weight: 600;
@@ -73,17 +80,20 @@
     background-clip: text;
 }
 
+/* Subtitle - Used by: Login, SignUp, ForgotPassword, ResetPassword, OTPVerification */
 .subtitle {
     color: var(--light-grey);
     font-size: 16px;
     font-weight: 400;
 }
 
+/* Form Group - Used by: Login, SignUp, ForgotPassword, ResetPassword, OTPVerification */
 .form-group {
     margin-bottom: 24px;
     position: relative;
 }
 
+/* Form Group Label - Used by: Login, SignUp, ForgotPassword, ResetPassword, OTPVerification */
 .form-group label {
     display: block;
     margin-bottom: 8px;
@@ -92,10 +102,12 @@
     font-size: 14px;
 }
 
+/* Input Container - Used by: Login, SignUp, ForgotPassword, ResetPassword, OTPVerification */
 .input-container {
     position: relative;
 }
 
+/* Form Input - Used by: Login, SignUp, ForgotPassword, ResetPassword, OTPVerification */
 .form-input {
     width: 100%;
     padding: 16px 20px;
@@ -109,18 +121,20 @@
     backdrop-filter: blur(10px);
 }
 
+/* Form Input Focus - Used by: Login, SignUp, ForgotPassword, ResetPassword, OTPVerification */
 .form-input:focus {
     outline: none;
     border-color: var(--naples-yellow);
     background: rgba(255, 255, 255, 0.08);
-    box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.1);
 }
 
+/* Form Input Placeholder - Used by: Login, SignUp, ForgotPassword, ResetPassword, OTPVerification */
 .form-input::placeholder {
     color: var(--light-grey);
     opacity: 0.7;
 }
 
+/* Password Toggle - Used by: Login, SignUp, ResetPassword */
 .password-toggle {
     position: absolute;
     right: 16px;
@@ -134,10 +148,12 @@
     transition: color 0.3s ease;
 }
 
+/* Password Toggle Hover - Used by: Login, SignUp, ResetPassword */
 .password-toggle:hover {
     color: var(--naples-yellow);
 }
 
+/* Error Message - Used by: Login, SignUp, ForgotPassword, ResetPassword, OTPVerification */
 .error-message {
     color: #ff6b6b;
     font-size: 14px;
@@ -147,6 +163,7 @@
     gap: 8px;
 }
 
+/* Submit Button - Used by: Login, SignUp, ForgotPassword, ResetPassword, OTPVerification */
 .submit-btn {
     width: 100%;
     padding: 16px;
@@ -156,7 +173,7 @@
     border-radius: 12px;
     font-size: 16px;
     font-weight: 600;
-    font-family: 'Poppins', sans-serif;
+    font-family: var(--font-poppins), 'Poppins', sans-serif;
     cursor: pointer;
     transition: all 0.3s ease;
     position: relative;
@@ -167,21 +184,26 @@
     gap: 8px;
 }
 
+/* Submit Button Hover - Used by: Login, SignUp, ForgotPassword, ResetPassword, OTPVerification */
 .submit-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 12px 30px rgba(255, 215, 0, 0.4);
 }
 
+/* Submit Button Active - Used by: Login, SignUp, ForgotPassword, ResetPassword, OTPVerification */
 .submit-btn:active {
     transform: translateY(0);
 }
 
+/* Submit Button Disabled - Used by: Login, SignUp, ForgotPassword, ResetPassword, OTPVerification */
 .submit-btn:disabled {
     opacity: 0.7;
     cursor: not-allowed;
     transform: none;
 }
 
+/* ===== LOGIN & SIGNUP SPECIFIC STYLES ===== */
+
+/* Divider - Used by: Login, SignUp */
 .divider {
     display: flex;
     align-items: center;
@@ -190,6 +212,7 @@
     font-size: 14px;
 }
 
+/* Divider Before/After - Used by: Login, SignUp */
 .divider::before,
 .divider::after {
     content: '';
@@ -198,10 +221,12 @@
     background: rgba(255, 255, 255, 0.1);
 }
 
+/* Divider Span - Used by: Login, SignUp */
 .divider span {
     padding: 0 16px;
 }
 
+/* Google Button - Used by: Login, SignUp */
 .google-btn {
     width: 100%;
     padding: 16px;
@@ -221,18 +246,23 @@
     margin-bottom: 24px;
 }
 
+/* Google Button Hover - Used by: Login, SignUp */
 .google-btn:hover {
     background: rgba(255, 255, 255, 0.08);
     border-color: rgba(255, 255, 255, 0.2);
     transform: translateY(-2px);
 }
 
+/* ===== COMMON FOOTER STYLES ===== */
+
+/* Footer Links - Used by: Login, SignUp, ForgotPassword, ResetPassword, OTPVerification */
 .footer-links {
     text-align: center;
     color: var(--light-grey);
     font-size: 14px;
 }
 
+/* Footer Links Anchor - Used by: Login, SignUp, ForgotPassword, ResetPassword, OTPVerification */
 .footer-links a {
     color: var(--naples-yellow);
     text-decoration: none;
@@ -240,15 +270,20 @@
     transition: color 0.3s ease;
 }
 
+/* Footer Links Anchor Hover - Used by: Login, SignUp, ForgotPassword, ResetPassword, OTPVerification */
 .footer-links a:hover {
     color: var(--white);
 }
 
+/* ===== LOGIN SPECIFIC STYLES ===== */
+
+/* Forgot Password - Used by: Login */
 .forgot-password {
     text-align: center;
     margin-bottom: 16px;
 }
 
+/* Forgot Password Anchor - Used by: Login */
 .forgot-password a {
     color: var(--naples-yellow);
     text-decoration: none;
@@ -257,11 +292,14 @@
     transition: color 0.3s ease;
 }
 
+/* Forgot Password Anchor Hover - Used by: Login */
 .forgot-password a:hover {
     color: var(--white);
 }
 
-/* Responsive Design */
+/* ===== RESPONSIVE DESIGN (Used by all pages) ===== */
+
+/* Mobile Responsive - Used by: Login, SignUp, ForgotPassword, ResetPassword, OTPVerification */
 @media (max-width: 768px) {
     .container {
         padding: 16px;
@@ -290,6 +328,7 @@
     }
 }
 
+/* Small Mobile Responsive - Used by: Login, SignUp, ForgotPassword, ResetPassword, OTPVerification */
 @media (max-width: 480px) {
     .form-card {
         padding: 24px 20px;
@@ -307,7 +346,9 @@
     }
 }
 
-/* Loading animation */
+/* ===== COMMON ANIMATION STYLES ===== */
+
+/* Loading Animation - Used by: Login, SignUp, ForgotPassword, ResetPassword, OTPVerification */
 .loading {
     display: inline-block;
     width: 20px;
@@ -318,6 +359,7 @@
     animation: spin 1s ease-in-out infinite;
 }
 
+/* Spin Keyframes - Used by: Login, SignUp, ForgotPassword, ResetPassword, OTPVerification */
 @keyframes spin {
     to { transform: rotate(360deg); }
 }

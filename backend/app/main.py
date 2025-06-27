@@ -6,17 +6,9 @@ import logging
 import traceback
 import os
 
-from backend.database.database import init_db
 from backend.app.middleware.redis_middleware import RedisMiddleware
-from backend.app.routers import auth, health, presentations, utils
+from backend.app.routers import auth, health, presentations, utils, users
 
-# Import all models to ensure they are registered with SQLAlchemy
-from backend.app.models.user.user import User
-from backend.app.models.presentation.presentation import Presentation
-from backend.app.models.analysis.voice_analysis import VoiceAnalysis
-from backend.app.models.analysis.body_analysis import BodyAnalysis
-from backend.app.models.segments.voice_segment import VoiceSegment
-from backend.app.models.segments.body_segment import BodySegment
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -45,6 +37,7 @@ app.include_router(auth.router)
 app.include_router(health.router)
 app.include_router(utils.router)
 app.include_router(presentations.router)
+app.include_router(users.router)
 
 # Mount static files for uploaded videos
 uploads_dir = "uploads"  # Relative to the app working directory
@@ -69,17 +62,3 @@ async def global_exception_handler(request, exc):
         status_code=500,
         content={"detail": "Internal server error", "message": error_detail}
     )
-
-# Routes
-# @app.post("/auth/register", response_model=UserAuthResponse, status_code=status.HTTP_201_CREATED)
-# async def register_user(
-#     email: EmailStr = Form(...),
-#     username: str = Form(...),
-#     phone_number: str = Form(...),
-#     password: str = Form(...),
-#     password_confirmation: str = Form(...),
-#     gender: Gender = Form(...),
-#     db: Session = Depends(get_db)
-# ):
-#     return RegisterUser.register_user(email=email, username=username, phone_number=phone_number, password=password, password_confirmation=password_confirmation,gender=gender, db=db)
-    

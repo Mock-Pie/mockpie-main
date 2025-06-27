@@ -1,7 +1,9 @@
 'use client';
 
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { useRouter } from 'next/navigation';
 import styles from "./page.module.css";
+import uploadStyles from "../UploadRecordVideos/uploadrecord.module.css";
 import SideBar from "../UploadRecordVideos/components/SideBar";
 import ImprovementChart from "./components/ImprovementChart";
 import CalendarWidget from "./components/CalendarWidget";
@@ -9,8 +11,48 @@ import PieChart from "./components/PieChart";
 import StatsCard from "./components/StatsCard";
 import StatsSummary from "./components/StatsSummary";
 import PresentationTable from "./components/PresentationTable";
+import UserService, { User } from "../services/userService";
 
 const Dashboard = () => {
+  const router = useRouter();
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchUserData();
+  }, []);
+
+  const fetchUserData = async () => {
+    try {
+      setLoading(true);
+      const result = await UserService.getCurrentUser();
+      
+      if (result.success && result.data) {
+        setUser(result.data);
+      } else {
+        console.error('Failed to fetch user data:', result.error);
+        if (result.error?.includes('Authentication expired')) {
+          router.push('/Login');
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching user data:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getDisplayName = () => {
+    if (!user) return 'Loading...';
+    
+    const fullName = `${user.first_name || ''} ${user.last_name || ''}`.trim();
+    return fullName || user.username || 'Unknown User';
+  };
+
+  const handleProfileClick = () => {
+    router.push('/ProfileInfo');
+  };
+
   // SVG icons for stats cards
   const purpleIcon = (
     <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -30,39 +72,89 @@ const Dashboard = () => {
   return (
     <div className={styles.container}>
       <SideBar />
-      <div className={styles.mainContent}>
-        <h1 className={styles.greeting}>Hello, Jana</h1>
+      <div className={uploadStyles.mainContent}>
+        {/* Header with search, profile, title and subtitle - matching UploadRecordVideos position */}
+        <div className={uploadStyles.header}>
+        {/* Enhanced Header with search and profile */}
+        <div className={styles.enhancedHeader}>
+          <div className={styles.searchSection}>
+            <div className={styles.searchContainer}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={styles.searchIcon}>
+                <path d="M21 21L16.514 16.506L21 21ZM19 10.5C19 15.194 15.194 19 10.5 19C5.806 19 2 15.194 2 10.5C2 5.806 5.806 2 10.5 2C15.194 2 19 5.806 19 10.5Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              <input 
+                type="text" 
+                placeholder="Search presentations, analytics..." 
+                className={styles.searchInput}
+              />
+            </div>
+          </div>
+          
+          <div className={styles.userSection}>
+            <div className={styles.userInfo}>
+                <span className={styles.userName}>{loading ? 'Loading...' : getDisplayName()}</span>
+                <span className={styles.userEmail}>{loading ? 'Loading...' : (user?.email || 'No email')}</span>
+            </div>
+              <div className={styles.userAvatar} onClick={handleProfileClick}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <circle cx="12" cy="7" r="4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+          {/* Title and subtitle */}
+          <h1 className={uploadStyles.title}>Dashboard</h1>
+          <p className={uploadStyles.subtitle}>Welcome back! Here's your presentation analytics overview</p>
+        </div>
         
-        <div className={styles.dashboardGrid}>
+        {/* Main Dashboard Grid */}
+        <div className={styles.modernDashboardGrid}>
+          {/* Left Column - Main Content */}
+          <div className={styles.leftColumn}>
           {/* Improvement Chart Section */}
           <ImprovementChart />
 
-          {/* Calendar Section */}
-          <CalendarWidget />
-
-          {/* Pie Chart Section */}
-          <PieChart />
-
-          {/* Stats Cards */}
+            {/* Stats Cards Row */}
+            <div className={styles.statsCardsRow}>
           <StatsCard 
             value={150} 
             title="Submitted Trials" 
             color="purple" 
             icon={purpleIcon} 
           />
-
           <StatsCard 
             value={20} 
             title="Presentations In Line" 
             color="yellow" 
             icon={yellowIcon} 
           />
-
-          {/* Time Range Selector and Stats Summary */}
-          <StatsSummary />
+            </div>
 
           {/* Presentation Details Table */}
           <PresentationTable />
+          </div>
+
+          {/* Right Column - Sidebar Content */}
+          <div className={styles.rightColumn}>
+            {/* Calendar Section */}
+            <CalendarWidget />
+
+            {/* Pie Chart Section */}
+            <PieChart />
+
+            {/* Stats Summary */}
+            <div className={styles.statsSummaryCard}>
+              <div className={styles.statsSummaryHeader}>
+                <span className={styles.dateRange}>10th - 12th Jun</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={styles.chevronDown}>
+                  <path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+              <StatsSummary />
+            </div>
+          </div>
         </div>
       </div>
     </div>

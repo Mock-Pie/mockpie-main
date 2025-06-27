@@ -61,6 +61,7 @@ class UserResponse(BaseModel):
     gender: Gender
     created_at: datetime
     updated_at: datetime
+    deleted_at: Optional[datetime] = None
     
     class Config:
         from_attributes = True
@@ -70,6 +71,11 @@ class UserAuthResponse(BaseModel):
     refresh_token: str
     user: UserResponse
     
+    class Config:
+        from_attributes = True
+        
+        
+class UserProfileResponse(UserResponse):    
     class Config:
         from_attributes = True
 

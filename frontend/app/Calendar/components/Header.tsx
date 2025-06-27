@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from "../../Login/page.module.css";
+import styles from "../../UploadRecordVideos/page.module.css";
 
 const Header = () => {
     return (

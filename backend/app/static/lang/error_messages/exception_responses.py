@@ -24,6 +24,9 @@ class ErrorMessage(str, Enum):
     PASSWORD_MISMATCH = "Passwords do not match"
     EMAIL_DOES_NOT_EXIST = "Email address does not exist"
     EMAIL_NOT_VERIFIED = "Email address not verified"
+    DELETED_USER_EXISTS_WITH_THIS_EMAIL = "A deleted user exists with this email address. Please wait 30 days before registering with this email again."
+    DELETED_USER_EXISTS_WITH_THIS_USERNAME = "A deleted user exists with this username. Please wait 30 days before using this username again."
+    DELETED_USER_EXISTS_WITH_THIS_PHONE = "A deleted user exists with this phone number. Please wait 30 days before registering with this phone number again."
     
     # Presentation related errors
     PRESENTATION_NOT_FOUND = "Presentation not found"

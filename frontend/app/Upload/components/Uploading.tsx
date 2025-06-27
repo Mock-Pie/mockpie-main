@@ -1,45 +1,55 @@
 "use client";
 import React, { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { FiUploadCloud, FiFile, FiCheck, FiX } from "react-icons/fi";
 import styles from "../page.module.css";
 
 const Uploading = () => {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
-    const [previewUrl, setPreviewUrl] = useState<string | null>(null); // State for video preview
-    const [fileName, setFileName] = useState<string | null>(null); // State for file name
-    const [uploadStatus, setUploadStatus] = useState<string | null>(null); // State for upload status
-    const [isUploading, setIsUploading] = useState(false); // State for upload progress
-    const [videoTitle, setVideoTitle] = useState<string>(""); // State for video title
-    const fileInputRef = useRef<HTMLInputElement | null>(null); // Ref for the file input
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const [fileName, setFileName] = useState<string | null>(null);
+    const [uploadStatus, setUploadStatus] = useState<string | null>(null);
+    const [isUploading, setIsUploading] = useState(false);
+    const [videoTitle, setVideoTitle] = useState<string>("");
+    const [isDragOver, setIsDragOver] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement | null>(null);
     const router = useRouter();
+
+    const formatFileSize = (bytes: number): string => {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    };
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file) {
-            // Revoke the previous preview URL to free up memory
-            if (previewUrl) {
-                URL.revokeObjectURL(previewUrl);
-            }
-            setSelectedFile(file);
-            setPreviewUrl(URL.createObjectURL(file)); // Generate a new preview URL
-            setFileName(file.name); // Update the file name
-            setVideoTitle(file.name.split('.')[0]); // Set default title as filename without extension
+            processFile(file);
         }
+    };
+
+    const processFile = (file: File) => {
+        // Revoke the previous preview URL to free up memory
+        if (previewUrl) {
+            URL.revokeObjectURL(previewUrl);
+        }
+        setSelectedFile(file);
+        setPreviewUrl(URL.createObjectURL(file));
+        setFileName(file.name);
+        setVideoTitle(file.name.split('.')[0]);
+        setUploadStatus(null);
     };
 
     const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
         event.preventDefault();
+        setIsDragOver(false);
+        
         const file = event.dataTransfer.files?.[0];
         if (file && file.type.startsWith("video/")) {
-            // Revoke the previous preview URL to free up memory
-            if (previewUrl) {
-                URL.revokeObjectURL(previewUrl);
-            }
-            setSelectedFile(file);
-            setPreviewUrl(URL.createObjectURL(file)); // Generate a new preview URL
-            setFileName(file.name); // Update the file name
-            setVideoTitle(file.name.split('.')[0]); // Set default title as filename without extension
-
+            processFile(file);
+            
             // Programmatically set the file input's value
             if (fileInputRef.current) {
                 const dataTransfer = new DataTransfer();
@@ -47,32 +57,38 @@ const Uploading = () => {
                 fileInputRef.current.files = dataTransfer.files;
             }
         } else {
-            alert("Please drop a valid video file.");
+            setUploadStatus("Please drop a valid video file.");
         }
     };
 
     const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
         event.preventDefault();
+        setIsDragOver(true);
+    };
+
+    const handleDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
+        event.preventDefault();
+        setIsDragOver(false);
     };
 
     const handleUpload = async () => {
         if (!selectedFile) {
-            alert("Please select a file first.");
+            setUploadStatus("Please select a file first.");
             return;
         }
 
         // Check if user is authenticated
         const accessToken = localStorage.getItem("access_token");
         if (!accessToken) {
-            alert("Please log in to upload videos.");
-            router.push("/Login");
+            setUploadStatus("Please log in to upload videos.");
+            setTimeout(() => router.push("/Login"), 2000);
             return;
         }
 
         // Validate file size (100MB limit)
         const maxSize = 100 * 1024 * 1024; // 100MB
         if (selectedFile.size > maxSize) {
-            alert("File size exceeds 100MB limit. Please choose a smaller file.");
+            setUploadStatus("File size exceeds 100MB limit. Please choose a smaller file.");
             return;
         }
 
@@ -82,7 +98,7 @@ const Uploading = () => {
             'video/flv', 'video/webm', 'video/m4v', 'video/3gp', 'video/quicktime'
         ];
         if (!allowedTypes.includes(selectedFile.type)) {
-            alert("Unsupported file type. Please upload a valid video file.");
+            setUploadStatus("Unsupported file type. Please upload a valid video file.");
             return;
         }
 
@@ -109,7 +125,7 @@ const Uploading = () => {
                 setUploadStatus("Upload successful!");
                 console.log("Upload response:", data);
                 
-                // Redirect to dashboard or presentations list after successful upload
+                // Redirect to dashboard after successful upload
                 setTimeout(() => {
                     router.push("/Dashboard");
                 }, 2000);
@@ -117,10 +133,9 @@ const Uploading = () => {
                 const errorData = await response.json();
                 
                 if (response.status === 401) {
-                    // Token expired or invalid
                     localStorage.removeItem("access_token");
-                    alert("Session expired. Please log in again.");
-                    router.push("/Login");
+                    setUploadStatus("Session expired. Please log in again.");
+                    setTimeout(() => router.push("/Login"), 2000);
                 } else if (response.status === 413) {
                     setUploadStatus("File too large. Maximum size is 100MB.");
                 } else if (response.status === 415) {
@@ -137,60 +152,78 @@ const Uploading = () => {
         }
     };
 
+    const getStatusClass = () => {
+        if (!uploadStatus) return "";
+        if (uploadStatus.includes("successful")) return styles.StatusSuccess;
+        if (uploadStatus.includes("failed") || uploadStatus.includes("error") || uploadStatus.includes("expired")) return styles.StatusError;
+        if (uploadStatus.includes("Uploading")) return styles.StatusUploading;
+        return styles.StatusError;
+    };
+
     return (
         <div className={styles.UploadContainer}>
             <div
-                className={styles.PreviewSquare}
+                className={`${styles.PreviewSquare} ${isDragOver ? styles.dragOver : ''}`}
                 onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
+                onClick={() => fileInputRef.current?.click()}
             >
                 {previewUrl ? (
                     <video
-                        key={previewUrl} // Force the video to reload when the URL changes
+                        key={previewUrl}
                         controls
                         className={styles.VideoPreview}
-                        style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                     >
                         <source src={previewUrl} type="video/mp4" />
                         Your browser does not support the video tag.
                     </video>
                 ) : (
-                    <img
-                        src="/Images/Uploading.png"
-                        alt="Upload Video"
-                        className={styles.ImagePreview}
-                        style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-                    />
+                    <div className={styles.DropZone}>
+                        <FiUploadCloud className={styles.UploadIcon} />
+                        <div className={styles.DropZoneText}>
+                            {isDragOver ? "Drop your video here" : "Upload Video"}
+                        </div>
+                        <div className={styles.DropZoneSubtext}>
+                            Drag and drop your video file here, or click to browse
+                        </div>
+                        <div className={styles.DropZoneSubtext}>
+                            Supports: MP4, AVI, MKV, MOV, WMV (Max: 100MB)
+                        </div>
+                    </div>
                 )}
             </div>
             
-            {/* Video Title Input */}
+            {/* File Information */}
             {selectedFile && (
-                <div style={{ marginTop: '20px', width: '60%' }}>
-                    <label style={{ display: 'block', marginBottom: '8px', color: 'var(--white)' }}>
-                        Video Title:
-                    </label>
-                    <input
-                        type="text"
-                        value={videoTitle}
-                        onChange={(e) => setVideoTitle(e.target.value)}
-                        placeholder="Enter video title"
-                        style={{
-                            width: '100%',
-                            padding: '10px',
-                            borderRadius: '5px',
-                            border: '1px solid var(--light-grey)',
-                            backgroundColor: 'var(--chinese-black)',
-                            color: 'var(--white)',
-                            fontSize: '14px'
-                        }}
-                    />
+                <div className={styles.FileInfo}>
+                    <div className={styles.TitleInputGroup}>
+                        <label className={styles.TitleLabel}>
+                            Video Title
+                        </label>
+                        <input
+                            type="text"
+                            value={videoTitle}
+                            onChange={(e) => setVideoTitle(e.target.value)}
+                            placeholder="Enter a title for your video"
+                            className={styles.TitleInput}
+                        />
+                    </div>
+                    <div className={styles.FileDetails}>
+                        <div className={styles.FileName}>
+                            <FiFile style={{ marginRight: '8px', verticalAlign: 'middle' }} />
+                            {fileName}
+                        </div>
+                        <div className={styles.FileSize}>
+                            {formatFileSize(selectedFile.size)}
+                        </div>
+                    </div>
                 </div>
             )}
 
             <div className={styles.ButtonGroup}>
                 <label htmlFor="fileInput" className={styles.ChooseFileButton}>
-                    Choose File
+                    {selectedFile ? "Change File" : "Choose File"}
                 </label>
                 <input
                     id="fileInput"
@@ -198,29 +231,33 @@ const Uploading = () => {
                     accept="video/*"
                     onChange={handleFileChange}
                     className={styles.FileInput}
-                    ref={fileInputRef} // Attach the ref to the file input
+                    ref={fileInputRef}
                 />
                 <button 
                     onClick={handleUpload} 
                     className={styles.UploadButton}
                     disabled={isUploading || !selectedFile}
-                    style={{
-                        opacity: (isUploading || !selectedFile) ? 0.6 : 1,
-                        cursor: (isUploading || !selectedFile) ? 'not-allowed' : 'pointer'
-                    }}
                 >
-                    {isUploading ? "Uploading..." : "Upload"}
+                    {isUploading ? (
+                        <>
+                            <div className={styles.LoadingSpinner}></div>
+                            Uploading...
+                        </>
+                    ) : (
+                        <>
+                            <FiUploadCloud style={{ marginRight: '8px' }} />
+                            Upload Video
+                        </>
+                    )}
                 </button>
             </div>
-            {fileName && <p className={styles.FileName}>Selected File: {fileName}</p>}
+
             {uploadStatus && (
-                <p className={styles.UploadStatus} style={{
-                    color: uploadStatus.includes("successful") ? "var(--naples-yellow)" : 
-                           uploadStatus.includes("failed") || uploadStatus.includes("error") ? "#ff4444" :
-                           "var(--white)"
-                }}>
+                <div className={`${styles.UploadStatus} ${getStatusClass()}`}>
+                    {uploadStatus.includes("successful") && <FiCheck style={{ marginRight: '8px' }} />}
+                    {(uploadStatus.includes("failed") || uploadStatus.includes("error")) && <FiX style={{ marginRight: '8px' }} />}
                     {uploadStatus}
-                </p>
+                </div>
             )}
         </div>
     );

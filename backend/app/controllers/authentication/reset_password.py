@@ -39,23 +39,28 @@ class ResetPassword:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=ErrorMessage.USER_NOT_FOUND.value
             )
-            
-        if user.email_verified_at is None:
+        
+        # Check if this is a temporary user (username starts with "verify_")
+        is_temp_user = user.username.startswith("verify_")
+        
+        # For regular users, check email verification requirement
+        if not is_temp_user and user.email_verified_at is None:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=ErrorMessage.EMAIL_NOT_VERIFIED.value
             )
         
-        # Check if more than 5 minutes have passed  
-        verification_expiry = user.email_verified_at + timedelta(minutes=5)
-        if datetime.now() > verification_expiry:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Session expired. Please request a new password reset or re-verify your email."
-            )
+        # For regular users, check if more than 5 minutes have passed since verification
+        if not is_temp_user and user.email_verified_at:
+            verification_expiry = user.email_verified_at + timedelta(minutes=5)
+            if datetime.now() > verification_expiry:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Session expired. Please request a new password reset or re-verify your email."
+                )
 
         # Add debug before password update
-        print(f"Updating password for user: {user.email}")
+        print(f"Updating password for user: {user.email} (temp user: {is_temp_user})")
         result = update_user_password(db, user, new_password)
         print(f"Password update result: {result}")
 

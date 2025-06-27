@@ -3,8 +3,8 @@ import styles from "../page.module.css";
 
 const Header = () => {
     return (
-        <div className={styles.titleContainer}>
-            <h2 className={styles.title}>Profile</h2>
+        <div className={styles.header}>
+            <h1 className={styles.headerTitle}>Profile Information</h1>
         </div>
     );
 };
