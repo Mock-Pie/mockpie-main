@@ -135,6 +135,8 @@ def verify_file_content(file_path: Path) -> bool:
 async def upload_video(
     file: UploadFile = File(...),
     title: Optional[str] = Form(None),
+    language: Optional[str] = Form(None),
+    topic: Optional[str] = Form(None),
     current_user: User = Depends(TokenHandler.get_current_user),
     db: Session = Depends(get_db),
     redis: RedisClient = Depends(get_redis_client)
@@ -145,6 +147,8 @@ async def upload_video(
     Args:
         file: The video file to upload
         title: Optional title for the video
+        language: language of the presentation
+        topic: topic of the presentation
         current_user: Authenticated user
         db: Database session
         redis: Redis client
@@ -187,12 +191,13 @@ async def upload_video(
         
         # Use provided title or generate one from filename
         video_title = title if title else Path(file.filename).stem
-        
-        # Create presentation record in database
+          # Create presentation record in database
         presentation = Presentation(
             user_id=current_user.id,
             title=video_title,
             url=file_url,
+            language=language,
+            topic=topic,
             is_public=False,
             uploaded_at=datetime.now()
         )
@@ -200,11 +205,12 @@ async def upload_video(
         db.add(presentation)
         db.commit()
         db.refresh(presentation)
-        
         return {
             "message": "Video uploaded successfully",
             "presentation_id": presentation.id,
             "title": video_title,
+            "language": language,
+            "topic": topic,
             "filename": unique_filename,
             "original_filename": file.filename,
             "file_url": file_url,
