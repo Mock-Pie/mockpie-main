@@ -173,7 +173,7 @@
     border-radius: 12px;
     font-size: 16px;
     font-weight: 600;
-    font-family: 'Poppins', sans-serif;
+    font-family: var(--font-poppins), 'Poppins', sans-serif;
     cursor: pointer;
     transition: all 0.3s ease;
     position: relative;
