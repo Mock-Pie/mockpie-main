@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import styles from '../page.module.css';
 import UserService, { User } from '../../services/userService';
 
@@ -187,7 +188,7 @@ const ProfileForm = () => {
         }
     };
 
-    const handleDeleteAccount = () => {
+    const handleDeleteAccount = async () => {
         const confirmDelete = window.confirm(
             'Are you sure you want to delete your account? This action cannot be undone.'
         );
@@ -198,9 +199,32 @@ const ProfileForm = () => {
             );
             
             if (doubleConfirm) {
-                // TODO: Implement delete account API call
-                console.log('Delete account requested');
-                alert('Delete account functionality will be implemented soon.');
+                try {
+                    setSaving(true);
+                    const result = await UserService.deleteUser();
+                    
+                    if (result.success) {
+                        // Clear all local storage
+                        localStorage.clear();
+                        sessionStorage.clear();
+                        
+                        // Show success message
+                        alert('Your account has been deleted successfully. You will be redirected to the login page.');
+                        
+                        // Redirect to login page
+                        router.push('/Login');
+                    } else {
+                        setError(result.error || 'Failed to delete account');
+                        if (result.error?.includes('Authentication expired')) {
+                            router.push('/Login');
+                        }
+                    }
+                } catch (err) {
+                    setError('Failed to delete account. Please try again.');
+                    console.error('Error deleting account:', err);
+                } finally {
+                    setSaving(false);
+                }
             }
         }
     };
@@ -381,14 +405,16 @@ const ProfileForm = () => {
                     <button 
                         className={styles.changePasswordButton}
                         onClick={() => router.push('/ChangePassword')}
+                        disabled={saving}
                     >
                         Change Password
                     </button>
                     <button 
                         className={styles.deleteAccountButton}
                         onClick={handleDeleteAccount}
+                        disabled={saving}
                     >
-                        Delete Account
+                        {saving ? 'Deleting...' : 'Delete Account'}
                     </button>
                 </div>
             </div>

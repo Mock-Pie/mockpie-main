@@ -16,6 +16,19 @@ export interface UserApiResponse {
   error?: string;
 }
 
+export interface DeleteUserResponse {
+  success: boolean;
+  message?: string;
+  error?: string;
+}
+
+export interface RestoreUserResponse {
+  success: boolean;
+  data?: User;
+  message?: string;
+  error?: string;
+}
+
 class UserService {
   private static readonly BASE_URL = 'http://localhost:8081';
 
@@ -110,6 +123,104 @@ class UserService {
       };
     } catch (error) {
       console.error('Error updating user:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error occurred'
+      };
+    }
+  }
+
+  static async deleteUser(): Promise<DeleteUserResponse> {
+    try {
+      console.log('UserService.deleteUser called');
+      
+      const response = await fetch(`${this.BASE_URL}/users/`, {
+        method: 'DELETE',
+        headers: this.getAuthHeaders(),
+      });
+
+      console.log('Delete response status:', response.status);
+      console.log('Delete response ok:', response.ok);
+
+      if (response.status === 401) {
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        return {
+          success: false,
+          error: 'Authentication expired. Please log in again.'
+        };
+      }
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Delete failed with response:', errorText);
+        return {
+          success: false,
+          error: `Failed to delete user: ${response.statusText}`
+        };
+      }
+
+      const result = await response.json();
+      console.log('Delete result received:', result);
+      
+      return {
+        success: true,
+        message: result.message || 'User deleted successfully'
+      };
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error occurred'
+      };
+    }
+  }
+
+  static async restoreUser(email: string, otp: string): Promise<RestoreUserResponse> {
+    try {
+      console.log('UserService.restoreUser called with email:', email);
+      
+      const formData = new FormData();
+      formData.append('email', email);
+      formData.append('otp', otp);
+      
+      const response = await fetch(`${this.BASE_URL}/users/retrieve`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      console.log('Restore response status:', response.status);
+      console.log('Restore response ok:', response.ok);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Restore failed with response:', errorText);
+        
+        let errorMessage = 'Failed to restore user account';
+        try {
+          const errorData = JSON.parse(errorText);
+          errorMessage = errorData.detail || errorMessage;
+        } catch (e) {
+          // If parsing fails, use the raw text
+          errorMessage = errorText;
+        }
+        
+        return {
+          success: false,
+          error: errorMessage
+        };
+      }
+
+      const restoredUser: User = await response.json();
+      console.log('Restored user received:', restoredUser);
+      
+      return {
+        success: true,
+        data: restoredUser,
+        message: 'Account restored successfully'
+      };
+    } catch (error) {
+      console.error('Error restoring user:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error occurred'

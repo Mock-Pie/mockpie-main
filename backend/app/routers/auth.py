@@ -11,6 +11,7 @@ from backend.app.controllers.authentication.verify_otp import VerifyOTP
 from backend.app.controllers.authentication.user_login import LoginUser
 from backend.app.controllers.authentication.forgot_password import ForgotPassword
 from backend.app.controllers.authentication.reset_password import ResetPassword
+from backend.app.controllers.authentication.restore_account_otp import RestoreAccountOTP
 from backend.app.schemas.user.user_schema import UserAuthResponse, UserResponse, UserUpdate
 from backend.app.utils.redis_client import RedisClient
 from backend.app.utils.redis_dependency import get_redis_client
@@ -94,6 +95,17 @@ async def verify_user_otp(
     db: Session = Depends(get_db)
 ):
     return VerifyOTP.verify_user_otp(email=email, otp=otp, db=db)
+
+
+@router.post("/restore-account-otp", status_code=status.HTTP_200_OK)
+async def send_restore_account_otp(
+    email: EmailStr = Form(...),
+    db: Session = Depends(get_db)
+) -> Dict[str, Any]:
+    """
+    Send OTP for account restoration verification
+    """
+    return await RestoreAccountOTP.send_restore_otp(email=email, db=db)
 
 
 @router.get("/me", response_model=UserResponse)

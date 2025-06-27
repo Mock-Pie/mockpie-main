@@ -258,6 +258,8 @@ const LoginForm = () => {
 
                     <div className={styles['forgot-password']}>
                         <Link href="/ForgotPassword">Forgot your password?</Link>
+                        <span className={styles['link-separator']}>•</span>
+                        <Link href="/RestoreAccount">Restore deleted account</Link>
                     </div>
 
                     <div className={styles.divider}>

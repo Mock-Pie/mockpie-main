@@ -4,8 +4,9 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { FaExclamationTriangle } from "react-icons/fa";
 import Image from "next/image";
 import styles from "../../Login/page.module.css";
+import UserService from "../../services/userService";
 
-const PasswordResetOTPForm = () => {
+const RestoreAccountOTPForm = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const emailFromParams = (searchParams && searchParams.get("email")) || "";
@@ -76,23 +77,17 @@ const PasswordResetOTPForm = () => {
     }
     
     try {
-      const data = new FormData();
-      data.append("email", email);
-      data.append("otp", otpValue);
+      const result = await UserService.restoreUser(email, otpValue);
       
-      const response = await fetch("http://localhost:8081/auth/verify-otp", {
-        method: "POST",
-        body: data,
-      });
-      
-      if (response.ok) {
-        // Redirect to reset password page
-        router.push(`/ResetPassword?email=${encodeURIComponent(email)}`);
+      if (result.success) {
+        // Show success message and redirect
+        alert("Account restored successfully! Your email is now verified and you can log in directly with your original credentials.");
+        router.push('/Login?message=Account restored successfully! Your email is verified and you can log in directly.');
       } else {
-        const errorData = await response.json();
-        setError(errorData.detail || errorData.message || "Invalid OTP. Please try again.");
+        setError(result.error || "Failed to restore account");
       }
     } catch (err) {
+      console.error("Error restoring account:", err);
       setError("Network error. Please check your connection and try again.");
     } finally {
       setLoading(false);
@@ -106,12 +101,12 @@ const PasswordResetOTPForm = () => {
     setResendCooldown(30);
     
     try {
-      const data = new FormData();
-      data.append("email", email);
-    
-      const response = await fetch("http://localhost:8081/auth/forgot-password", {
+      const formData = new FormData();
+      formData.append('email', email);
+      
+      const response = await fetch("http://localhost:8081/auth/restore-account-otp", {
         method: "POST",
-        body: data,
+        body: formData,
       });
       
       if (!response.ok) {
@@ -137,8 +132,8 @@ const PasswordResetOTPForm = () => {
     <div className={styles['form-card']}>
       <div className={styles.header}>
         <Image src="/Images/Logoo.png" alt="MockPie Logo" width={60} height={60} className={styles.logo} priority />
-        <h1 className={styles['welcome-text']}>Reset Password</h1>
-        <p className={styles.subtitle}>We sent a six digit code to {email} to reset your password</p>
+        <h1 className={styles['welcome-text']}>Restore Account</h1>
+        <p className={styles.subtitle}>We sent a six digit code to {email} to verify your identity</p>
       </div>
 
       <form onSubmit={handleVerifyOtp} noValidate>
@@ -211,32 +206,31 @@ const PasswordResetOTPForm = () => {
           {loading ? (
             <>
               <div className={styles.loading}></div>
-              Verifying...
+              Restoring Account...
             </>
           ) : (
-            'Verify Code'
+            'Restore Account'
           )}
         </button>
 
-        <div style={{ textAlign: 'center', marginTop: '16px' }}>
-          <span style={{ fontSize: '14px', color: '#666' }}>
-            Don't receive the code?{' '}
-          </span>
-          <button
-            type="button"
+        <div className={styles['footer-links']}>
+          <button 
+            type="button" 
             onClick={handleResendOtp}
             disabled={resendCooldown > 0}
             style={{
               background: 'none',
               border: 'none',
-              color: resendCooldown > 0 ? '#999' : '#007bff',
+              color: resendCooldown > 0 ? 'var(--light-grey)' : 'var(--naples-yellow)',
               cursor: resendCooldown > 0 ? 'not-allowed' : 'pointer',
               textDecoration: 'underline',
-              fontSize: '14px',
-              fontWeight: '500'
+              fontSize: '14px'
             }}
           >
-            {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend Code'}
+            {resendCooldown > 0 
+              ? `Resend code in ${resendCooldown}s` 
+              : 'Resend verification code'
+            }
           </button>
         </div>
       </form>
@@ -244,4 +238,4 @@ const PasswordResetOTPForm = () => {
   );
 };
 
-export default PasswordResetOTPForm; 
+export default RestoreAccountOTPForm; 

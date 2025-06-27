@@ -310,7 +310,16 @@ const EmailVerificationForm = () => {
 
       <form onSubmit={handleVerifyOtp} noValidate>
         <div className={styles['form-group']}>
-          <label>Enter 6-digit code</label>
+          <label style={{ 
+            textAlign: 'center', 
+            display: 'block', 
+            width: '100%',
+            margin: '0 auto',
+            fontSize: '16px',
+            fontWeight: '500',
+            color: 'var(--naples-yellow)',
+            marginBottom: '12px'
+          }}>Enter 6-digit code</label>
           <div className={styles['otp-container']} style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '16px' }} onPaste={handlePaste}>
             {otp.map((digit, index) => (
               <input

@@ -14,19 +14,21 @@ from backend.app.services.authentication.email_service import EmailService
 
 class RetrieveUser:
     @staticmethod
-    async def get_user(email: str, db: Session):
+    async def get_user(email: str, otp: str, db: Session):
         """
         Retrieve a deleted user and reactivate all associated presentations and analyses
+        Requires OTP verification
         
         Args:
             email: Email of the deleted user
+            otp: OTP for verification
             db: Database session
             
         Returns:
             User: The reactivated user
             
         Raises:
-            HTTPException: If user not found or error occurs
+            HTTPException: If user not found, OTP invalid, or error occurs
         """
         from backend.app.models.presentation.presentation import Presentation
         from backend.app.models.analysis.voice_analysis import VoiceAnalysis
@@ -53,9 +55,31 @@ class RetrieveUser:
                 detail="Cannot retrieve accounts deleted more than 30 days ago"
             )
         
+        # Verify OTP
+        if not user.otp or user.otp != otp:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid OTP"
+            )
+        
+        # Check if OTP has expired
+        if user.otp_expired_at and user.otp_expired_at < datetime.now():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="OTP has expired. Please request a new one."
+            )
+        
         try:
+            # Clear OTP after successful verification
+            user.otp = None
+            user.otp_expired_at = None
+            
             # Reactivate the user
             user.deleted_at = None
+            
+            # Always set email verification status after successful OTP verification
+            # This ensures the user can login directly after account restoration
+            user.email_verified_at = datetime.now()
             
             # Find and reactivate all presentations associated with the user
             presentations = db.query(Presentation).filter(

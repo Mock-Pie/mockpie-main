@@ -23,6 +23,20 @@ def set_otp_and_otp_expiry_time(db: Session, user: User, otp: str, expiry: datet
         db.rollback()
         return False
 
+def set_restore_otp_and_expiry_time(db: Session, user: User, otp: str, expiry: datetime) -> bool:
+    """
+    Set OTP for account restoration without clearing email verification status
+    """
+    try:
+        user.otp = otp
+        user.otp_expired_at = expiry
+        # Don't clear email_verified_at for restore operations
+        db.commit()
+        return True
+    except Exception:
+        db.rollback()
+        return False
+
 def verify_otp(db: Session, email: str, otp: str) -> User | None:
     user = get_user_by_email(db, email)
     
