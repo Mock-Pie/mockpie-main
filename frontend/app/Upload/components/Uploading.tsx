@@ -11,6 +11,8 @@ const Uploading = () => {
     const [uploadStatus, setUploadStatus] = useState<string | null>(null);
     const [isUploading, setIsUploading] = useState(false);
     const [videoTitle, setVideoTitle] = useState<string>("");
+    const [presentationTopic, setPresentationTopic] = useState<string>("");
+    const [selectedLanguage, setSelectedLanguage] = useState<string>("");
     const [isDragOver, setIsDragOver] = useState(false);
     const fileInputRef = useRef<HTMLInputElement | null>(null);
     const router = useRouter();
@@ -77,6 +79,17 @@ const Uploading = () => {
             return;
         }
 
+        // Validate required fields
+        if (!presentationTopic.trim()) {
+            setUploadStatus("Please enter a presentation topic.");
+            return;
+        }
+
+        if (!selectedLanguage) {
+            setUploadStatus("Please select a language.");
+            return;
+        }
+
         // Check if user is authenticated
         const accessToken = localStorage.getItem("access_token");
         if (!accessToken) {
@@ -107,6 +120,8 @@ const Uploading = () => {
         if (videoTitle.trim()) {
             formData.append("title", videoTitle.trim());
         }
+        formData.append("topic", presentationTopic.trim());
+        formData.append("language", selectedLanguage);
 
         try {
             setIsUploading(true);
@@ -236,7 +251,7 @@ const Uploading = () => {
                 <button 
                     onClick={handleUpload} 
                     className={styles.UploadButton}
-                    disabled={isUploading || !selectedFile}
+                    disabled={isUploading || !selectedFile || !presentationTopic.trim() || !selectedLanguage}
                 >
                     {isUploading ? (
                         <>
@@ -250,6 +265,36 @@ const Uploading = () => {
                         </>
                     )}
                 </button>
+            </div>
+
+            {/* Presentation Details Form */}
+            <div className={styles.PresentationDetailsForm}>
+                <div className={styles.FormGroup}>
+                    <label className={styles.FormLabel}>
+                        Presentation Topic *
+                    </label>
+                    <input
+                        type="text"
+                        value={presentationTopic}
+                        onChange={(e) => setPresentationTopic(e.target.value)}
+                        placeholder="for content relevance analysis"
+                        className={styles.FormInput}
+                    />
+                </div>
+                <div className={styles.FormGroup}>
+                    <label className={styles.FormLabel}>
+                        Language *
+                    </label>
+                    <select
+                        value={selectedLanguage}
+                        onChange={(e) => setSelectedLanguage(e.target.value)}
+                        className={styles.FormSelect}
+                    >
+                        <option value="">Select Language</option>
+                        <option value="english">English</option>
+                        <option value="arabic">Arabic</option>
+                    </select>
+                </div>
             </div>
 
             {uploadStatus && (
