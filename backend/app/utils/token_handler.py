@@ -110,16 +110,14 @@ class TokenHandler:
         try:
             payload = TokenHandler.decode_token(token)
             email = payload.get("sub")
-            
             if email is None:
-                # print('here')
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     detail=ErrorMessage.INVALID_TOKEN.value,
                     headers={"WWW-Authenticate": "Bearer"},
                 )
                 
-            user = db.query(User).filter(User.email == email).first()
+            user = db.query(User).filter(User.email == email, User.deleted_at == None).first()
             if user is None:
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,

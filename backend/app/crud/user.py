@@ -7,10 +7,10 @@ from backend.app.utils.encryption_handler import EncryptionHandler
 
 
 def get_user_by_email(db: Session, email: str) -> User | None:
-    return db.query(User).filter(User.email == email).first()
+    return db.query(User).filter(User.email == email, User.deleted_at == None).first()
 
 def get_user_by_username(db: Session, username: str) -> User | None:
-    return db.query(User).filter(User.username == username).first()
+    return db.query(User).filter(User.username == username, User.deleted_at == None).first()
 
 def set_otp_and_otp_expiry_time(db: Session, user: User, otp: str, expiry: datetime) -> bool:
     try:

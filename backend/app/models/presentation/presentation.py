@@ -12,6 +12,7 @@ class Presentation(Base):
     url = Column(String, nullable=False)
     is_public = Column(Boolean, nullable=False, server_default=text('false'))  # Default value is false, indicating the presentation is private
     uploaded_at = Column(DateTime, server_default=func.now(), nullable=False)
+    deleted_at = Column(DateTime, nullable=True)
         
     # Establish the relationship with the User model
     user = relationship("User", back_populates="presentations")
