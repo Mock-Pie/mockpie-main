@@ -43,12 +43,19 @@ class LoginUser:
             
         Raises:
             HTTPException: If login fails
-        """
+        """        
         # Find user by email
-        user = db.query(User).filter(User.email == email).first()
+        user = db.query(User).filter(User.email == email, User.deleted_at == None).first()
         
-        # print(match_plain_and_hashed_passwords(user, password), password, user.password)
+        # Check if user exists before proceeding
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=ErrorMessage.USER_NOT_FOUND.value,
+                headers={"WWW-Authenticate": "Bearer"},
+            )
         
+        # Check email verification status
         if user.email_verified_at is None:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -56,8 +63,8 @@ class LoginUser:
                 headers={"WWW-Authenticate": "Bearer"}
             )
         
-        # Check if user exists and password matches
-        if not user or not match_plain_and_hashed_passwords(user, password):
+        # Check if password matches
+        if not match_plain_and_hashed_passwords(user, password):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail=ErrorMessage.INVALID_CREDENTIALS.value,
@@ -136,9 +143,8 @@ class LoginUser:
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     detail=ErrorMessage.INVALID_REFRESH_TOKEN.value
                 )
-            
-            # Get user
-            user = db.query(User).filter(User.email == email).first()
+              # Get user (excluding deleted users)
+            user = db.query(User).filter(User.email == email, User.deleted_at == None).first()
             if not user:
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,

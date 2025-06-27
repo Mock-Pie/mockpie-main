@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordBearer
 from datetime import datetime, timedelta, timezone
+from typing import Optional, Tuple
 import jwt
 
 from backend.database.database import *
@@ -26,6 +27,43 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # OAuth2 configuration
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
+
+def check_recently_deleted_user(user: Optional[User], error_message: str) -> Tuple[bool, Optional[HTTPException]]:
+    """
+    Check if a user was recently deleted (less than 30 days ago).
+    
+    Args:
+        user: The user object to check
+        error_message: The error message to raise if the user was recently deleted
+        
+    Returns:
+        Tuple containing:
+            - Boolean: True if the user exists and is not recently deleted, False otherwise
+            - Optional[HTTPException]: The exception to raise if the user was recently deleted
+    """
+    if not user:
+        return False, None
+    
+    if user.deleted_at is None:
+        # User exists and is not deleted
+        return True, None
+        
+    # User exists but is deleted - check if deletion was recent
+    deleted_at = user.deleted_at
+    if deleted_at.tzinfo is None:
+        deleted_at = deleted_at.replace(tzinfo=timezone.utc)
+    
+    thirty_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
+    
+    if deleted_at > thirty_days_ago:
+        # User was deleted within the last 30 days
+        return False, HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=error_message
+        )
+    
+    # User was deleted more than 30 days ago
+    return False, None
 
 class RegisterUser():
     @staticmethod
@@ -60,17 +98,15 @@ class RegisterUser():
             dict: Authentication tokens and user information
             
         Raises:
-            HTTPException: If registration fails
-        """
-        if password != password_confirmation:
-            raise HTTPException(
-                status_code=400, 
-                detail=ErrorMessage.PASSWORD_MISMATCH.value
-            )
-        
+            HTTPException: If registration fails        """
         # Check if user with this email already exists
         db_user = db.query(User).filter(User.email == email).first()
-        if db_user:
+        is_active_user, exception = check_recently_deleted_user(
+            db_user, ErrorMessage.DELETED_USER_EXISTS_WITH_THIS_EMAIL.value
+        )
+        if exception:
+            raise exception
+        if is_active_user:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=ErrorMessage.EMAIL_TAKEN.value
@@ -78,7 +114,12 @@ class RegisterUser():
         
         # Check if username is taken
         db_user = db.query(User).filter(User.username == username).first()
-        if db_user:
+        is_active_user, exception = check_recently_deleted_user(
+            db_user, ErrorMessage.DELETED_USER_EXISTS_WITH_THIS_USERNAME.value
+        )
+        if exception:
+            raise exception
+        if is_active_user:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=ErrorMessage.USERNAME_TAKEN.value
@@ -86,11 +127,23 @@ class RegisterUser():
         
         # Check if phone number is taken
         db_user = db.query(User).filter(User.phone_number == phone_number).first()
-        if db_user:
+        is_active_user, exception = check_recently_deleted_user(
+            db_user, ErrorMessage.DELETED_USER_EXISTS_WITH_THIS_PHONE.value
+        )
+        if exception:
+            raise exception
+        if is_active_user:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=ErrorMessage.PHONE_TAKEN.value
             )
+            
+        if password != password_confirmation:
+            raise HTTPException(
+                status_code=400, 
+                detail=ErrorMessage.PASSWORD_MISMATCH.value
+            )
+            
         # Create new user
         new_user = User(
             first_name=first_name,
