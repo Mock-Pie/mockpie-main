@@ -9,15 +9,17 @@
 /* Main content area */
 .mainContent {
     flex: 1;
+    padding: 40px;
     display: flex;
     flex-direction: column;
     overflow-y: auto;
+    min-height: 100vh;
 }
 
 /* Header styles - same as UploadRecordVideos */
 .header {
     text-align: center;
-    margin-top: 20px;
+    margin-bottom: 60px;
 }
 
 .title {
@@ -40,14 +42,13 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    min-height: 100vh;
     width: 100%;
     color: var(--white);
     margin: 0;
-    padding: 40px 20px;
+    padding: 0;
     position: relative;
     overflow-y: auto;
+    flex: 1;
 }
 
 .UploadContainer::before {
@@ -213,22 +214,23 @@
 .ChooseFileButton, .UploadButton {
     font-size: 16px;
     font-weight: 600;
-    background: linear-gradient(135deg, var(--naples-yellow) 0%, #e6b800 100%);
-    color: var(--white);
+    background: var(--naples-yellow);
+    color: var(--raisin-black);
     border: none;
-    border-radius: 12px;
+    border-radius: 25px;
     cursor: pointer;
     padding: 14px 28px;
     min-width: 160px;
     text-align: center;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
+    font-family: var(--font-poppins), 'Poppins', sans-serif;
 }
 
 .ChooseFileButton:hover, .UploadButton:hover {
-    transform: translateY(-2px);
-    background: linear-gradient(135deg, #e6b800 0%, var(--naples-yellow) 100%);
+    background: var(--dark-yellow);
+    transform: scale(1.05);
 }
 
 .ChooseFileButton:active, .UploadButton:active {

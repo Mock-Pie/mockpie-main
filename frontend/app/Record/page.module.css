@@ -244,28 +244,29 @@
     font-size: 16px;
     font-weight: 600;
     border: none;
-    border-radius: 12px;
+    border-radius: 25px;
     cursor: pointer;
-    padding: 14px 28px;
+    padding: 12px 30px;
     min-width: 160px;
     text-align: center;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
+    font-family: var(--font-poppins), 'Poppins', sans-serif;
 }
 
 .recordButton {
     background: var(--naples-yellow);
-    color: var(--white);
+    color: var(--raisin-black);
 }
 
 .recordButton:hover {
-    transform: translateY(-2px);
     background: var(--dark-yellow);
+    transform: scale(1.05);
 }
 
 .recordButton.recording {
@@ -275,42 +276,42 @@
 
 .stopButton {
     background: var(--naples-yellow);
-    color: var(--white);
+    color: var(--raisin-black);
 }
 
 .stopButton:hover {
-    transform: translateY(-2px);
     background: var(--dark-yellow);
+    transform: scale(1.05);
 }
 
 .downloadButton {
     background: var(--naples-yellow);
-    color: var(--white);
+    color: var(--raisin-black);
 }
 
 .downloadButton:hover {
-    transform: translateY(-2px);
     background: var(--dark-yellow);
+    transform: scale(1.05);
 }
 
 .uploadButton {
     background: var(--naples-yellow);
-    color: var(--white);
+    color: var(--raisin-black);
 }
 
 .uploadButton:hover {
-    transform: translateY(-2px);
     background: var(--dark-yellow);
+    transform: scale(1.05);
 }
 
 .newRecordingButton {
     background: var(--naples-yellow);
-    color: var(--white);
+    color: var(--raisin-black);
 }
 
 .newRecordingButton:hover {
-    transform: translateY(-2px);
     background: var(--dark-yellow);
+    transform: scale(1.05);
 }
 
 .actionButton:active {

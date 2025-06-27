@@ -2,6 +2,7 @@
 import React, { useState, useRef, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { FaExclamationTriangle } from "react-icons/fa";
+import Image from "next/image";
 import styles from "../../Login/page.module.css";
 
 const PasswordResetOTPForm = () => {
@@ -135,7 +136,7 @@ const PasswordResetOTPForm = () => {
   return (
     <div className={styles['form-card']}>
       <div className={styles.header}>
-        <div className={styles.logo}>M</div>
+        <Image src="/Images/Logoo.png" alt="MockPie Logo" width={60} height={60} className={styles.logo} priority />
         <h1 className={styles['welcome-text']}>Reset Password</h1>
         <p className={styles.subtitle}>We sent a six digit code to {email} to reset your password</p>
       </div>
