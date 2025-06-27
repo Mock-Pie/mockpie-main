@@ -1,6 +1,18 @@
 "use client";
 import React, { useState } from 'react';
-import { Filter, Download, Trash2, Play, Search, Calendar, User, FileText, Eye, ChevronDown, X } from 'lucide-react';
+import { 
+  IoFilterOutline, 
+  IoDownloadOutline, 
+  IoTrashOutline, 
+  IoPlayOutline, 
+  IoSearchOutline, 
+  IoCalendarOutline, 
+  IoPersonOutline, 
+  IoDocumentTextOutline, 
+  IoEyeOutline, 
+  IoChevronDownOutline, 
+  IoCloseOutline 
+} from 'react-icons/io5';
 import { useRouter } from 'next/navigation';
 import styles from "./page.module.css";
 import styles1 from "../UploadRecordVideos/page.module.css";
@@ -154,7 +166,7 @@ const SubmittedTrials = () => {
             <div className={styles.searchFiltersContent}>
               <div className={styles.searchContainer}>
                 <div className={styles.searchInputWrapper}>
-                  <Search className={styles.searchIcon} size={20} />
+                  <IoSearchOutline className={styles.searchIcon} size={20} />
                   <input
                     type="text"
                     placeholder="Search trials by name, ID, or feedback..."
@@ -178,12 +190,12 @@ const SubmittedTrials = () => {
                     <option value="week">Last Week</option>
                     <option value="month">Last Month</option>
                   </select>
-                  <ChevronDown className={styles.filterSelectIcon} size={16} />
+                  <IoChevronDownOutline className={styles.filterSelectIcon} size={16} />
                 </div>
 
                 {/* Submit New Trial Button */}
                 <button className={styles.submitNewButton} onClick={handleSubmitNewTrial}>
-                  <FileText size={18} />
+                  <IoDocumentTextOutline size={18} />
                   Submit New Trial
                 </button>
 
@@ -193,7 +205,7 @@ const SubmittedTrials = () => {
                     onClick={handleBulkDelete}
                     className={styles.bulkDeleteButton}
                   >
-                    <Trash2 size={16} />
+                    <IoTrashOutline size={16} />
                     Delete ({selectedTrials.length})
                   </button>
                 )}
@@ -243,10 +255,10 @@ const SubmittedTrials = () => {
                         <div className={styles.trialInfo}>
                           <div className={styles.videoThumbnail}>
                             <div className={styles.videoPlaceholder}>
-                              <Play className={styles.videoIcon} size={16} />
+                              <IoPlayOutline className={styles.videoIcon} size={16} />
                             </div>
                             <div className={styles.playIndicator}>
-                              <Play className={styles.playIcon} size={8} />
+                              <IoPlayOutline className={styles.playIcon} size={8} />
                             </div>
                           </div>
                           <div className={styles.trialDetails}>
@@ -270,7 +282,7 @@ const SubmittedTrials = () => {
                             onClick={() => toggleFeedback(trial.id)}
                             className={styles.viewMoreButton}
                           >
-                            <Eye size={12} />
+                            <IoEyeOutline size={12} />
                             {expandedFeedback === trial.id ? 'Show less' : 'View more'}
                           </button>
                         </div>
@@ -281,13 +293,13 @@ const SubmittedTrials = () => {
                             className={styles.actionButton}
                             title="Download"
                           >
-                            <Download size={16} />
+                            <IoDownloadOutline size={16} />
                           </button>
                           <button 
                             className={styles.actionButton}
                             title="Delete"
                           >
-                            <Trash2 size={16} />
+                            <IoTrashOutline size={16} />
                           </button>
                         </div>
                       </td>
@@ -299,7 +311,7 @@ const SubmittedTrials = () => {
 
             {filteredTrials.length === 0 && (
               <div className={styles.emptyState}>
-                <FileText className={styles.emptyStateIcon} />
+                <IoDocumentTextOutline className={styles.emptyStateIcon} />
                 <h3 className={styles.emptyStateTitle}>No trials found</h3>
                 <p className={styles.emptyStateText}>
                   Try adjusting your search or filter criteria.
