@@ -399,6 +399,71 @@
 }
 
 /* Media Queries */
+/* Presentation Details Form */
+.presentationForm {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 20px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.formRow {
+    display: flex;
+    gap: 16px;
+}
+
+.formGroup {
+    margin-bottom: 16px;
+    flex: 1;
+}
+
+.formGroup:last-child {
+    margin-bottom: 0;
+}
+
+.formRow .formGroup {
+    margin-bottom: 0;
+}
+
+.formLabel {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--white);
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.formInput, .formSelect {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--white);
+    font-size: 14px;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    font-family: var(--font-poppins), 'Poppins', sans-serif;
+}
+
+.formInput:focus, .formSelect:focus {
+    outline: none;
+    border-color: var(--naples-yellow);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.formInput::placeholder {
+    color: var(--light-grey);
+}
+
+.formSelect option {
+    background: var(--raisin-black);
+    color: var(--white);
+    padding: 8px;
+}
+
 @media (max-width: 768px) {
     .container {
         padding: 20px 10px;
@@ -521,5 +586,17 @@
 
     .container {
         padding: 20px 10px;
+    }
+}
+
+@media (max-width: 576px) {
+    .formRow {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .presentationForm {
+        padding: 12px;
+        margin-bottom: 16px;
     }
 }

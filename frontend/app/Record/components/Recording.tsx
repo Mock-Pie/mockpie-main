@@ -30,6 +30,8 @@ const Recording = () => {
     const [cameraReady, setCameraReady] = useState(false);
     const [isClient, setIsClient] = useState(false);
     const [videoFormat, setVideoFormat] = useState<{mimeType: string, extension: string}>({mimeType: 'video/mp4', extension: 'mp4'});
+    const [presentationTopic, setPresentationTopic] = useState<string>("");
+    const [selectedLanguage, setSelectedLanguage] = useState<string>("");
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const videoStreamRef = useRef<MediaStream | null>(null);
     const chunksRef = useRef<Blob[]>([]);
@@ -241,6 +243,17 @@ const Recording = () => {
             return;
         }
 
+        // Validate required fields
+        if (!presentationTopic.trim()) {
+            setUploadStatus("Please enter a presentation topic.");
+            return;
+        }
+
+        if (!selectedLanguage) {
+            setUploadStatus("Please select a language.");
+            return;
+        }
+
         const accessToken = localStorage.getItem("access_token");
         if (!accessToken) {
             setUploadStatus("Please log in to upload videos.");
@@ -262,6 +275,8 @@ const Recording = () => {
             const formData = new FormData();
             formData.append("file", file);
             formData.append("title", `Recording ${new Date().toLocaleString()}`);
+            formData.append("topic", presentationTopic.trim());
+            formData.append("language", selectedLanguage);
 
             setUploadStatus("Uploading video...");
 
@@ -369,8 +384,9 @@ const Recording = () => {
     return (
         <div className={styles.container} onSubmit={(e) => e.preventDefault()}>
             <div className={styles.studioContainer}>
-                {/* Video Preview Section */}
-                <div className={`${styles.preview} ${isRecording ? styles.recording : ''}`}>
+                <div className={styles.mainContent}>
+                    {/* Video Preview Section */}
+                    <div className={`${styles.preview} ${isRecording ? styles.recording : ''}`}>
                     <div className={styles.videoWrapper}>
                         {/* Live Camera Preview */}
                         {showPreview && isClient && (
@@ -485,9 +501,41 @@ const Recording = () => {
                         </div>
                     </div>
                 </div>
+                </div>
 
                 {/* Control Panel */}
                 <div className={styles.controlPanel}>
+                    {/* Presentation Details Form */}
+                    <div className={styles.presentationForm}>
+                        <div className={styles.formRow}>
+                            <div className={styles.formGroup}>
+                                <label className={styles.formLabel}>
+                                    Presentation Topic *
+                                </label>
+                                <input
+                                    type="text"
+                                    value={presentationTopic}
+                                    onChange={(e) => setPresentationTopic(e.target.value)}
+                                    placeholder="for content relevance analysis"
+                                    className={styles.formInput}
+                                />
+                            </div>
+                            <div className={styles.formGroup}>
+                                <label className={styles.formLabel}>
+                                    Language *
+                                </label>
+                                <select
+                                    value={selectedLanguage}
+                                    onChange={(e) => setSelectedLanguage(e.target.value)}
+                                    className={styles.formSelect}
+                                >
+                                    <option value="">Select Language</option>
+                                    <option value="english">English</option>
+                                    <option value="arabic">Arabic</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
                     {/* Preview Toggle Section */}
                     {videoURL && (
                         <div className={styles.toggleSection}>
@@ -559,7 +607,7 @@ const Recording = () => {
                                 </button>
                                 <button
                                     onClick={uploadVideo}
-                                    disabled={isUploading}
+                                    disabled={isUploading || !presentationTopic.trim() || !selectedLanguage}
                                     className={`${styles.actionButton} ${styles.uploadButton}`}
                                 >
                                     {isUploading ? (
