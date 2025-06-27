@@ -269,18 +269,22 @@ const Uploading = () => {
 
             {/* Presentation Details Form */}
             <div className={styles.PresentationDetailsForm}>
-                <div className={styles.FormGroup}>
-                    <label className={styles.FormLabel}>
-                        Presentation Topic *
-                    </label>
-                    <input
-                        type="text"
-                        value={presentationTopic}
-                        onChange={(e) => setPresentationTopic(e.target.value)}
-                        placeholder="for content relevance analysis"
-                        className={styles.FormInput}
-                    />
-                </div>
+                                    <div className={styles.FormGroup}>
+                        <label className={styles.FormLabel}>
+                            Presentation Topic *
+                        </label>
+                        <input
+                            type="text"
+                            value={presentationTopic}
+                            onChange={(e) => setPresentationTopic(e.target.value)}
+                            placeholder="for content relevance analysis"
+                            className={styles.FormInput}
+                            maxLength={255}
+                        />
+                        <div className={styles.CharacterCount}>
+                            {presentationTopic.length}/255 characters
+                        </div>
+                    </div>
                 <div className={styles.FormGroup}>
                     <label className={styles.FormLabel}>
                         Language *

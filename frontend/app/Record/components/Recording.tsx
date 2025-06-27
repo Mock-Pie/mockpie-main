@@ -518,7 +518,11 @@ const Recording = () => {
                                     onChange={(e) => setPresentationTopic(e.target.value)}
                                     placeholder="for content relevance analysis"
                                     className={styles.formInput}
+                                    maxLength={255}
                                 />
+                                <div className={styles.characterCount}>
+                                    {presentationTopic.length}/255 characters
+                                </div>
                             </div>
                             <div className={styles.formGroup}>
                                 <label className={styles.formLabel}>
