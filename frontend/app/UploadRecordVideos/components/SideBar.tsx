@@ -70,9 +70,14 @@ const SideBar = () => {
         }
     };
 
+    const handleLogoClick = () => {
+        // Redirect to dashboard and refresh the page
+        window.location.href = "/Dashboard";
+    };
+
     return (
         <div className={styles.sidebar}>
-            <div className={styles.logoContainer}>
+            <div className={styles.logoContainer} onClick={handleLogoClick}>
                 <Image 
                     src="/Images/Logoo.png" 
                     alt="Logo" 

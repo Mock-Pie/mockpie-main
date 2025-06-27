@@ -64,27 +64,6 @@ const ImprovementChart = () => {
           <div style={{ position: 'absolute', bottom: '10px', right: '20px', fontSize: '12px', color: 'var(--light-grey)' }}>
             Peak Month
           </div>
-          
-          <div className={styles.avatarContainer}>
-            {/* Enhanced avatar with better styling */}
-            <svg width="80" height="120" viewBox="0 0 80 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-              {/* Head */}
-              <ellipse cx="40" cy="30" rx="20" ry="25" fill="#FFD7B5" stroke="#E6C7A3" strokeWidth="2"/>
-              {/* Hair */}
-              <ellipse cx="40" cy="20" rx="22" ry="18" fill="#8B4513"/>
-              {/* Body */}
-              <rect x="20" y="55" width="40" height="60" rx="5" fill="#6C7A89" stroke="#5A6774" strokeWidth="2"/>
-              {/* Shirt */}
-              <rect x="25" y="55" width="30" height="50" rx="3" fill="#95A5A6"/>
-              {/* Arms */}
-              <ellipse cx="15" cy="70" rx="8" ry="25" fill="#FFD7B5"/>
-              <ellipse cx="65" cy="70" rx="8" ry="25" fill="#FFD7B5"/>
-              {/* Face details */}
-              <circle cx="33" cy="28" r="2" fill="#000"/>
-              <circle cx="47" cy="28" r="2" fill="#000"/>
-              <path d="M35,35 Q40,40 45,35" stroke="#000" strokeWidth="1.5" fill="none"/>
-            </svg>
-          </div>
         </div>
       </div>
     </div>
