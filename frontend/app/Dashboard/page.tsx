@@ -75,34 +75,34 @@ const Dashboard = () => {
       <div className={uploadStyles.mainContent}>
         {/* Header with search, profile, title and subtitle - matching UploadRecordVideos position */}
         <div className={uploadStyles.header}>
-          {/* Enhanced Header with search and profile */}
-          <div className={styles.enhancedHeader}>
-            <div className={styles.searchSection}>
-              <div className={styles.searchContainer}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={styles.searchIcon}>
-                  <path d="M21 21L16.514 16.506L21 21ZM19 10.5C19 15.194 15.194 19 10.5 19C5.806 19 2 15.194 2 10.5C2 5.806 5.806 2 10.5 2C15.194 2 19 5.806 19 10.5Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-                <input 
-                  type="text" 
-                  placeholder="Search presentations, analytics..." 
-                  className={styles.searchInput}
-                />
-              </div>
-            </div>
-            
-            <div className={styles.userSection}>
-              <div className={styles.userInfo}>
-                <span className={styles.userName}>{loading ? 'Loading...' : getDisplayName()}</span>
-                <span className={styles.userEmail}>{loading ? 'Loading...' : (user?.email || 'No email')}</span>
-              </div>
-              <div className={styles.userAvatar} onClick={handleProfileClick}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <circle cx="12" cy="7" r="4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </div>
+        {/* Enhanced Header with search and profile */}
+        <div className={styles.enhancedHeader}>
+          <div className={styles.searchSection}>
+            <div className={styles.searchContainer}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={styles.searchIcon}>
+                <path d="M21 21L16.514 16.506L21 21ZM19 10.5C19 15.194 15.194 19 10.5 19C5.806 19 2 15.194 2 10.5C2 5.806 5.806 2 10.5 2C15.194 2 19 5.806 19 10.5Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              <input 
+                type="text" 
+                placeholder="Search presentations, analytics..." 
+                className={styles.searchInput}
+              />
             </div>
           </div>
+          
+          <div className={styles.userSection}>
+            <div className={styles.userInfo}>
+                <span className={styles.userName}>{loading ? 'Loading...' : getDisplayName()}</span>
+                <span className={styles.userEmail}>{loading ? 'Loading...' : (user?.email || 'No email')}</span>
+            </div>
+              <div className={styles.userAvatar} onClick={handleProfileClick}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <circle cx="12" cy="7" r="4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+          </div>
+        </div>
 
           {/* Title and subtitle */}
           <h1 className={uploadStyles.title}>Dashboard</h1>
