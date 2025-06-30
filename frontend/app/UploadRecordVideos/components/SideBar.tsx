@@ -19,6 +19,7 @@ const SideBar = () => {
         { href: "/Dashboard", icon: AiOutlineHome, label: "Dashboard" },
         { href: "/UploadRecordVideos", icon: AiOutlineAppstore, label: "Upload or Record" },
         { href: "/SubmittedTrials", icon: FiFileText, label: "Submitted Trials" },
+        { href: "/Feedback", icon: IoSettingsOutline, label: "Feedback" },
         { href: "/Calendar", icon: VscCalendar, label: "Calendar" },
         { href: "/ProfileInfo", icon: FiUser, label: "Profile" },
     ];
