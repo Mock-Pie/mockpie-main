@@ -46,4 +46,5 @@ class User(Base):
     
     # Relationships
     presentations = relationship("Presentation", back_populates="user")
+    upcoming_presentations = relationship("UpcomingPresentation", back_populates="user")
 
