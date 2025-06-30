@@ -140,9 +140,9 @@ const Uploading = () => {
                 setUploadStatus("Upload successful!");
                 console.log("Upload response:", data);
                 
-                // Redirect to dashboard after successful upload
+                // Redirect to feedback after successful upload
                 setTimeout(() => {
-                    router.push("/Dashboard");
+                    router.push("/Feedback");
                 }, 2000);
             } else {
                 const errorData = await response.json();

@@ -176,15 +176,75 @@ const SubmittedTrials = () => {
     }
   };
 
-  const handleDownloadPresentation = (presentation: Presentation) => {
-    // Create a download link for the video file
-    const downloadUrl = `http://localhost:8081${presentation.url}`;
-    const link = document.createElement('a');
-    link.href = downloadUrl;
-    link.download = presentation.title;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleDownloadPresentation = async (presentation: Presentation) => {
+    try {
+      // Get authentication token
+      const accessToken = localStorage.getItem('access_token');
+      if (!accessToken) {
+        setError('Please log in to download videos.');
+        setTimeout(() => router.push('/Login'), 2000);
+        return;
+      }
+
+      // Show loading state
+      setError(null);
+      setRefreshing(true);
+
+      // Fetch the video file with authentication
+      const downloadUrl = `http://localhost:8081${presentation.url}`;
+      const response = await fetch(downloadUrl, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem('access_token');
+          setError('Session expired. Please log in again.');
+          setTimeout(() => router.push('/Login'), 2000);
+          return;
+        } else if (response.status === 404) {
+          setError('Video file not found. It may have been deleted.');
+          return;
+        } else {
+          setError(`Download failed: ${response.statusText}`);
+          return;
+        }
+      }
+
+      // Convert response to blob
+      const blob = await response.blob();
+      
+      // Create object URL for the blob
+      const objectUrl = URL.createObjectURL(blob);
+      
+      // Create and trigger download
+      const link = document.createElement('a');
+      link.href = objectUrl;
+      
+      // Extract file extension from URL or use mp4 as default
+      const urlParts = presentation.url.split('.');
+      const extension = urlParts.length > 1 ? urlParts[urlParts.length - 1] : 'mp4';
+      
+      // Set download filename
+      link.download = `${presentation.title.replace(/[^a-z0-9]/gi, '_')}.${extension}`;
+      
+      // Append to DOM, click, and remove
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Clean up object URL
+      URL.revokeObjectURL(objectUrl);
+      
+    } catch (error) {
+      console.error('Error downloading presentation:', error);
+      setError('Network error. Please check your connection and try again.');
+    } finally {
+      setRefreshing(false);
+    }
   };
 
   const getFeedbackText = (presentation: Presentation): string => {

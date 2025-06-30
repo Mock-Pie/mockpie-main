@@ -400,7 +400,7 @@ const Calendar = () => {
 
     return (
         <div className={styles.container}>
-            <SideBar />
+            <SideBar />  
             <div className={calendarStyles.mainContent}>
                 <Header />
                 

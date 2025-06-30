@@ -290,11 +290,11 @@ const Recording = () => {
 
             if (uploadResponse.ok) {
                 const data = await uploadResponse.json();
-                setUploadStatus("Upload successful! Redirecting to dashboard...");
+                setUploadStatus("Upload successful!");
                 console.log("Upload response:", data);
                 
                 setTimeout(() => {
-                    router.push("/Dashboard");
+                    router.push("/Feedback");
                 }, 2000);
             } else {
                 const errorData = await uploadResponse.json();
@@ -367,7 +367,7 @@ const Recording = () => {
 
     const getUploadStatusClass = () => {
         if (!uploadStatus) return "";
-        if (uploadStatus.includes("successful") || uploadStatus.includes("Redirecting")) return styles.uploadSuccess;
+        if (uploadStatus.includes("successful")) return styles.uploadSuccess;
         if (uploadStatus.includes("failed") || uploadStatus.includes("error") || uploadStatus.includes("expired")) return styles.uploadError;
         if (uploadStatus.includes("Uploading") || uploadStatus.includes("Preparing")) return styles.uploadUploading;
         return styles.uploadError;
@@ -375,7 +375,7 @@ const Recording = () => {
 
     const getStatusIcon = () => {
         if (!uploadStatus) return null;
-        if (uploadStatus.includes("successful") || uploadStatus.includes("Redirecting")) return <FiCheck />;
+        if (uploadStatus.includes("successful")) return <FiCheck />;
         if (uploadStatus.includes("failed") || uploadStatus.includes("error") || uploadStatus.includes("expired")) return <FiX />;
         if (uploadStatus.includes("Uploading") || uploadStatus.includes("Preparing")) return <div className={styles.loadingSpinner}></div>;
         return <FiX />;
@@ -564,8 +564,9 @@ const Recording = () => {
 
                     {/* Upload Status */}
                     {uploadStatus && (
-                        <div className={`${styles.uploadStatus} ${getUploadStatusClass()}`}>
-                            {getStatusIcon()}
+                        <div className={`${styles.UploadStatus} ${getUploadStatusClass()}`}>
+                            {uploadStatus.includes("successful") && <FiCheck style={{ marginRight: '8px' }} />}
+                            {(uploadStatus.includes("failed") || uploadStatus.includes("error") || uploadStatus.includes("expired")) && <FiX style={{ marginRight: '8px' }} />}
                             {uploadStatus}
                         </div>
                     )}

@@ -330,40 +330,33 @@
     box-shadow: none;
 }
 
-.uploadStatus {
-    margin: 16px 0;
-    padding: 12px 20px;
+.UploadStatus {
+    margin-top: 15px;
+    padding: 10px 16px;
     border-radius: 8px;
     font-size: 14px;
     font-weight: 500;
     text-align: center;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    background: var(--naples-yellow);
-    color: var(--white);
-    border-color: var(--naples-yellow);
+    min-width: 200px;
+    transition: all 0.3s ease;
 }
 
 .uploadSuccess {
-    background: var(--naples-yellow);
-    color: var(--white);
-    border-color: var(--naples-yellow);
+    background: rgba(76, 175, 80, 0.1);
+    color: #4caf50;
+    border: 1px solid rgba(76, 175, 80, 0.3);
 }
 
 .uploadError {
-    background: var(--naples-yellow);
-    color: var(--white);
-    border-color: var(--naples-yellow);
+    background: rgba(244, 67, 54, 0.1);
+    color: #f44336;
+    border: 1px solid rgba(244, 67, 54, 0.3);
 }
 
 .uploadUploading {
-    background: var(--naples-yellow);
-    color: var(--white);
-    border-color: var(--naples-yellow);
+    background: rgba(255, 206, 84, 0.1);
+    color: var(--naples-yellow);
+    border: 1px solid rgba(255, 206, 84, 0.3);
 }
 
 .loadingSpinner {
