@@ -765,7 +765,7 @@
     font-size: 0.95rem;
 }
 
-.formInput, .formTextarea {
+.formInput, .formTextarea, .formSelect {
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 10px;
@@ -776,7 +776,7 @@
     font-family: inherit;
 }
 
-.formInput:focus, .formTextarea:focus {
+.formInput:focus, .formTextarea:focus, .formSelect:focus {
     outline: none;
     border-color: var(--naples-yellow);
     background: rgba(255, 255, 255, 0.08);
@@ -784,6 +784,12 @@
 
 .formInput::placeholder, .formTextarea::placeholder {
     color: var(--light-grey);
+}
+
+.formSelect option {
+    background: var(--raisin-black);
+    color: var(--white);
+    padding: 8px;
 }
 
 .formTextarea {

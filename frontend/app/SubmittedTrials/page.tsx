@@ -32,6 +32,9 @@ const SubmittedTrials = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteType, setDeleteType] = useState<'single' | 'bulk'>('single');
+  const [itemToDelete, setItemToDelete] = useState<number | null>(null);
 
   // Fetch presentations on component mount
   useEffect(() => {
@@ -132,9 +135,11 @@ const SubmittedTrials = () => {
   const handleBulkDelete = async () => {
     if (selectedPresentations.length === 0) return;
     
-    if (!confirm(`Are you sure you want to delete ${selectedPresentations.length} presentation(s)?`)) {
-      return;
-    }
+    setDeleteType('bulk');
+    setShowDeleteModal(true);
+  };
+
+  const confirmBulkDelete = async () => {
 
     try {
       const deletePromises = selectedPresentations.map(id => 
@@ -150,6 +155,7 @@ const SubmittedTrials = () => {
         // Refresh the list after successful deletion
         await fetchPresentations();
         setSelectedPresentations([]);
+        setShowDeleteModal(false);
       }
     } catch (err) {
       setError('Error deleting presentations');
@@ -158,15 +164,21 @@ const SubmittedTrials = () => {
   };
 
   const handleDeletePresentation = async (id: number) => {
-    if (!confirm('Are you sure you want to delete this presentation?')) {
-      return;
-    }
+    setItemToDelete(id);
+    setDeleteType('single');
+    setShowDeleteModal(true);
+  };
+
+  const confirmSingleDelete = async () => {
+    if (!itemToDelete) return;
 
     try {
-      const response = await PresentationService.deletePresentation(id);
+      const response = await PresentationService.deletePresentation(itemToDelete);
       
       if (response.success) {
         await fetchPresentations();
+        setShowDeleteModal(false);
+        setItemToDelete(null);
       } else {
         setError(response.error || 'Failed to delete presentation');
       }
@@ -174,6 +186,19 @@ const SubmittedTrials = () => {
       setError('Error deleting presentation');
       console.error('Error deleting presentation:', err);
     }
+  };
+
+  const handleConfirmDelete = () => {
+    if (deleteType === 'bulk') {
+      confirmBulkDelete();
+    } else {
+      confirmSingleDelete();
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeleteModal(false);
+    setItemToDelete(null);
   };
 
   const handleDownloadPresentation = async (presentation: Presentation) => {
@@ -501,6 +526,39 @@ const SubmittedTrials = () => {
             </div>
           </div>
         </div>
+
+        {/* Delete Confirmation Modal */}
+        {showDeleteModal && (
+          <div className={styles.modalOverlay}>
+            <div className={styles.deleteModal}>
+              <div className={styles.modalContent}>
+                <h3 className={styles.modalTitle}>
+                  Confirm Delete
+                </h3>
+                <p className={styles.modalMessage}>
+                  {deleteType === 'bulk' 
+                    ? `Are you sure you want to delete ${selectedPresentations.length} presentation(s)? This action cannot be undone.`
+                    : 'Are you sure you want to delete this presentation? This action cannot be undone.'
+                  }
+                </p>
+                <div className={styles.modalActions}>
+                  <button 
+                    className={styles.cancelButton} 
+                    onClick={handleCancelDelete}
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    className={styles.deleteButton} 
+                    onClick={handleConfirmDelete}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

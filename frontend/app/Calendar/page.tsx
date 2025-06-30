@@ -363,6 +363,16 @@ const Calendar = () => {
         }
     };
 
+    const handlePresentationClick = (presentation: Presentation) => {
+        if (presentation.type === 'past') {
+            // Redirect to submitted trials for past presentations
+            router.push('/SubmittedTrials');
+        } else {
+            // Open modal for upcoming presentations
+            openModal(undefined, presentation);
+        }
+    };
+
     const clearFilters = () => {
         setFilters({
             type: 'all',
@@ -421,7 +431,7 @@ const Calendar = () => {
                             <FiSearch className={calendarStyles.searchIcon} />
                             <input
                                 type="text"
-                                placeholder="Search presentations by topic, description, language..."
+                                placeholder="Search presentations by topic, language..."
                                 className={calendarStyles.searchInput}
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -595,7 +605,7 @@ const Calendar = () => {
                                                 title={presentation.topic}
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    openModal(undefined, presentation);
+                                                    handlePresentationClick(presentation);
                                                 }}
                                             >
                                                 {presentation.topic.substring(0, 15)}...
@@ -636,7 +646,14 @@ const Calendar = () => {
                                 </div>
                             ) : (
                                 getPresentationsForDate(selectedDate).map(presentation => (
-                                    <div key={presentation.id} className={`${calendarStyles.presentationCard} ${calendarStyles[presentation.type]}`}>
+                                    <div 
+                                        key={presentation.id} 
+                                        className={`${calendarStyles.presentationCard} ${calendarStyles[presentation.type]} ${
+                                            presentation.type === 'past' ? calendarStyles.clickableCard : ''
+                                        }`}
+                                        onClick={() => presentation.type === 'past' ? handlePresentationClick(presentation) : undefined}
+                                        style={presentation.type === 'past' ? { cursor: 'pointer' } : undefined}
+                                    >
                                         <div className={calendarStyles.cardHeader}>
                                             <h4 className={calendarStyles.cardTitle}>
                                                 {presentation.type === 'past' 
@@ -645,15 +662,23 @@ const Calendar = () => {
                                                 }
                                             </h4>
                                             <div className={calendarStyles.cardActions}>
-                                                <button
-                                                    className={calendarStyles.actionButton}
-                                                    onClick={() => openModal(undefined, presentation)}
-                                                >
-                                                    <FiEdit3 />
-                                                </button>
+                                                {presentation.type === 'upcoming' && (
+                                                    <button
+                                                        className={calendarStyles.actionButton}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            openModal(undefined, presentation);
+                                                        }}
+                                                    >
+                                                        <FiEdit3 />
+                                                    </button>
+                                                )}
                                                 <button
                                                     className={`${calendarStyles.actionButton} ${calendarStyles.deleteButton}`}
-                                                    onClick={() => deletePresentation(presentation.id)}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        deletePresentation(presentation.id);
+                                                    }}
                                                 >
                                                     <FiTrash2 />
                                                 </button>
@@ -694,7 +719,14 @@ const Calendar = () => {
                                 </div>
                             ) : (
                                 filteredPresentations.map(presentation => (
-                                    <div key={presentation.id} className={`${calendarStyles.presentationCard} ${calendarStyles[presentation.type]}`}>
+                                    <div 
+                                        key={presentation.id} 
+                                        className={`${calendarStyles.presentationCard} ${calendarStyles[presentation.type]} ${
+                                            presentation.type === 'past' ? calendarStyles.clickableCard : ''
+                                        }`}
+                                        onClick={() => presentation.type === 'past' ? handlePresentationClick(presentation) : undefined}
+                                        style={presentation.type === 'past' ? { cursor: 'pointer' } : undefined}
+                                    >
                                         <div className={calendarStyles.cardHeader}>
                                             <h4 className={calendarStyles.cardTitle}>
                                                 {presentation.type === 'past' 
@@ -703,15 +735,23 @@ const Calendar = () => {
                                                 }
                                             </h4>
                                             <div className={calendarStyles.cardActions}>
-                                                <button
-                                                    className={calendarStyles.actionButton}
-                                                    onClick={() => openModal(undefined, presentation)}
-                                                >
-                                                    <FiEdit3 />
-                                                </button>
+                                                {presentation.type === 'upcoming' && (
+                                                    <button
+                                                        className={calendarStyles.actionButton}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            openModal(undefined, presentation);
+                                                        }}
+                                                    >
+                                                        <FiEdit3 />
+                                                    </button>
+                                                )}
                                                 <button
                                                     className={`${calendarStyles.actionButton} ${calendarStyles.deleteButton}`}
-                                                    onClick={() => deletePresentation(presentation.id)}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        deletePresentation(presentation.id);
+                                                    }}
                                                 >
                                                     <FiTrash2 />
                                                 </button>
@@ -788,13 +828,13 @@ const Calendar = () => {
                                 
                                 <div className={calendarStyles.formGroup}>
                                     <label className={calendarStyles.formLabel}>Language *</label>
-                                    <select
-                                        className={calendarStyles.formInput}
-                                        value={formData.language}
-                                        onChange={(e) => setFormData({...formData, language: e.target.value})}
-                                        required
-                                    >
-                                        <option value="">Select Language</option>
+                                                    <select
+                  className={calendarStyles.formSelect}
+                  value={formData.language}
+                  onChange={(e) => setFormData({...formData, language: e.target.value})}
+                  required
+                >
+                  <option value="">Select Language</option>
                                         <option value="english">English</option>
                                         <option value="arabic">Arabic</option>
                                     </select>

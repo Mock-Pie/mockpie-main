@@ -12,14 +12,32 @@ import StatsCard from "./components/StatsCard";
 import StatsSummary from "./components/StatsSummary";
 import PresentationTable from "./components/PresentationTable";
 import UserService, { User } from "../services/userService";
+import PresentationService from "../services/presentationService";
+
+interface UpcomingPresentation {
+  id: string;
+  topic: string;
+  date: string;
+  time: string;
+  description: string;
+  type: 'upcoming';
+  language?: string;
+}
 
 const Dashboard = () => {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [submittedTrialsCount, setSubmittedTrialsCount] = useState<number>(0);
+  const [presentationsLoading, setPresentationsLoading] = useState(true);
+  const [submittedTrialsData, setSubmittedTrialsData] = useState<any[]>([]);
+  const [upcomingPresentations, setUpcomingPresentations] = useState<UpcomingPresentation[]>([]);
+  const [upcomingLoading, setUpcomingLoading] = useState(true);
 
   useEffect(() => {
     fetchUserData();
+    fetchPresentationsData();
+    fetchUpcomingPresentations();
   }, []);
 
   const fetchUserData = async () => {
@@ -42,6 +60,95 @@ const Dashboard = () => {
     }
   };
 
+  const fetchPresentationsData = async () => {
+    try {
+      setPresentationsLoading(true);
+      const result = await PresentationService.getUserPresentations();
+      
+      if (result.success && result.data) {
+        const presentations = (result.data as any).videos || [];
+        setSubmittedTrialsCount(presentations.length);
+        setSubmittedTrialsData(presentations);
+      } else {
+        console.error('Failed to fetch presentations data:', result.error);
+        if (result.error?.includes('Authentication expired')) {
+          router.push('/Login');
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching presentations data:', err);
+    } finally {
+      setPresentationsLoading(false);
+    }
+  };
+
+  const fetchUpcomingPresentations = async () => {
+    try {
+      setUpcomingLoading(true);
+      
+      // Sample upcoming presentations - these can be managed locally or from an API
+      const today = new Date();
+      const tomorrow = new Date(today);
+      tomorrow.setDate(today.getDate() + 1);
+      const nextWeek = new Date(today);
+      nextWeek.setDate(today.getDate() + 7);
+      const nextMonth = new Date(today);
+      nextMonth.setMonth(today.getMonth() + 1);
+      const nextQuarter = new Date(today);
+      nextQuarter.setMonth(today.getMonth() + 3);
+      
+      const sampleUpcomingPresentations: UpcomingPresentation[] = [
+        {
+          id: 'upcoming-1',
+          topic: 'Monthly Team Review',
+          date: tomorrow.toISOString().split('T')[0],
+          time: '10:00',
+          description: 'Monthly team performance review and planning session',
+          type: 'upcoming',
+          language: 'english'
+        },
+        {
+          id: 'upcoming-2',
+          topic: 'Client Project Demo',
+          date: nextWeek.toISOString().split('T')[0],
+          time: '15:30',
+          description: 'Demonstrating new features to client stakeholders',
+          type: 'upcoming',
+          language: 'arabic'
+        },
+        {
+          id: 'upcoming-3',
+          topic: 'Quarterly Business Review',
+          date: nextMonth.toISOString().split('T')[0],
+          time: '14:00',
+          description: 'Quarterly financial and business performance review',
+          type: 'upcoming',
+          language: 'english'
+        },
+        {
+          id: 'upcoming-4',
+          topic: 'Product Launch Presentation',
+          date: nextQuarter.toISOString().split('T')[0],
+          time: '11:30',
+          description: 'Launch presentation for new product features',
+          type: 'upcoming',
+          language: 'english'
+        }
+      ];
+      
+      // Filter to only show future presentations
+      const futurePresentation = sampleUpcomingPresentations.filter(presentation => {
+        return new Date(presentation.date) >= today;
+      });
+      
+      setUpcomingPresentations(futurePresentation);
+    } catch (err) {
+      console.error('Error fetching upcoming presentations:', err);
+    } finally {
+      setUpcomingLoading(false);
+    }
+  };
+
   const getDisplayName = () => {
     if (!user) return 'Loading...';
     
@@ -51,6 +158,30 @@ const Dashboard = () => {
 
   const handleProfileClick = () => {
     router.push('/ProfileInfo');
+  };
+
+  const handleSubmittedTrialsClick = () => {
+    router.push('/SubmittedTrials');
+  };
+
+  const handleCalendarClick = () => {
+    router.push('/Calendar');
+  };
+
+  const handlePresentationClick = (presentation: any) => {
+    if (presentation.type === 'past') {
+      router.push('/SubmittedTrials');
+    } else {
+      router.push('/Calendar');
+    }
+  };
+
+  const refreshAllData = async () => {
+    await Promise.all([
+      fetchUserData(),
+      fetchPresentationsData(),
+      fetchUpcomingPresentations()
+    ]);
   };
 
   // SVG icons for stats cards
@@ -119,16 +250,20 @@ const Dashboard = () => {
             {/* Stats Cards Row */}
             <div className={styles.statsCardsRow}>
           <StatsCard 
-            value={150} 
+            value={submittedTrialsCount} 
             title="Submitted Trials" 
             color="purple" 
             icon={purpleIcon} 
+            onClick={handleSubmittedTrialsClick}
+            loading={presentationsLoading}
           />
           <StatsCard 
-            value={20} 
+            value={upcomingPresentations.length} 
             title="Presentations In Line" 
             color="yellow" 
             icon={yellowIcon} 
+            onClick={handleCalendarClick}
+            loading={upcomingLoading}
           />
             </div>
 
@@ -139,7 +274,11 @@ const Dashboard = () => {
           {/* Right Column - Sidebar Content */}
           <div className={styles.rightColumn}>
             {/* Calendar Section */}
-            <CalendarWidget />
+            <CalendarWidget 
+              submittedTrials={submittedTrialsData}
+              upcomingPresentations={upcomingPresentations}
+              onPresentationClick={handlePresentationClick}
+            />
 
             {/* Pie Chart Section */}
             <PieChart />

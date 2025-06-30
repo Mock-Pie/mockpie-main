@@ -40,6 +40,7 @@ const ProfileForm = () => {
 
     const [formErrors, setFormErrors] = useState<FormErrors>({});
     const [saving, setSaving] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
 
     useEffect(() => {
         fetchUserData();
@@ -188,17 +189,15 @@ const ProfileForm = () => {
         }
     };
 
-    const handleDeleteAccount = async () => {
-        const confirmDelete = window.confirm(
-            'Are you sure you want to delete your account? This action cannot be undone.'
-        );
-        
-        if (confirmDelete) {
-            const doubleConfirm = window.confirm(
-                'This will permanently delete all your data. Are you absolutely sure?'
-            );
-            
-            if (doubleConfirm) {
+    const handleDeleteAccount = () => {
+        setShowDeleteModal(true);
+    };
+
+    const handleCancelDelete = () => {
+        setShowDeleteModal(false);
+    };
+
+    const handleConfirmDelete = async () => {
                 try {
                     setSaving(true);
                     const result = await UserService.deleteUser();
@@ -224,8 +223,7 @@ const ProfileForm = () => {
                     console.error('Error deleting account:', err);
                 } finally {
                     setSaving(false);
-                }
-            }
+            setShowDeleteModal(false);
         }
     };
 
@@ -418,6 +416,38 @@ const ProfileForm = () => {
                     </button>
                 </div>
             </div>
+
+            {/* Delete Confirmation Modal */}
+            {showDeleteModal && (
+                <div className={styles.modalOverlay}>
+                    <div className={styles.deleteModal}>
+                        <div className={styles.modalContent}>
+                            <h3 className={styles.modalTitle}>
+                                Confirm Account Deletion
+                            </h3>
+                            <p className={styles.modalMessage}>
+                                Are you sure you want to delete your account? This will permanently delete all your data and cannot be undone.
+                            </p>
+                            <div className={styles.modalActions}>
+                                <button 
+                                    className={styles.cancelButton} 
+                                    onClick={handleCancelDelete}
+                                    disabled={saving}
+                                >
+                                    Cancel
+                                </button>
+                                <button 
+                                    className={styles.deleteButton} 
+                                    onClick={handleConfirmDelete}
+                                    disabled={saving}
+                                >
+                                    {saving ? 'Deleting...' : 'Delete Account'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
