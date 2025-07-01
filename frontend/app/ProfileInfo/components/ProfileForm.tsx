@@ -426,7 +426,7 @@ const ProfileForm = () => {
                                 Confirm Account Deletion
                             </h3>
                             <p className={styles.modalMessage}>
-                                Are you sure you want to delete your account? This will permanently delete all your data and cannot be undone.
+                                Are you sure you want to delete your account?
                             </p>
                             <div className={styles.modalActions}>
                                 <button 

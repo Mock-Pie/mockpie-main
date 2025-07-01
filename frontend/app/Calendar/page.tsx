@@ -6,6 +6,7 @@ import calendarStyles from "./page.module.css";
 import SideBar from "../UploadRecordVideos/components/SideBar";
 import Header from "./components/Header";
 import PresentationService, { Presentation as ApiPresentation } from '../services/presentationService';
+import UpcomingPresentationService, { UpcomingPresentation as UpcomingPresentationData } from '../services/upcomingPresentationService';
 import { 
     FiChevronLeft, 
     FiChevronRight, 
@@ -37,33 +38,17 @@ const Calendar = () => {
     const [currentDate, setCurrentDate] = useState(new Date());
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
     const [presentations, setPresentations] = useState<Presentation[]>([]);
-    const [upcomingPresentations, setUpcomingPresentations] = useState<Presentation[]>([
-        // Sample upcoming presentations - these can be managed locally
-        {
-            id: 'upcoming-1',
-            topic: 'Monthly Team Review',
-            date: '2024-02-28',
-            time: '10:00',
-            description: 'Monthly team performance review and planning session',
-            type: 'upcoming',
-            language: 'english'
-        },
-        {
-            id: 'upcoming-2',
-            topic: 'Client Project Demo',
-            date: '2024-03-05',
-            time: '15:30',
-            description: 'Demonstrating new features to client stakeholders',
-            type: 'upcoming',
-            language: 'arabic'
-        }
-    ]);
+    const [upcomingPresentations, setUpcomingPresentations] = useState<Presentation[]>([]);
     const [filteredPresentations, setFilteredPresentations] = useState<Presentation[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [refreshing, setRefreshing] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingPresentation, setEditingPresentation] = useState<Presentation | null>(null);
+    const [successMessage, setSuccessMessage] = useState<string | null>(null);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [deleteType, setDeleteType] = useState<'past' | 'upcoming'>('past');
+    const [itemToDelete, setItemToDelete] = useState<string | null>(null);
     const [formData, setFormData] = useState({
         topic: '',
         date: '',
@@ -91,15 +76,33 @@ const Calendar = () => {
 
     // Fetch presentations on component mount
     useEffect(() => {
-        fetchPresentations();
+        const initializeData = async () => {
+            // First fetch upcoming presentations
+            const upcomingData = await fetchUpcomingPresentations();
+            // Then fetch past presentations and combine with upcoming
+            await fetchPresentations(upcomingData, true);
+        };
+        
+        initializeData();
     }, []);
 
-    const fetchPresentations = async () => {
+    // Helper function to combine and update all presentations
+    const combineAndUpdatePresentations = async (pastPresentations: Presentation[], upcomingPresentations: Presentation[]) => {
+        const allPresentations = [...pastPresentations, ...upcomingPresentations];
+        setPresentations(allPresentations);
+        return allPresentations;
+    };
+
+    const fetchPresentations = async (currentUpcoming?: Presentation[], isInitialLoad = false) => {
         try {
-            setLoading(true);
+            if (isInitialLoad) {
+                setLoading(true);
+            }
             setError(null);
             
             const response = await PresentationService.getUserPresentations();
+            
+            const upcomingToUse = currentUpcoming || upcomingPresentations;
             
             if (response.success && response.data) {
                 const apiPresentations = (response.data as any).videos || [];
@@ -118,9 +121,8 @@ const Calendar = () => {
                     };
                 });
                 
-                // Combine API presentations (past) with upcoming presentations
-                const allPresentations = [...mappedPresentations, ...upcomingPresentations];
-                setPresentations(allPresentations);
+                // Combine with upcoming presentations
+                await combineAndUpdatePresentations(mappedPresentations, upcomingToUse);
                 
             } else {
                 setError(response.error || 'Failed to fetch presentations');
@@ -128,22 +130,70 @@ const Calendar = () => {
                     setTimeout(() => router.push('/Login'), 2000);
                 }
                 // If API fails, just use upcoming presentations
-                setPresentations(upcomingPresentations);
+                await combineAndUpdatePresentations([], upcomingToUse);
             }
         } catch (err) {
             setError('Network error. Please check your connection.');
             console.error('Error fetching presentations:', err);
             // Fallback to upcoming presentations only
-            setPresentations(upcomingPresentations);
+            await combineAndUpdatePresentations([], currentUpcoming || upcomingPresentations);
         } finally {
-            setLoading(false);
+            if (isInitialLoad) {
+                setLoading(false);
+            }
+        }
+    };
+
+    const fetchUpcomingPresentations = async (updateCalendar = false) => {
+        try {
+            // Initialize sample data if needed
+            await UpcomingPresentationService.initializeSampleData();
+            
+            // Fetch upcoming presentations from service
+            const result = await UpcomingPresentationService.getUpcomingPresentations();
+            
+            if (result.success && result.data) {
+                // Convert service data to calendar format
+                const mappedUpcoming: Presentation[] = (result.data as UpcomingPresentationData[]).map(upcoming => ({
+                    id: upcoming.id,
+                    topic: upcoming.topic,
+                    date: upcoming.date,
+                    time: upcoming.time,
+                    description: upcoming.description,
+                    type: 'upcoming' as const,
+                    language: upcoming.language || 'english'
+                }));
+                
+                setUpcomingPresentations(mappedUpcoming);
+                
+                // If updating calendar, refresh the combined presentations
+                if (updateCalendar) {
+                    await fetchPresentations(mappedUpcoming);
+                }
+                
+                return mappedUpcoming;
+            } else {
+                console.error('Failed to fetch upcoming presentations:', result.error);
+                return [];
+            }
+        } catch (err) {
+            console.error('Error fetching upcoming presentations:', err);
+            return [];
         }
     };
 
     const handleRefresh = async () => {
         setRefreshing(true);
-        await fetchPresentations();
-        setRefreshing(false);
+        try {
+            // First refresh upcoming presentations
+            const upcomingData = await fetchUpcomingPresentations();
+            // Then refresh past presentations and combine with updated upcoming data
+            await fetchPresentations(upcomingData);
+        } catch (err) {
+            console.error('Error during refresh:', err);
+        } finally {
+            setRefreshing(false);
+        }
     };
 
     // Filter presentations based on search and filters
@@ -287,42 +337,83 @@ const Calendar = () => {
         });
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         
         const presentationDate = new Date(formData.date);
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         
-        const newPresentation: Presentation = {
-            id: editingPresentation ? editingPresentation.id : `local-${Date.now()}`,
-            topic: formData.topic,
-            date: formData.date,
-            time: formData.time,
-            description: formData.description,
-            type: presentationDate < today ? 'past' : 'upcoming',
-            language: formData.language
-        };
+        const presentationType = presentationDate < today ? 'past' : 'upcoming';
 
-        if (editingPresentation) {
-            // If editing an upcoming presentation, update both states
-            if (editingPresentation.type === 'upcoming') {
-                setUpcomingPresentations(prev => 
-                    prev.map(p => p.id === editingPresentation.id ? newPresentation : p)
-                );
+        try {
+            if (presentationType === 'upcoming') {
+                if (editingPresentation && editingPresentation.type === 'upcoming') {
+                    // Update existing upcoming presentation
+                    const result = await UpcomingPresentationService.updateUpcomingPresentation(
+                        editingPresentation.id,
+                        {
+                            topic: formData.topic,
+                            date: formData.date,
+                            time: formData.time,
+                            description: formData.description,
+                            language: formData.language
+                        }
+                    );
+
+                    if (result.success) {
+                        await fetchUpcomingPresentations(true); // Refresh data and update calendar
+                        setSuccessMessage('Presentation updated successfully!');
+                        setTimeout(() => setSuccessMessage(null), 3000);
+                    } else {
+                        setError(result.error || 'Failed to update presentation');
+                        return;
+                    }
+                } else if (!editingPresentation) {
+                    // Add new upcoming presentation
+                    const result = await UpcomingPresentationService.addUpcomingPresentation({
+                        topic: formData.topic,
+                        date: formData.date,
+                        time: formData.time,
+                        description: formData.description,
+                        language: formData.language
+                    });
+
+                    if (result.success) {
+                        await fetchUpcomingPresentations(true); // Refresh data and update calendar
+                        setSuccessMessage('New presentation added to calendar!');
+                        setTimeout(() => setSuccessMessage(null), 3000);
+                    } else {
+                        setError(result.error || 'Failed to add presentation');
+                        return;
+                    }
+                }
+            } else {
+                // For past presentations, use local state (since they can't be "scheduled")
+                const newPresentation: Presentation = {
+                    id: editingPresentation ? editingPresentation.id : `local-${Date.now()}`,
+                    topic: formData.topic,
+                    date: formData.date,
+                    time: formData.time,
+                    description: formData.description,
+                    type: 'past',
+                    language: formData.language
+                };
+
+                if (editingPresentation) {
+                    setPresentations(presentations.map(p => 
+                        p.id === editingPresentation.id ? newPresentation : p
+                    ));
+                } else {
+                    setPresentations([...presentations, newPresentation]);
+                }
             }
-            setPresentations(presentations.map(p => 
-                p.id === editingPresentation.id ? newPresentation : p
-            ));
-        } else {
-            // Add new presentation
-            if (newPresentation.type === 'upcoming') {
-                setUpcomingPresentations(prev => [...prev, newPresentation]);
-            }
-            setPresentations([...presentations, newPresentation]);
+
+            closeModal();
+        } catch (err) {
+            setError('Failed to save presentation. Please try again.');
+            console.error('Error saving presentation:', err);
         }
-        
-        closeModal();
     };
 
     const deletePresentation = async (id: string) => {
@@ -330,8 +421,8 @@ const Calendar = () => {
         
         if (!presentation) return;
         
-        // If it's a past presentation (from API), try to delete via API
         if (presentation.type === 'past' && !id.startsWith('local-')) {
+            // Delete submitted trial via API
             if (!confirm('Are you sure you want to delete this submitted trial?')) {
                 return;
             }
@@ -341,7 +432,7 @@ const Calendar = () => {
                 
                 if (response.success) {
                     // Refresh data from API after successful deletion
-                    await fetchPresentations();
+                    await fetchPresentations(upcomingPresentations);
                 } else {
                     setError(response.error || 'Failed to delete presentation');
                 }
@@ -349,8 +440,26 @@ const Calendar = () => {
                 setError('Error deleting presentation');
                 console.error('Error deleting presentation:', err);
             }
+        } else if (presentation.type === 'upcoming' && !id.startsWith('local-')) {
+            // Delete upcoming presentation via service
+            if (!confirm('Are you sure you want to delete this upcoming presentation?')) {
+                return;
+            }
+            
+            try {
+                const result = await UpcomingPresentationService.deleteUpcomingPresentation(id);
+                
+                if (result.success) {
+                    await fetchUpcomingPresentations(true); // Refresh upcoming presentations and update calendar
+                } else {
+                    setError(result.error || 'Failed to delete presentation');
+                }
+            } catch (err) {
+                setError('Error deleting presentation');
+                console.error('Error deleting presentation:', err);
+            }
         } else {
-            // For upcoming presentations or local presentations, delete locally
+            // For local presentations, delete locally
             if (!confirm('Are you sure you want to delete this presentation?')) {
                 return;
             }
@@ -419,6 +528,16 @@ const Calendar = () => {
                     <div className={calendarStyles.errorMessage}>
                         <span>{error}</span>
                         <button onClick={() => setError(null)} className={calendarStyles.closeErrorButton}>
+                            <FiX />
+                        </button>
+                    </div>
+                )}
+                
+                {/* Success Display */}
+                {successMessage && (
+                    <div className={calendarStyles.successMessage}>
+                        <span>{successMessage}</span>
+                        <button onClick={() => setSuccessMessage(null)} className={calendarStyles.closeSuccessButton}>
                             <FiX />
                         </button>
                     </div>

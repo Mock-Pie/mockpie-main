@@ -13,16 +13,7 @@ import StatsSummary from "./components/StatsSummary";
 import PresentationTable from "./components/PresentationTable";
 import UserService, { User } from "../services/userService";
 import PresentationService from "../services/presentationService";
-
-interface UpcomingPresentation {
-  id: string;
-  topic: string;
-  date: string;
-  time: string;
-  description: string;
-  type: 'upcoming';
-  language?: string;
-}
+import UpcomingPresentationService, { UpcomingPresentation } from "../services/upcomingPresentationService";
 
 const Dashboard = () => {
   const router = useRouter();
@@ -86,62 +77,20 @@ const Dashboard = () => {
     try {
       setUpcomingLoading(true);
       
-      // Sample upcoming presentations - these can be managed locally or from an API
-      const today = new Date();
-      const tomorrow = new Date(today);
-      tomorrow.setDate(today.getDate() + 1);
-      const nextWeek = new Date(today);
-      nextWeek.setDate(today.getDate() + 7);
-      const nextMonth = new Date(today);
-      nextMonth.setMonth(today.getMonth() + 1);
-      const nextQuarter = new Date(today);
-      nextQuarter.setMonth(today.getMonth() + 3);
+      // Initialize sample data if needed (only on first run)
+      await UpcomingPresentationService.initializeSampleData();
       
-      const sampleUpcomingPresentations: UpcomingPresentation[] = [
-        {
-          id: 'upcoming-1',
-          topic: 'Monthly Team Review',
-          date: tomorrow.toISOString().split('T')[0],
-          time: '10:00',
-          description: 'Monthly team performance review and planning session',
-          type: 'upcoming',
-          language: 'english'
-        },
-        {
-          id: 'upcoming-2',
-          topic: 'Client Project Demo',
-          date: nextWeek.toISOString().split('T')[0],
-          time: '15:30',
-          description: 'Demonstrating new features to client stakeholders',
-          type: 'upcoming',
-          language: 'arabic'
-        },
-        {
-          id: 'upcoming-3',
-          topic: 'Quarterly Business Review',
-          date: nextMonth.toISOString().split('T')[0],
-          time: '14:00',
-          description: 'Quarterly financial and business performance review',
-          type: 'upcoming',
-          language: 'english'
-        },
-        {
-          id: 'upcoming-4',
-          topic: 'Product Launch Presentation',
-          date: nextQuarter.toISOString().split('T')[0],
-          time: '11:30',
-          description: 'Launch presentation for new product features',
-          type: 'upcoming',
-          language: 'english'
+      // Fetch upcoming presentations from service
+      const result = await UpcomingPresentationService.getUpcomingPresentations();
+      
+      if (result.success && result.data) {
+        setUpcomingPresentations(result.data as UpcomingPresentation[]);
+      } else {
+        console.error('Failed to fetch upcoming presentations:', result.error);
+        if (result.error?.includes('Authentication expired')) {
+          router.push('/Login');
         }
-      ];
-      
-      // Filter to only show future presentations
-      const futurePresentation = sampleUpcomingPresentations.filter(presentation => {
-        return new Date(presentation.date) >= today;
-      });
-      
-      setUpcomingPresentations(futurePresentation);
+      }
     } catch (err) {
       console.error('Error fetching upcoming presentations:', err);
     } finally {
