@@ -1,8 +1,9 @@
 "use client";
 import React, { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { FiUploadCloud, FiFile, FiCheck, FiX } from "react-icons/fi";
+import { FiUploadCloud, FiFile, FiCheck, FiX, FiTarget } from "react-icons/fi";
 import styles from "../page.module.css";
+import FocusModal from "./FocusModal";
 
 const Uploading = () => {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -13,6 +14,8 @@ const Uploading = () => {
     const [videoTitle, setVideoTitle] = useState<string>("");
     const [presentationTopic, setPresentationTopic] = useState<string>("");
     const [selectedLanguage, setSelectedLanguage] = useState<string>("");
+    const [selectedFocus, setSelectedFocus] = useState<string[]>([]);
+    const [showFocusModal, setShowFocusModal] = useState(false);
     const [isDragOver, setIsDragOver] = useState(false);
     const fileInputRef = useRef<HTMLInputElement | null>(null);
     const router = useRouter();
@@ -90,6 +93,11 @@ const Uploading = () => {
             return;
         }
 
+        if (selectedFocus.length === 0) {
+            setUploadStatus("Please select at least one focus area for analysis.");
+            return;
+        }
+
         // Check if user is authenticated
         const accessToken = localStorage.getItem("access_token");
         if (!accessToken) {
@@ -122,6 +130,7 @@ const Uploading = () => {
         }
         formData.append("topic", presentationTopic.trim());
         formData.append("language", selectedLanguage);
+        formData.append("focus_areas", JSON.stringify(selectedFocus));
 
         try {
             setIsUploading(true);
@@ -251,7 +260,7 @@ const Uploading = () => {
                 <button 
                     onClick={handleUpload} 
                     className={styles.UploadButton}
-                    disabled={isUploading || !selectedFile || !presentationTopic.trim() || !selectedLanguage}
+                    disabled={isUploading || !selectedFile || !presentationTopic.trim() || !selectedLanguage || selectedFocus.length === 0}
                 >
                     {isUploading ? (
                         <>
@@ -299,6 +308,37 @@ const Uploading = () => {
                         <option value="arabic">Arabic</option>
                     </select>
                 </div>
+                
+                <div className={styles.FormGroup}>
+                    <label className={styles.FormLabel}>
+                        Focus Areas *
+                    </label>
+                    <button
+                        type="button"
+                        onClick={() => setShowFocusModal(true)}
+                        className={styles.FocusButton}
+                    >
+                        <FiTarget style={{ marginRight: '8px' }} />
+                        {selectedFocus.length > 0 
+                            ? `${selectedFocus.length} focus area${selectedFocus.length > 1 ? 's' : ''} selected`
+                            : "Choose a focus"
+                        }
+                    </button>
+                    {selectedFocus.length > 0 && (
+                        <div className={styles.SelectedFocusPreview}>
+                            {selectedFocus.slice(0, 2).map((focus, index) => (
+                                <span key={focus} className={styles.FocusTag}>
+                                    {focus.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                                </span>
+                            ))}
+                            {selectedFocus.length > 2 && (
+                                <span className={styles.FocusMore}>
+                                    +{selectedFocus.length - 2} more
+                                </span>
+                            )}
+                        </div>
+                    )}
+                </div>
             </div>
 
             {uploadStatus && (
@@ -308,6 +348,13 @@ const Uploading = () => {
                     {uploadStatus}
                 </div>
             )}
+
+            <FocusModal
+                isOpen={showFocusModal}
+                onClose={() => setShowFocusModal(false)}
+                onSave={(focus) => setSelectedFocus(focus)}
+                selectedFocus={selectedFocus}
+            />
         </div>
     );
 };

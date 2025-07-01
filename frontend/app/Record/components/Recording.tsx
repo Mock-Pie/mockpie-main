@@ -14,9 +14,11 @@ import {
     FiClock,
     FiEye,
     FiFilm,
-    FiRadio
+    FiRadio,
+    FiTarget
 } from "react-icons/fi";
 import styles from "../page.module.css";
+import FocusModal from "./FocusModal";
 
 const Recording = () => {
     const router = useRouter();
@@ -32,6 +34,8 @@ const Recording = () => {
     const [videoFormat, setVideoFormat] = useState<{mimeType: string, extension: string}>({mimeType: 'video/mp4', extension: 'mp4'});
     const [presentationTopic, setPresentationTopic] = useState<string>("");
     const [selectedLanguage, setSelectedLanguage] = useState<string>("");
+    const [selectedFocus, setSelectedFocus] = useState<string[]>([]);
+    const [showFocusModal, setShowFocusModal] = useState(false);
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const videoStreamRef = useRef<MediaStream | null>(null);
     const chunksRef = useRef<Blob[]>([]);
@@ -254,6 +258,11 @@ const Recording = () => {
             return;
         }
 
+        if (selectedFocus.length === 0) {
+            setUploadStatus("Please select at least one focus area for analysis.");
+            return;
+        }
+
         const accessToken = localStorage.getItem("access_token");
         if (!accessToken) {
             setUploadStatus("Please log in to upload videos.");
@@ -277,6 +286,7 @@ const Recording = () => {
             formData.append("title", `Recording ${new Date().toLocaleString()}`);
             formData.append("topic", presentationTopic.trim());
             formData.append("language", selectedLanguage);
+            formData.append("focus_areas", JSON.stringify(selectedFocus));
 
             setUploadStatus("Uploading video...");
 
@@ -538,6 +548,36 @@ const Recording = () => {
                                     <option value="arabic">Arabic</option>
                                 </select>
                             </div>
+                            <div className={styles.formGroup}>
+                                <label className={styles.formLabel}>
+                                    Focus Areas *
+                                </label>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowFocusModal(true)}
+                                    className={styles.focusButton}
+                                >
+                                    <FiTarget style={{ marginRight: '8px' }} />
+                                    {selectedFocus.length > 0 
+                                        ? `${selectedFocus.length} focus area${selectedFocus.length > 1 ? 's' : ''} selected`
+                                        : "Choose a focus"
+                                    }
+                                </button>
+                                {selectedFocus.length > 0 && (
+                                    <div className={styles.selectedFocusPreview}>
+                                        {selectedFocus.slice(0, 2).map((focus, index) => (
+                                            <span key={focus} className={styles.focusTag}>
+                                                {focus.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                                            </span>
+                                        ))}
+                                        {selectedFocus.length > 2 && (
+                                            <span className={styles.focusMore}>
+                                                +{selectedFocus.length - 2} more
+                                            </span>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
                     {/* Preview Toggle Section */}
@@ -612,7 +652,7 @@ const Recording = () => {
                                 </button>
                                 <button
                                     onClick={uploadVideo}
-                                    disabled={isUploading || !presentationTopic.trim() || !selectedLanguage}
+                                    disabled={isUploading || !presentationTopic.trim() || !selectedLanguage || selectedFocus.length === 0}
                                     className={`${styles.actionButton} ${styles.uploadButton}`}
                                 >
                                     {isUploading ? (
@@ -632,6 +672,13 @@ const Recording = () => {
                     </div>
                 </div>
             </div>
+
+            <FocusModal
+                isOpen={showFocusModal}
+                onClose={() => setShowFocusModal(false)}
+                onSave={(focus) => setSelectedFocus(focus)}
+                selectedFocus={selectedFocus}
+            />
         </div>
     );
 };
