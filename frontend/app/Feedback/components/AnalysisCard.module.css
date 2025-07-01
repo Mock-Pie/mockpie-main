@@ -1,0 +1,311 @@
+/* Analysis Card Container */
+.analysisCard {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 32px;
+  margin-bottom: 32px;
+  transition: all 0.3s ease;
+}
+
+.analysisCard:hover {
+  border-color: rgba(255, 206, 84, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+/* Card Header */
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 32px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.categoryIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: rgba(255, 206, 84, 0.1);
+  border-radius: 12px;
+  color: var(--naples-yellow);
+  font-size: 24px;
+}
+
+.categoryInfo {
+  flex: 1;
+}
+
+.categoryTitle {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--white);
+  margin: 0 0 4px 0;
+}
+
+.categoryDescription {
+  color: var(--light-grey);
+  font-size: 14px;
+  margin: 0;
+}
+
+/* Metrics Grid */
+.metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+/* Metric Item */
+.metricItem {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 24px;
+  transition: all 0.3s ease;
+}
+
+.metricItem:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 206, 84, 0.3);
+  transform: translateY(-2px);
+}
+
+/* Metric Header */
+.metricHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.metricIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 206, 84, 0.1);
+  border-radius: 10px;
+  color: var(--naples-yellow);
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.metricTitle {
+  flex: 1;
+}
+
+.metricTitle h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--white);
+  margin: 0 0 8px 0;
+}
+
+.metricValue {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.value {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--white);
+}
+
+.score {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Metric Content */
+.metricContent {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Progress Bar */
+.progressBar {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+/* Insight Text */
+.insight {
+  color: var(--light-grey);
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Recommendation */
+.recommendation {
+  background: rgba(255, 206, 84, 0.05);
+  border: 1px solid rgba(255, 206, 84, 0.2);
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 14px;
+  color: var(--light-grey);
+  line-height: 1.4;
+}
+
+.recommendationLabel {
+  color: var(--naples-yellow);
+  font-weight: 600;
+  margin-right: 8px;
+}
+
+/* Score Colors */
+.excellent {
+  --current-color: #10b981;
+}
+
+.excellent.score {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.excellent.progressFill {
+  background: linear-gradient(90deg, #10b981, #34d399);
+}
+
+.good {
+  --current-color: var(--naples-yellow);
+}
+
+.good.score {
+  background: rgba(255, 206, 84, 0.2);
+  color: var(--naples-yellow);
+  border: 1px solid rgba(255, 206, 84, 0.3);
+}
+
+.good.progressFill {
+  background: linear-gradient(90deg, var(--naples-yellow), #fbbf24);
+}
+
+.average {
+  --current-color: #f59e0b;
+}
+
+.average.score {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.average.progressFill {
+  background: linear-gradient(90deg, #f59e0b, #fbbf24);
+}
+
+.needsWork {
+  --current-color: #ef4444;
+}
+
+.needsWork.score {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.needsWork.progressFill {
+  background: linear-gradient(90deg, #ef4444, #f87171);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .analysisCard {
+    padding: 24px;
+    margin-bottom: 24px;
+  }
+
+  .cardHeader {
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+  }
+
+  .categoryIcon {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+
+  .categoryTitle {
+    font-size: 20px;
+  }
+
+  .metricsGrid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .metricItem {
+    padding: 20px;
+  }
+
+  .metricHeader {
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .metricIcon {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+  }
+
+  .metricTitle h4 {
+    font-size: 14px;
+  }
+
+  .value {
+    font-size: 16px;
+  }
+
+  .metricContent {
+    gap: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .analysisCard {
+    padding: 20px;
+  }
+
+  .cardHeader {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+
+  .metricHeader {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+
+  .metricValue {
+    justify-content: center;
+  }
+} 

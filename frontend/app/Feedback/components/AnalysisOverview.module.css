@@ -1,0 +1,316 @@
+/* Overview Container */
+.overviewContainer {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 32px;
+  margin-bottom: 32px;
+  transition: all 0.3s ease;
+}
+
+.overviewContainer:hover {
+  border-color: rgba(255, 206, 84, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+/* Header */
+.overviewHeader {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.title {
+  font-size: 28px;
+  font-weight: 600;
+  background: linear-gradient(135deg, var(--white), var(--naples-yellow));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 8px;
+}
+
+.subtitle {
+  color: var(--light-grey);
+  font-size: 16px;
+  margin: 0;
+}
+
+/* Metrics Grid */
+.metricsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+/* Score Card */
+.scoreCard {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 24px;
+  transition: all 0.3s ease;
+}
+
+.primaryCard {
+  border-color: rgba(255, 206, 84, 0.2);
+}
+
+.scoreCircle {
+  position: relative;
+}
+
+.scoreRing {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  border: 4px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.scoreRing::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  padding: 4px;
+  background: conic-gradient(
+    var(--current-color) 0deg,
+    var(--current-color) calc(3.6deg * var(--score, 0)),
+    transparent calc(3.6deg * var(--score, 0)),
+    transparent 360deg
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+}
+
+.scoreValue {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--white);
+  line-height: 1;
+}
+
+.scoreLabel {
+  font-size: 12px;
+  color: var(--light-grey);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 4px;
+}
+
+.scoreDetails {
+  flex: 1;
+}
+
+.scoreBadge {
+  display: inline-block;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.scoreDescription {
+  color: var(--light-grey);
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Score Colors */
+.excellent {
+  --current-color: #10b981;
+}
+
+.excellent.scoreBadge {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.good {
+  --current-color: var(--naples-yellow);
+}
+
+.good.scoreBadge {
+  background: rgba(255, 206, 84, 0.2);
+  color: var(--naples-yellow);
+  border: 1px solid rgba(255, 206, 84, 0.3);
+}
+
+.average {
+  --current-color: #f59e0b;
+}
+
+.average.scoreBadge {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.needsWork {
+  --current-color: #ef4444;
+}
+
+.needsWork.scoreBadge {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* Stats Grid */
+.statsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.statCard {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 20px;
+  transition: all 0.3s ease;
+}
+
+.statCard:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 206, 84, 0.3);
+  transform: translateY(-2px);
+}
+
+.statIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 206, 84, 0.1);
+  border-radius: 10px;
+  color: var(--naples-yellow);
+  font-size: 18px;
+}
+
+.statContent {
+  display: flex;
+  flex-direction: column;
+}
+
+.statValue {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--white);
+  line-height: 1.2;
+}
+
+.statLabel {
+  font-size: 12px;
+  color: var(--light-grey);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Focus Section */
+.focusSection {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 24px;
+}
+
+.focusTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--white);
+  margin-bottom: 16px;
+}
+
+.focusTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.focusTag {
+  background: rgba(255, 206, 84, 0.1);
+  color: var(--naples-yellow);
+  border: 1px solid rgba(255, 206, 84, 0.3);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.focusTag:hover {
+  background: rgba(255, 206, 84, 0.2);
+  transform: translateY(-1px);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .overviewContainer {
+    padding: 24px;
+    margin-bottom: 24px;
+  }
+
+  .metricsGrid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .scoreCard {
+    flex-direction: column;
+    text-align: center;
+    gap: 20px;
+  }
+
+  .scoreRing {
+    width: 100px;
+    height: 100px;
+  }
+
+  .scoreValue {
+    font-size: 28px;
+  }
+
+  .statsGrid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .statCard {
+    padding: 16px;
+  }
+
+  .title {
+    font-size: 24px;
+  }
+
+  .focusTags {
+    gap: 8px;
+  }
+
+  .focusTag {
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+} 
