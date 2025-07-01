@@ -55,12 +55,10 @@ const ProfileForm = () => {
             alert(successMessage);
         }
         
-        // Check for success message from URL parameters (password change)
+        // URL parameter handling for password change is now handled by modal in ResetPasswordForm
+        // Clean up any leftover URL parameters
         const urlParams = new URLSearchParams(window.location.search);
-        const message = urlParams.get('message');
-        if (message) {
-            alert(message);
-            // Clean up the URL
+        if (urlParams.get('message')) {
             window.history.replaceState({}, document.title, window.location.pathname);
         }
     }, []);
