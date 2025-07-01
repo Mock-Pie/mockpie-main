@@ -416,59 +416,66 @@ const Calendar = () => {
         }
     };
 
-    const deletePresentation = async (id: string) => {
+    const handleDeleteClick = (id: string) => {
         const presentation = presentations.find(p => p.id === id);
-        
         if (!presentation) return;
-        
-        if (presentation.type === 'past' && !id.startsWith('local-')) {
-            // Delete submitted trial via API
-            if (!confirm('Are you sure you want to delete this submitted trial?')) {
-                return;
-            }
-            
-            try {
-                const response = await PresentationService.deletePresentation(parseInt(id));
+
+        setItemToDelete(id);
+        setDeleteType(presentation.type);
+        setShowDeleteModal(true);
+    };
+
+    const handleCancelDelete = () => {
+        setShowDeleteModal(false);
+        setItemToDelete(null);
+    };
+
+    const handleConfirmDelete = async () => {
+        if (!itemToDelete) return;
+
+        const presentation = presentations.find(p => p.id === itemToDelete);
+        if (!presentation) return;
+
+        try {
+            if (presentation.type === 'past' && !itemToDelete.startsWith('local-')) {
+                // Delete submitted trial via API
+                const response = await PresentationService.deletePresentation(parseInt(itemToDelete));
                 
                 if (response.success) {
                     // Refresh data from API after successful deletion
                     await fetchPresentations(upcomingPresentations);
+                    setSuccessMessage('Presentation deleted successfully!');
+                    setTimeout(() => setSuccessMessage(null), 3000);
                 } else {
                     setError(response.error || 'Failed to delete presentation');
                 }
-            } catch (err) {
-                setError('Error deleting presentation');
-                console.error('Error deleting presentation:', err);
-            }
-        } else if (presentation.type === 'upcoming' && !id.startsWith('local-')) {
-            // Delete upcoming presentation via service
-            if (!confirm('Are you sure you want to delete this upcoming presentation?')) {
-                return;
-            }
-            
-            try {
-                const result = await UpcomingPresentationService.deleteUpcomingPresentation(id);
+            } else if (presentation.type === 'upcoming' && !itemToDelete.startsWith('local-')) {
+                // Delete upcoming presentation via service
+                const result = await UpcomingPresentationService.deleteUpcomingPresentation(itemToDelete);
                 
                 if (result.success) {
                     await fetchUpcomingPresentations(true); // Refresh upcoming presentations and update calendar
+                    setSuccessMessage('Presentation deleted successfully!');
+                    setTimeout(() => setSuccessMessage(null), 3000);
                 } else {
                     setError(result.error || 'Failed to delete presentation');
                 }
-            } catch (err) {
-                setError('Error deleting presentation');
-                console.error('Error deleting presentation:', err);
+            } else {
+                // For local presentations, delete locally
+                setPresentations(prev => prev.filter(p => p.id !== itemToDelete));
+                
+                if (presentation.type === 'upcoming') {
+                    setUpcomingPresentations(prev => prev.filter(p => p.id !== itemToDelete));
+                }
+                setSuccessMessage('Presentation deleted successfully!');
+                setTimeout(() => setSuccessMessage(null), 3000);
             }
-        } else {
-            // For local presentations, delete locally
-            if (!confirm('Are you sure you want to delete this presentation?')) {
-                return;
-            }
-            
-            setPresentations(prev => prev.filter(p => p.id !== id));
-            
-            if (presentation.type === 'upcoming') {
-                setUpcomingPresentations(prev => prev.filter(p => p.id !== id));
-            }
+        } catch (err) {
+            setError('Error deleting presentation');
+            console.error('Error deleting presentation:', err);
+        } finally {
+            setShowDeleteModal(false);
+            setItemToDelete(null);
         }
     };
 
@@ -796,7 +803,7 @@ const Calendar = () => {
                                                     className={`${calendarStyles.actionButton} ${calendarStyles.deleteButton}`}
                                                     onClick={(e) => {
                                                         e.stopPropagation();
-                                                        deletePresentation(presentation.id);
+                                                        handleDeleteClick(presentation.id);
                                                     }}
                                                 >
                                                     <FiTrash2 />
@@ -869,7 +876,7 @@ const Calendar = () => {
                                                     className={`${calendarStyles.actionButton} ${calendarStyles.deleteButton}`}
                                                     onClick={(e) => {
                                                         e.stopPropagation();
-                                                        deletePresentation(presentation.id);
+                                                        handleDeleteClick(presentation.id);
                                                     }}
                                                 >
                                                     <FiTrash2 />
@@ -895,7 +902,40 @@ const Calendar = () => {
                     </div>
                 )}
 
-                {/* Modal */}
+                {/* Delete Confirmation Modal */}
+                {showDeleteModal && (
+                    <div className={calendarStyles.modalOverlay}>
+                        <div className={calendarStyles.deleteModal}>
+                            <div className={calendarStyles.modalContent}>
+                                <h3 className={calendarStyles.modalTitle}>
+                                    Confirm Delete
+                                </h3>
+                                <p className={calendarStyles.modalMessage}>
+                                    {deleteType === 'past' 
+                                        ? 'Are you sure you want to delete this submitted trial? This action cannot be undone.'
+                                        : 'Are you sure you want to delete this upcoming presentation? This action cannot be undone.'
+                                    }
+                                </p>
+                                <div className={calendarStyles.modalActions}>
+                                    <button 
+                                        className={calendarStyles.cancelButton} 
+                                        onClick={handleCancelDelete}
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button 
+                                        className={calendarStyles.deleteButton} 
+                                        onClick={handleConfirmDelete}
+                                    >
+                                        Delete
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Add/Edit Modal */}
                 {isModalOpen && (
                     <div className={calendarStyles.modalOverlay} onClick={closeModal}>
                         <div className={calendarStyles.modal} onClick={(e) => e.stopPropagation()}>

@@ -1035,6 +1035,94 @@
     }
 }
 
+/* Delete Confirmation Modal - Matches SubmittedTrials design */
+.deleteModal {
+    background: var(--chinese-black);
+    border-radius: 16px;
+    padding: 0;
+    max-width: 440px;
+    width: 90%;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.deleteModal .modalContent {
+    padding: 32px;
+}
+
+.deleteModal .modalTitle {
+    color: var(--white);
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+.deleteModal .modalMessage {
+    color: var(--light-grey);
+    font-size: 16px;
+    line-height: 1.5;
+    margin-bottom: 32px;
+    text-align: center;
+}
+
+.deleteModal .modalActions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.deleteModal .cancelButton {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--white);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 100px;
+}
+
+.deleteModal .cancelButton:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+}
+
+.deleteModal .deleteButton {
+    background: #dc3545;
+    color: var(--white);
+    border: 1px solid #dc3545;
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 100px;
+}
+
+.deleteModal .deleteButton:hover {
+    background: #c82333;
+    border-color: #c82333;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
 @media (max-width: 576px) {
     .searchSection {
         padding: 12px;
@@ -1122,5 +1210,26 @@
     .cardMeta {
         flex-direction: column;
         gap: 8px;
+    }
+    
+    .deleteModal {
+        max-width: 320px;
+    }
+
+    .deleteModal .modalContent {
+        padding: 24px;
+    }
+
+    .deleteModal .modalTitle {
+        font-size: 20px;
+    }
+
+    .deleteModal .modalActions {
+        flex-direction: column;
+    }
+
+    .deleteModal .cancelButton,
+    .deleteModal .deleteButton {
+        width: 100%;
     }
 }
