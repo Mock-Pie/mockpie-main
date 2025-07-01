@@ -1,0 +1,173 @@
+/* Modal Overlay */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+/* Success Modal */
+.successModal {
+  background: var(--chinese-black);
+  border-radius: 20px;
+  padding: 0;
+  max-width: 480px;
+  width: 90%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.6);
+  animation: successModalSlideIn 0.4s ease-out;
+}
+
+@keyframes successModalSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.successModal .modalContent {
+  padding: 48px 40px;
+  text-align: center;
+}
+
+.successIcon {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 32px;
+}
+
+.checkmark {
+  width: 100px;
+  height: 100px;
+  animation: checkmarkAnimation 0.8s ease-in-out;
+}
+
+@keyframes checkmarkAnimation {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.checkmarkCircle {
+  stroke-dasharray: 166;
+  stroke-dashoffset: 166;
+  animation: strokeAnimation 0.6s ease-in-out 0.3s forwards;
+}
+
+.checkmarkCheck {
+  stroke-dasharray: 48;
+  stroke-dashoffset: 48;
+  animation: strokeAnimation 0.3s ease-in-out 0.6s forwards;
+}
+
+@keyframes strokeAnimation {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.successTitle {
+  color: #22c55e;
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  text-shadow: 0 2px 4px rgba(34, 197, 94, 0.3);
+}
+
+.successMessage {
+  color: #9ca3af;
+  font-size: 16px;
+  line-height: 1.6;
+  margin-bottom: 40px;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.loginButton {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #1f2937;
+  border: none;
+  border-radius: 12px;
+  padding: 16px 32px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(245, 158, 11, 0.3);
+  min-width: 200px;
+}
+
+.loginButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(245, 158, 11, 0.4);
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+}
+
+.loginButton:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 20px rgba(245, 158, 11, 0.3);
+}
+
+.loadingContainer {
+  margin: 0 auto;
+  width: 30px;
+  height: 30px;
+}
+
+.redirectText {
+  color: var(--light-grey);
+  font-size: 14px;
+  margin-top: 1rem;
+}
+
+@media (max-width: 768px) {
+  .successModal {
+    max-width: 380px;
+  }
+
+  .successModal .modalContent {
+    padding: 40px 30px;
+  }
+
+  .checkmark {
+    width: 80px;
+    height: 80px;
+  }
+
+  .successTitle {
+    font-size: 28px;
+    margin-bottom: 16px;
+  }
+
+  .successMessage {
+    font-size: 15px;
+    margin-bottom: 32px;
+  }
+
+  .loginButton {
+    padding: 14px 28px;
+    font-size: 15px;
+    min-width: 180px;
+  }
+}

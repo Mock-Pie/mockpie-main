@@ -108,9 +108,58 @@ class UserService {
       if (!response.ok) {
         const errorText = await response.text();
         console.error('Update failed with response:', errorText);
+        
+        // Try to parse the error response for specific field errors
+        let errorMessage = `Failed to update user data: ${response.statusText}`;
+        try {
+          const errorData = JSON.parse(errorText);
+          
+          // Handle different types of API error responses
+          if (errorData.detail) {
+            const detail = errorData.detail;
+            
+            // Check for specific duplicate data errors
+            if (typeof detail === 'string') {
+              if (detail.toLowerCase().includes('username') && detail.toLowerCase().includes('already')) {
+                errorMessage = 'FIELD_ERROR:username:This username is already taken by another user. Please choose a different username.';
+              } else if (detail.toLowerCase().includes('phone') && detail.toLowerCase().includes('already')) {
+                errorMessage = 'FIELD_ERROR:phone_number:This phone number is already registered to another account. Please use a different phone number.';
+              } else if (detail.toLowerCase().includes('email') && detail.toLowerCase().includes('already')) {
+                errorMessage = 'FIELD_ERROR:email:This email address is already registered to another account.';
+              } else {
+                errorMessage = detail;
+              }
+            } else if (Array.isArray(detail)) {
+              // Handle validation error arrays
+              const fieldErrors = detail.map(err => {
+                if (typeof err === 'object' && err.loc && err.msg) {
+                  const field = err.loc[err.loc.length - 1];
+                  if (err.msg.toLowerCase().includes('already') || err.msg.toLowerCase().includes('exists')) {
+                    return `FIELD_ERROR:${field}:${err.msg}`;
+                  }
+                  return `FIELD_ERROR:${field}:${err.msg}`;
+                }
+                return err.toString();
+              });
+              errorMessage = fieldErrors.join('|');
+            }
+          } else if (errorData.message) {
+            errorMessage = errorData.message;
+          }
+        } catch (parseError) {
+          // If JSON parsing fails, check for common patterns in plain text
+          if (errorText.toLowerCase().includes('username') && errorText.toLowerCase().includes('already')) {
+            errorMessage = 'FIELD_ERROR:username:This username is already taken by another user. Please choose a different username.';
+          } else if (errorText.toLowerCase().includes('phone') && errorText.toLowerCase().includes('already')) {
+            errorMessage = 'FIELD_ERROR:phone_number:This phone number is already registered to another account. Please use a different phone number.';
+          } else {
+            errorMessage = errorText;
+          }
+        }
+        
         return {
           success: false,
-          error: `Failed to update user data: ${response.statusText}`
+          error: errorMessage
         };
       }
 

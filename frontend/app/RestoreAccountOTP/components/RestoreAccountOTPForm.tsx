@@ -4,6 +4,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { FaExclamationTriangle } from "react-icons/fa";
 import Image from "next/image";
 import styles from "../../Login/page.module.css";
+import modalStyles from "../page.module.css";
 import UserService from "../../services/userService";
 
 const RestoreAccountOTPForm = () => {
@@ -16,6 +17,7 @@ const RestoreAccountOTPForm = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
 
   const handleOtpChange = useCallback((index: number, value: string) => {
@@ -80,9 +82,8 @@ const RestoreAccountOTPForm = () => {
       const result = await UserService.restoreUser(email, otpValue);
       
       if (result.success) {
-        // Show success message and redirect
-        alert("Account restored successfully! Your email is now verified and you can log in directly with your original credentials.");
-        router.push('/Login?message=Account restored successfully! Your email is verified and you can log in directly.');
+        // Show success modal with manual navigation
+        setShowSuccessModal(true);
       } else {
         setError(result.error || "Failed to restore account");
       }
@@ -234,8 +235,57 @@ const RestoreAccountOTPForm = () => {
           </button>
         </div>
       </form>
+
+      {/* Success Modal */}
+      {showSuccessModal && (
+        <div className={modalStyles.modalOverlay}>
+          <div className={modalStyles.successModal}>
+            <div className={modalStyles.modalContent}>
+              <div className={modalStyles.successIcon}>
+                <svg 
+                  className={modalStyles.checkmark}
+                  viewBox="0 0 52 52"
+                  fill="none" 
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle 
+                    className={modalStyles.checkmarkCircle}
+                    cx="26" 
+                    cy="26" 
+                    r="25" 
+                    fill="none"
+                    stroke="#22c55e"
+                    strokeWidth="2"
+                  />
+                  <path 
+                    className={modalStyles.checkmarkCheck}
+                    fill="none" 
+                    stroke="#22c55e" 
+                    strokeWidth="3" 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                    d="M14.5 26.5l7.5 7.5 15.5-15.5"
+                  />
+                </svg>
+              </div>
+              <h3 className={modalStyles.successTitle}>
+                Account Restored Successfully!
+              </h3>
+              <p className={modalStyles.successMessage}>
+                Your account has been successfully restored. You will be redirected to the login page in a few seconds.
+              </p>
+              <button 
+                className={modalStyles.loginButton}
+                onClick={() => router.push('/Login?message=Account restored successfully! Your email is verified and you can log in directly.')}
+              >
+                Go to Login Now
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
-export default RestoreAccountOTPForm; 
+export default RestoreAccountOTPForm;

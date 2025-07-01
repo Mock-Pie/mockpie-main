@@ -41,6 +41,9 @@ const ProfileForm = () => {
     const [formErrors, setFormErrors] = useState<FormErrors>({});
     const [saving, setSaving] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [successMessage, setSuccessMessage] = useState('');
+    const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
     useEffect(() => {
         fetchUserData();
@@ -61,6 +64,16 @@ const ProfileForm = () => {
             window.history.replaceState({}, document.title, window.location.pathname);
         }
     }, []);
+
+    // Auto-hide success message after 5 seconds
+    useEffect(() => {
+        if (showSuccessMessage) {
+            const timer = setTimeout(() => {
+                setShowSuccessMessage(false);
+            }, 5000);
+            return () => clearTimeout(timer);
+        }
+    }, [showSuccessMessage]);
 
     const fetchUserData = async () => {
         try {
@@ -141,6 +154,11 @@ const ProfileForm = () => {
                 [name]: ''
             }));
         }
+        
+        // Also clear general error if user is actively editing
+        if (error) {
+            setError(null);
+        }
     };
 
     const validateForm = () => {
@@ -160,6 +178,7 @@ const ProfileForm = () => {
 
         try {
             setSaving(true);
+            clearFieldErrors(); // Clear any existing errors
             
             // Prepare update data excluding email and gender (they're not changeable)
             const updateData = {
@@ -174,14 +193,26 @@ const ProfileForm = () => {
             
             if (result.success) {
                 await fetchUserData(); // Refresh data
-                alert('Profile updated successfully!');
+                setSuccessMessage('Profile updated successfully!');
+                setShowSuccessMessage(true);
             } else {
-                setError(result.error || 'Failed to update profile');
-                if (result.error?.includes('Authentication expired')) {
-                    router.push('/Login');
+                // Check if this is a field-specific error
+                const fieldErrors = parseFieldErrors(result.error || '');
+                
+                if (Object.keys(fieldErrors).length > 0) {
+                    // Display field-specific errors
+                    setFormErrors(fieldErrors);
+                    setError(null);
+                } else {
+                    // Display general error
+                    setError(result.error || 'Failed to update profile');
+                    if (result.error?.includes('Authentication expired')) {
+                        router.push('/Login');
+                    }
                 }
             }
         } catch (err) {
+            clearFieldErrors();
             setError('Failed to update profile');
             console.error('Error updating profile:', err);
         } finally {
@@ -207,11 +238,14 @@ const ProfileForm = () => {
                         localStorage.clear();
                         sessionStorage.clear();
                         
-                        // Show success message
-                        alert('Your account has been deleted successfully. You will be redirected to the login page.');
+                        // Hide delete modal and show success modal
+                        setShowDeleteModal(false);
+                        setShowSuccessModal(true);
                         
-                        // Redirect to login page
+                        // Redirect to login page after 3 seconds
+                        setTimeout(() => {
                         router.push('/Login');
+                        }, 3000);
                     } else {
                         setError(result.error || 'Failed to delete account');
                         if (result.error?.includes('Authentication expired')) {
@@ -225,6 +259,11 @@ const ProfileForm = () => {
                     setSaving(false);
             setShowDeleteModal(false);
         }
+    };
+
+    const handleSuccessModalClose = () => {
+        setShowSuccessModal(false);
+        router.push('/Login');
     };
 
     const formatDate = (dateString: string) => {
@@ -254,6 +293,60 @@ const ProfileForm = () => {
         } else {
             return user.username?.charAt(0)?.toUpperCase() || '?';
         }
+    };
+
+    // Helper function to parse field-specific errors from API responses
+    const parseFieldErrors = (errorMessage: string) => {
+        const fieldErrors: FormErrors = {};
+        
+        if (errorMessage.includes('FIELD_ERROR:')) {
+            const errors = errorMessage.split('|');
+            errors.forEach(error => {
+                if (error.startsWith('FIELD_ERROR:')) {
+                    const parts = error.split(':');
+                    if (parts.length >= 3) {
+                        const field = parts[1];
+                        const message = parts.slice(2).join(':');
+                        fieldErrors[field as keyof FormErrors] = message;
+                    }
+                }
+            });
+        }
+        
+        return fieldErrors;
+    };
+
+    // Helper function to clear field-specific errors
+    const clearFieldErrors = () => {
+        setFormErrors({});
+        setError(null);
+    };
+
+    // Helper function to determine if an error is a duplicate data error
+    const isDuplicateDataError = (errorMessage: string) => {
+        return errorMessage && (
+            errorMessage.toLowerCase().includes('already taken') ||
+            errorMessage.toLowerCase().includes('already registered') ||
+            errorMessage.toLowerCase().includes('already exists')
+        );
+    };
+
+    // Helper function to get error display class
+    const getErrorDisplayClass = (field: keyof FormErrors) => {
+        const errorMessage = formErrors[field];
+        if (!errorMessage) return styles.errorText;
+        
+        return isDuplicateDataError(errorMessage) 
+            ? styles.duplicateDataError 
+            : styles.errorText;
+    };
+
+    // Helper function to get input class names
+    const getInputClassName = (field: keyof FormErrors) => {
+        const hasError = formErrors[field];
+        return hasError 
+            ? `${styles.input} ${styles.hasError}` 
+            : styles.input;
     };
 
     if (loading) {
@@ -300,6 +393,31 @@ const ProfileForm = () => {
                 </button>
             </div>
 
+            {/* Success message display */}
+            {showSuccessMessage && (
+                <div className={styles.successSection}>
+                    <div className={styles.successIcon}>✅</div>
+                    <div className={styles.successText}>{successMessage}</div>
+                    <button 
+                        className={styles.successCloseButton}
+                        onClick={() => setShowSuccessMessage(false)}
+                        aria-label="Close success message"
+                    >
+                        ×
+                    </button>
+                </div>
+            )}
+
+            {/* Information section about data validation */}
+            {Object.keys(formErrors).some(key => formErrors[key as keyof FormErrors] && isDuplicateDataError(formErrors[key as keyof FormErrors] || '')) && (
+                <div className={styles.infoSection}>
+                    <div className={styles.infoIcon}>ℹ️</div>
+                    <div className={styles.infoText}>
+                        Some of your information conflicts with existing user data. Please update the highlighted fields with unique values.
+                    </div>
+                </div>
+            )}
+
             <div className={styles.formContainer}>
                 <div className={styles.formRow}>
                     <div className={styles.formGroup}>
@@ -310,9 +428,9 @@ const ProfileForm = () => {
                             value={formData.first_name}
                             onChange={handleInputChange}
                             placeholder="Your First Name" 
-                            className={styles.input} 
+                            className={getInputClassName('first_name')} 
                         />
-                        {formErrors.first_name && <div className={styles.errorText}>{formErrors.first_name}</div>}
+                        {formErrors.first_name && <div className={getErrorDisplayClass('first_name')}>{formErrors.first_name}</div>}
                     </div>
                     <div className={styles.formGroup}>
                         <label>Last Name</label>
@@ -322,9 +440,9 @@ const ProfileForm = () => {
                             value={formData.last_name}
                             onChange={handleInputChange}
                             placeholder="Your Last Name" 
-                            className={styles.input} 
+                            className={getInputClassName('last_name')} 
                         />
-                        {formErrors.last_name && <div className={styles.errorText}>{formErrors.last_name}</div>}
+                        {formErrors.last_name && <div className={getErrorDisplayClass('last_name')}>{formErrors.last_name}</div>}
                     </div>
                 </div>
 
@@ -337,9 +455,9 @@ const ProfileForm = () => {
                             value={formData.username}
                             onChange={handleInputChange}
                             placeholder="Your Username" 
-                            className={styles.input} 
+                            className={getInputClassName('username')} 
                         />
-                        {formErrors.username && <div className={styles.errorText}>{formErrors.username}</div>}
+                        {formErrors.username && <div className={getErrorDisplayClass('username')}>{formErrors.username}</div>}
                     </div>
                     <div className={styles.formGroup}>
                         <label>Phone Number</label>
@@ -349,9 +467,9 @@ const ProfileForm = () => {
                             value={formData.phone_number}
                             onChange={handleInputChange}
                             placeholder="+2010XXXXXXXX" 
-                            className={styles.input} 
+                            className={getInputClassName('phone_number')} 
                         />
-                        {formErrors.phone_number && <div className={styles.errorText}>{formErrors.phone_number}</div>}
+                        {formErrors.phone_number && <div className={getErrorDisplayClass('phone_number')}>{formErrors.phone_number}</div>}
                     </div>
                 </div>
 
@@ -365,7 +483,7 @@ const ProfileForm = () => {
                                 value={formData.email}
                                 onChange={handleInputChange}
                                 placeholder="your@email.com" 
-                                className={styles.input} 
+                                className={getInputClassName('email')} 
                                 disabled={true}
                                 style={{ cursor: 'not-allowed', opacity: 0.7 }}
                                 title="Email cannot be changed"
@@ -378,7 +496,7 @@ const ProfileForm = () => {
                             name="gender"
                             value={formData.gender}
                             onChange={handleInputChange}
-                            className={styles.select}
+                            className={getInputClassName('gender')}
                             disabled={true}
                             style={{ 
                                 cursor: 'not-allowed', 
@@ -442,6 +560,57 @@ const ProfileForm = () => {
                                     disabled={saving}
                                 >
                                     {saving ? 'Deleting...' : 'Delete Account'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Success Modal */}
+            {showSuccessModal && (
+                <div className={styles.modalOverlay}>
+                    <div className={styles.successModal}>
+                        <div className={styles.modalContent}>
+                            <div className={styles.successIcon}>
+                                <svg 
+                                    className={styles.checkmark} 
+                                    viewBox="0 0 52 52"
+                                    fill="none" 
+                                    xmlns="http://www.w3.org/2000/svg"
+                                >
+                                    <circle 
+                                        className={styles.checkmarkCircle} 
+                                        cx="26" 
+                                        cy="26" 
+                                        r="25" 
+                                        fill="none"
+                                        stroke="#22c55e"
+                                        strokeWidth="2"
+                                    />
+                                    <path 
+                                        className={styles.checkmarkCheck} 
+                                        fill="none" 
+                                        stroke="#22c55e" 
+                                        strokeWidth="3" 
+                                        strokeLinecap="round" 
+                                        strokeLinejoin="round" 
+                                        d="M14.5 26.5l7.5 7.5 15.5-15.5"
+                                    />
+                                </svg>
+                            </div>
+                            <h3 className={styles.successTitle}>
+                                Account Deleted Successfully!
+                            </h3>
+                            <p className={styles.successMessage}>
+                                Your account has been permanently deleted. You will be redirected to the login page in a few seconds.
+                            </p>
+                            <div className={styles.successActions}>
+                                <button 
+                                    className={styles.redirectButton} 
+                                    onClick={handleSuccessModalClose}
+                                >
+                                    Go to Login Now
                                 </button>
                             </div>
                         </div>
