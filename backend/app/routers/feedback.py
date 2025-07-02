@@ -5,7 +5,7 @@ from typing import Optional
 import os
 from sqlalchemy.orm import Session
 from backend.database.database import get_db
-from backend.app.crud.feedback import create_feedback
+from backend.app.crud.feedback import create_feedback, get_feedback_by_presentation_id
 
 router = APIRouter(prefix="/feedback", tags=["Feedback Service"])
 
@@ -106,4 +106,11 @@ async def custom_feedback(
             create_feedback(db, presentation_id, feedback_data)
             return JSONResponse(status_code=resp.status_code, content=feedback_data)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to contact feedback service: {str(e)}") 
+        raise HTTPException(status_code=500, detail=f"Failed to contact feedback service: {str(e)}")
+
+@router.get("/presentation/{presentation_id}/feedback")
+def get_presentation_feedback(presentation_id: int, db: Session = Depends(get_db)):
+    feedback = get_feedback_by_presentation_id(db, presentation_id)
+    if not feedback:
+        raise HTTPException(status_code=404, detail="Feedback not found for this presentation.")
+    return feedback.data 

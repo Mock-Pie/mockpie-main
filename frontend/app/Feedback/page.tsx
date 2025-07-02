@@ -9,7 +9,7 @@ import VisualAnalysisCard from "./components/VisualAnalysisCard";
 import ContentAnalysisCard from "./components/ContentAnalysisCard";
 import InsightsPanel from "./components/InsightsPanel";
 import LoadingFeedback from "./components/LoadingFeedback";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 
 // Define the type for the feedback data
 interface FeedbackData {
@@ -39,6 +39,8 @@ declare global {
 const Feedback = () => {
     const router = useRouter();
     const pathname = usePathname();
+    const searchParams = useSearchParams();
+    const presentationId = searchParams.get("presentationId");
     const [feedback, setFeedback] = useState<FeedbackData | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -53,9 +55,23 @@ const Feedback = () => {
                 return;
             }
         }
-        setError("No feedback data found. Please upload or record a presentation first.");
-        setLoading(false);
-    }, [pathname]);
+        // If not in localStorage, fetch from backend
+        if (!presentationId) {
+            setError("No presentation ID provided.");
+            setLoading(false);
+            return;
+        }
+        fetch(`/feedback/presentation/${presentationId}/feedback`)
+            .then(res => res.ok ? res.json() : Promise.reject("Failed to fetch feedback"))
+            .then(data => {
+                setFeedback(data);
+                setLoading(false);
+            })
+            .catch(err => {
+                setError(typeof err === "string" ? err : "Error loading feedback");
+                setLoading(false);
+            });
+    }, [pathname, presentationId]);
 
     if (loading) return <LoadingFeedback />;
     if (error) return <div style={{ padding: 32, textAlign: "center", color: "red" }}>{error}</div>;
