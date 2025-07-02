@@ -36,6 +36,7 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(health.router)
 app.include_router(utils.router)
+app.include_router(utils.ai_router)  # Include AI service router
 app.include_router(presentations.router)
 app.include_router(users.router)
 app.include_router(upcoming_presentations.router)
