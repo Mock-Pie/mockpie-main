@@ -217,7 +217,12 @@ const Dashboard = () => {
             </div>
 
           {/* Presentation Details Table */}
-          <PresentationTable />
+          <PresentationTable 
+            submittedTrials={submittedTrialsData}
+            upcomingPresentations={upcomingPresentations}
+            loading={presentationsLoading || upcomingLoading}
+            onRefresh={refreshAllData}
+          />
           </div>
 
           {/* Right Column - Sidebar Content */}

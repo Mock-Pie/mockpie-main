@@ -996,6 +996,16 @@
   font-weight: 700;
 }
 
+/* Refresh Animation */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* Responsive Design */
 @media (max-width: 1200px) {
   .modernDashboardGrid {
