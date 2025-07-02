@@ -569,6 +569,14 @@ async def api_custom_feedback(
                 logger.error(f"{service} analysis error: {e}")
                 results[service] = {"error": str(e)}
 
+        # Post-process results using EnhancedFeedbackGenerator
+        try:
+            enhanced_feedback = await analyzers["enhanced_feedback_generator"].generate_comprehensive_feedback(results)
+            results["enhanced_feedback"] = enhanced_feedback
+        except Exception as e:
+            logger.error(f"Enhanced feedback generation error: {e}")
+            results["enhanced_feedback"] = {"error": str(e)}
+
         return JSONResponse(content=results, status_code=200)
     except Exception as e:
         logger.error(f"Custom feedback API error: {e}")
