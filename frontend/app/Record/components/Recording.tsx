@@ -18,7 +18,7 @@ import {
     FiTarget
 } from "react-icons/fi";
 import styles from "../page.module.css";
-import FocusModal from "./FocusModal";
+import FocusModal from "../../components/shared/FocusModal";
 
 const Recording = () => {
     const router = useRouter();

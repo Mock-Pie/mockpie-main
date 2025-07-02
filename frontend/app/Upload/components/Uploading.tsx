@@ -3,7 +3,7 @@ import React, { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { FiUploadCloud, FiFile, FiCheck, FiX, FiTarget } from "react-icons/fi";
 import styles from "../page.module.css";
-import FocusModal from "./FocusModal";
+import FocusModal from "../../components/shared/FocusModal";
 
 const Uploading = () => {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);

@@ -1,5 +1,4 @@
 import React from 'react';
-import { FiUploadCloud } from 'react-icons/fi';
 import styles from "../page.module.css";
 
 const Header = () => {
