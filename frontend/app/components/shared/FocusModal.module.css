@@ -123,8 +123,15 @@
 .categoryHeader {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 12px;
   margin-bottom: 8px;
+}
+
+.categoryHeader > div:first-child {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .categoryHeader svg {
@@ -137,6 +144,44 @@
   font-size: 18px;
   font-weight: 600;
   color: var(--white);
+}
+
+/* Select All Container */
+.selectAllContainer {
+  display: flex;
+  align-items: center;
+}
+
+.selectAllLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.selectAllLabel:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 206, 84, 0.3);
+}
+
+.selectAllCheckbox {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--naples-yellow);
+  cursor: pointer;
+  border-radius: 3px;
+}
+
+.selectAllText {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--light-grey);
+  white-space: nowrap;
 }
 
 /* Options List */
@@ -272,5 +317,15 @@
   
   .categoriesContainer {
     gap: 24px;
+  }
+
+  .categoryHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .selectAllContainer {
+    align-self: flex-end;
   }
 } 

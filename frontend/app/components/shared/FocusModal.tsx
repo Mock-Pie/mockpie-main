@@ -55,6 +55,24 @@ const FocusModal: React.FC<FocusModalProps> = ({ isOpen, onClose, onSave, select
     });
   };
 
+  const handleSelectAllCategory = (category: string) => {
+    const categoryOptions = focusOptions.filter(option => option.category === category);
+    const categoryIds = categoryOptions.map(option => option.id);
+    
+    setLocalSelectedFocus(prev => {
+      const allCategorySelected = categoryIds.every(id => prev.includes(id));
+      
+      if (allCategorySelected) {
+        // If all are selected, deselect all in this category
+        return prev.filter(id => !categoryIds.includes(id));
+      } else {
+        // If not all are selected, select all in this category
+        const otherCategories = prev.filter(id => !categoryIds.includes(id));
+        return [...otherCategories, ...categoryIds];
+      }
+    });
+  };
+
   const handleSave = () => {
     onSave(localSelectedFocus);
     onClose();
@@ -76,6 +94,18 @@ const FocusModal: React.FC<FocusModalProps> = ({ isOpen, onClose, onSave, select
       case 'content': return 'Content Analysis';
       default: return 'Analysis';
     }
+  };
+
+  const isAllCategorySelected = (category: string) => {
+    const categoryOptions = focusOptions.filter(option => option.category === category);
+    const categoryIds = categoryOptions.map(option => option.id);
+    return categoryIds.every(id => localSelectedFocus.includes(id));
+  };
+
+  const isSomeCategorySelected = (category: string) => {
+    const categoryOptions = focusOptions.filter(option => option.category === category);
+    const categoryIds = categoryOptions.map(option => option.id);
+    return categoryIds.some(id => localSelectedFocus.includes(id));
   };
 
   const speechOptions = focusOptions.filter(option => option.category === 'speech');
@@ -109,6 +139,22 @@ const FocusModal: React.FC<FocusModalProps> = ({ isOpen, onClose, onSave, select
             <div className={styles.categoryHeader}>
               {getCategoryIcon('speech')}
               <h3>{getCategoryTitle('speech')}</h3>
+              <div className={styles.selectAllContainer}>
+                <label className={styles.selectAllLabel}>
+                  <input
+                    type="checkbox"
+                    checked={isAllCategorySelected('speech')}
+                    ref={(input) => {
+                      if (input) {
+                        input.indeterminate = isSomeCategorySelected('speech') && !isAllCategorySelected('speech');
+                      }
+                    }}
+                    onChange={() => handleSelectAllCategory('speech')}
+                    className={styles.selectAllCheckbox}
+                  />
+                  <span className={styles.selectAllText}>Select All</span>
+                </label>
+              </div>
             </div>
             <div className={styles.optionsList}>
               {speechOptions.map((option) => (
@@ -134,6 +180,22 @@ const FocusModal: React.FC<FocusModalProps> = ({ isOpen, onClose, onSave, select
             <div className={styles.categoryHeader}>
               {getCategoryIcon('visual')}
               <h3>{getCategoryTitle('visual')}</h3>
+              <div className={styles.selectAllContainer}>
+                <label className={styles.selectAllLabel}>
+                  <input
+                    type="checkbox"
+                    checked={isAllCategorySelected('visual')}
+                    ref={(input) => {
+                      if (input) {
+                        input.indeterminate = isSomeCategorySelected('visual') && !isAllCategorySelected('visual');
+                      }
+                    }}
+                    onChange={() => handleSelectAllCategory('visual')}
+                    className={styles.selectAllCheckbox}
+                  />
+                  <span className={styles.selectAllText}>Select All</span>
+                </label>
+              </div>
             </div>
             <div className={styles.optionsList}>
               {visualOptions.map((option) => (
@@ -159,6 +221,22 @@ const FocusModal: React.FC<FocusModalProps> = ({ isOpen, onClose, onSave, select
             <div className={styles.categoryHeader}>
               {getCategoryIcon('content')}
               <h3>{getCategoryTitle('content')}</h3>
+              <div className={styles.selectAllContainer}>
+                <label className={styles.selectAllLabel}>
+                  <input
+                    type="checkbox"
+                    checked={isAllCategorySelected('content')}
+                    ref={(input) => {
+                      if (input) {
+                        input.indeterminate = isSomeCategorySelected('content') && !isAllCategorySelected('content');
+                      }
+                    }}
+                    onChange={() => handleSelectAllCategory('content')}
+                    className={styles.selectAllCheckbox}
+                  />
+                  <span className={styles.selectAllText}>Select All</span>
+                </label>
+              </div>
             </div>
             <div className={styles.optionsList}>
               {contentOptions.map((option) => (

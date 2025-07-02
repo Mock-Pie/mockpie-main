@@ -1,6 +1,7 @@
 "use client";
 import React from 'react';
-import { FiZap, FiTrendingUp, FiAlertTriangle, FiCheckCircle, FiArrowRight } from 'react-icons/fi';
+import { FiZap, FiTrendingUp, FiAlertTriangle, FiCheckCircle, FiArrowRight, FiShare2, FiVideo } from 'react-icons/fi';
+import { useRouter } from 'next/navigation';
 import styles from './InsightsPanel.module.css';
 
 interface Insight {
@@ -21,6 +22,8 @@ const InsightsPanel: React.FC<InsightsPanelProps> = ({
   keyTakeaways,
   nextSteps
 }) => {
+  const router = useRouter();
+
   const getInsightIcon = (type: string) => {
     switch (type) {
       case 'strength': return <FiCheckCircle />;
@@ -54,6 +57,30 @@ const InsightsPanel: React.FC<InsightsPanelProps> = ({
       case 'medium': return styles.mediumPriority;
       case 'low': return styles.lowPriority;
       default: return styles.lowPriority;
+    }
+  };
+
+  const handlePracticeAgain = () => {
+    router.push('/UploadRecordVideos');
+  };
+
+  const handleShare = () => {
+    // Implement share functionality
+    if (navigator.share) {
+      navigator.share({
+        title: 'My Presentation Feedback - MockPie',
+        text: 'Check out my presentation analysis and feedback from MockPie!',
+        url: window.location.href,
+      }).catch((error) => {
+        console.log('Error sharing:', error);
+        // Fallback: copy to clipboard
+        navigator.clipboard.writeText(window.location.href);
+        alert('Link copied to clipboard!');
+      });
+    } else {
+      // Fallback for browsers that don't support Web Share API
+      navigator.clipboard.writeText(window.location.href);
+      alert('Link copied to clipboard!');
     }
   };
 
@@ -137,13 +164,13 @@ const InsightsPanel: React.FC<InsightsPanelProps> = ({
 
       {/* Action Buttons */}
       <div className={styles.actionButtons}>
-        <button className={styles.primaryButton}>
-          <FiTrendingUp />
+        <button className={styles.primaryButton} onClick={handlePracticeAgain}>
+          <FiVideo />
           Practice Again
         </button>
-        <button className={styles.secondaryButton}>
-          <FiCheckCircle />
-          Save Report
+        <button className={styles.secondaryButton} onClick={handleShare}>
+          <FiShare2 />
+          Share
         </button>
       </div>
     </div>

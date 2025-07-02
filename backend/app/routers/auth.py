@@ -12,6 +12,7 @@ from backend.app.controllers.authentication.user_login import LoginUser
 from backend.app.controllers.authentication.forgot_password import ForgotPassword
 from backend.app.controllers.authentication.reset_password import ResetPassword
 from backend.app.controllers.authentication.restore_account_otp import RestoreAccountOTP
+from backend.app.controllers.authentication.send_verification_otp import SendVerificationOTP
 from backend.app.schemas.user.user_schema import UserAuthResponse, UserResponse, UserUpdate
 from backend.app.utils.redis_client import RedisClient
 from backend.app.utils.redis_dependency import get_redis_client
@@ -67,23 +68,31 @@ async def refresh_token(
 
 @router.post("/forgot-password", status_code=status.HTTP_200_OK)
 async def forgot_password(
-    email: str = Form(...),
+    email: EmailStr = Form(...),
     db: Session = Depends(get_db)
-):
+) -> Dict[str, Any]:
+    """
+    Send OTP for password reset
+    """
     return await ForgotPassword.forgot_password(email=email, db=db)
 
 
 @router.post("/reset-password", status_code=status.HTTP_200_OK)
 async def reset_password(
     email: EmailStr = Form(...),
+    otp: str = Form(...),
     new_password: str = Form(...),
     confirm_password: str = Form(...),
     db: Session = Depends(get_db)
 ) -> Dict[str, Any]:
+    """
+    Reset password using OTP
+    """
     return await ResetPassword.reset_password(
-        email=email,
-        new_password=new_password,
-        confirm_password=confirm_password,
+        email=email, 
+        otp=otp, 
+        new_password=new_password, 
+        confirm_password=confirm_password, 
         db=db
     )
 
@@ -97,6 +106,17 @@ async def verify_user_otp(
     return VerifyOTP.verify_user_otp(email=email, otp=otp, db=db)
 
 
+@router.post("/send-verification-otp", status_code=status.HTTP_200_OK)
+async def send_verification_otp(
+    email: EmailStr = Form(...),
+    db: Session = Depends(get_db)
+) -> Dict[str, Any]:
+    """
+    Send OTP for email verification (for unverified users)
+    """
+    return await SendVerificationOTP.send_verification_otp(email=email, db=db)
+
+
 @router.post("/restore-account-otp", status_code=status.HTTP_200_OK)
 async def send_restore_account_otp(
     email: EmailStr = Form(...),
@@ -108,9 +128,25 @@ async def send_restore_account_otp(
     return await RestoreAccountOTP.send_restore_otp(email=email, db=db)
 
 
-@router.get("/me", response_model=UserResponse)
-async def get_current_user(current_user: User = Depends(TokenHandler.get_current_user)):
-    return UserResponse.model_validate(current_user)
+@router.post("/logout", status_code=status.HTTP_200_OK)
+async def logout_user(
+    current_user: User = Depends(TokenHandler.get_current_user),
+    redis: RedisClient = Depends(get_redis_client)
+) -> Dict[str, Any]:
+    """
+    Logout user and invalidate tokens
+    """
+    return await TokenHandler.logout_user(current_user=current_user, redis=redis)
+
+
+@router.get("/me", response_model=UserResponse, status_code=status.HTTP_200_OK)
+async def get_current_user(
+    current_user: User = Depends(TokenHandler.get_current_user)
+):
+    """
+    Get current user information
+    """
+    return current_user
 
 
 @router.put("/me", response_model=UserResponse)
@@ -181,21 +217,6 @@ async def update_current_user(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to update user profile"
         )
-
-
-@router.post("/logout", status_code=status.HTTP_200_OK)
-async def logout(
-    current_user: User = Depends(TokenHandler.get_current_user),
-    redis: RedisClient = Depends(get_redis_client)
-):
-    # Attempt to revoke tokens and get the result
-    revocation_success = TokenHandler.revoke_tokens(current_user.id, redis=redis)
-    
-    if not revocation_success:
-        # Log the issue but still respond with success to the client
-        print(f"Warning: There was an issue revoking tokens for user {current_user.id}")
-    
-    return {"message": "Successfully logged out", "tokens_revoked": revocation_success}
 
 
 @router.delete("/cleanup-temp-user", status_code=status.HTTP_200_OK)

@@ -1,16 +1,17 @@
 "use client";
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { FcGoogle } from "react-icons/fc";
-import { FaExclamationCircle, FaExclamationTriangle } from "react-icons/fa";
+import { FaExclamationCircle, FaExclamationTriangle, FaCheckCircle } from "react-icons/fa";
 import { signIn } from "next-auth/react";
 import styles from "../page.module.css";
 import Image from "next/image";
 
 const LoginForm = () => {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [formData, setFormData] = useState({
         identifier: "",
         password: "",
@@ -23,6 +24,19 @@ const LoginForm = () => {
     const [loading, setLoading] = useState(false);
     const [googleLoading, setGoogleLoading] = useState(false);
     const [apiError, setApiError] = useState("");
+    const [successMessage, setSuccessMessage] = useState("");
+
+    // Check for success message from URL parameters
+    useEffect(() => {
+        const message = searchParams?.get("message");
+        if (message) {
+            setSuccessMessage(message);
+            // Clear the message from URL without reloading the page
+            const newUrl = new URL(window.location.href);
+            newUrl.searchParams.delete("message");
+            window.history.replaceState({}, "", newUrl.toString());
+        }
+    }, [searchParams]);
 
     const validateField = useCallback((name: string, value: string) => {
         switch (name) {
@@ -51,7 +65,12 @@ const LoginForm = () => {
         if (apiError) {
             setApiError("");
         }
-    }, [formErrors, apiError]);
+
+        // Clear success message when user starts typing
+        if (successMessage) {
+            setSuccessMessage("");
+        }
+    }, [formErrors, apiError, successMessage]);
 
     const validateForm = useCallback(() => {
         const newErrors = {
@@ -63,9 +82,34 @@ const LoginForm = () => {
         return Object.values(newErrors).every((error) => !error);
     }, [formData, validateField]);
 
+    const sendVerificationOTP = async (email: string) => {
+        try {
+            const formDataToSend = new FormData();
+            formDataToSend.append('email', email);
+
+            const response = await fetch("http://localhost:8081/auth/send-verification-otp", {
+                method: "POST",
+                body: formDataToSend,
+            });
+
+            if (response.ok) {
+                console.log('Verification OTP sent successfully');
+                return true;
+            } else {
+                const errorData = await response.json();
+                console.error('Failed to send verification OTP:', errorData);
+                return false;
+            }
+        } catch (error) {
+            console.error('Error sending verification OTP:', error);
+            return false;
+        }
+    };
+
     const handleSubmit = useCallback(async (e: React.FormEvent) => {
         e.preventDefault();
         setApiError("");
+        setSuccessMessage("");
         
         if (!validateForm()) {
             return;
@@ -100,19 +144,37 @@ const LoginForm = () => {
                 const errorData = await response.json();
                 console.log("Login error response:", errorData);
                 
-                // Handle different error response formats
-                let errorMessage = "Login failed. Please check your credentials.";
-                
-                if (typeof errorData.detail === 'string') {
-                    errorMessage = errorData.detail;
-                } else if (Array.isArray(errorData.detail)) {
-                    // Handle validation errors from FastAPI/Pydantic
-                    errorMessage = errorData.detail.map((err: any) => err.msg || err.message).join(', ');
-                } else if (errorData.message) {
-                    errorMessage = errorData.message;
+                // Check if user is not verified (status code 403 or specific error message)
+                if (response.status === 403 || 
+                    (errorData.detail && typeof errorData.detail === 'string' && 
+                     (errorData.detail.toLowerCase().includes('not verified') || 
+                      errorData.detail.toLowerCase().includes('email not verified') ||
+                      errorData.detail.toLowerCase().includes('account not verified')))) {
+                    
+                    // Send verification OTP
+                    const otpSent = await sendVerificationOTP(formData.identifier.trim());
+                    
+                    if (otpSent) {
+                        // Redirect to OTP verification page
+                        router.push(`/OTPVerifcation?email=${encodeURIComponent(formData.identifier.trim())}&from=login`);
+                    } else {
+                        setApiError("Account not verified. Failed to send verification code. Please try again or contact support.");
+                    }
+                } else {
+                    // Handle other error response formats
+                    let errorMessage = "Login failed. Please check your credentials.";
+                    
+                    if (typeof errorData.detail === 'string') {
+                        errorMessage = errorData.detail;
+                    } else if (Array.isArray(errorData.detail)) {
+                        // Handle validation errors from FastAPI/Pydantic
+                        errorMessage = errorData.detail.map((err: any) => err.msg || err.message).join(', ');
+                    } else if (errorData.message) {
+                        errorMessage = errorData.message;
+                    }
+                    
+                    setApiError(errorMessage);
                 }
-                
-                setApiError(errorMessage);
             }
         } catch (error) {
             console.error("Login error:", error);
@@ -125,6 +187,7 @@ const LoginForm = () => {
     const handleGoogleSignIn = useCallback(async () => {
         setGoogleLoading(true);
         setApiError("");
+        setSuccessMessage("");
         
         try {
             const result = await signIn("google", {
@@ -233,6 +296,25 @@ const LoginForm = () => {
                             </div>
                         )}
                     </div>
+
+                    {successMessage && (
+                        <div style={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            gap: '8px',
+                            padding: '12px 16px',
+                            background: 'rgba(72, 187, 120, 0.1)',
+                            border: '1px solid rgba(72, 187, 120, 0.3)',
+                            borderRadius: '8px',
+                            color: '#2f855a',
+                            fontSize: '14px',
+                            fontWeight: '500',
+                            marginBottom: '16px'
+                        }}>
+                            <FaCheckCircle />
+                            <span>{successMessage}</span>
+                        </div>
+                    )}
 
                     {apiError && (
                         <div className={styles['error-message']} style={{ marginBottom: '16px' }}>
