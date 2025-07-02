@@ -300,12 +300,26 @@ const Recording = () => {
 
             if (uploadResponse.ok) {
                 const data = await uploadResponse.json();
-                setUploadStatus("Upload successful!");
-                console.log("Upload response:", data);
-                
-                setTimeout(() => {
+                setUploadStatus("Upload successful! Generating feedback...");
+                // POST to feedback API
+                const feedbackForm = new FormData();
+                // Assume the recorded video is available as a Blob in chunksRef.current
+                const videoBlob = new Blob(chunksRef.current, { type: videoFormat.mimeType });
+                feedbackForm.append("file", videoBlob, "recorded_video.mp4");
+                const feedbackRes = await fetch("http://localhost:8081/feedback/enhanced-overall-feedback", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${accessToken}`,
+                    },
+                    body: feedbackForm,
+                });
+                if (feedbackRes.ok) {
+                    const feedbackData = await feedbackRes.json();
+                    localStorage.setItem("feedbackData", JSON.stringify(feedbackData));
                     router.push("/Feedback");
-                }, 2000);
+                } else {
+                    setUploadStatus("Failed to generate feedback. Please try again later.");
+                }
             } else {
                 const errorData = await uploadResponse.json();
                 

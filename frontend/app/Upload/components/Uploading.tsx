@@ -135,7 +135,6 @@ const Uploading = () => {
         try {
             setIsUploading(true);
             setUploadStatus("Uploading...");
-
             const response = await fetch("http://localhost:8081/presentations/upload", {
                 method: "POST",
                 headers: {
@@ -143,16 +142,27 @@ const Uploading = () => {
                 },
                 body: formData,
             });
-
             if (response.ok) {
                 const data = await response.json();
-                setUploadStatus("Upload successful!");
-                console.log("Upload response:", data);
-                
-                // Redirect to feedback after successful upload
-                setTimeout(() => {
+                setUploadStatus("Upload successful! Generating feedback...");
+                // POST to feedback API
+                const feedbackForm = new FormData();
+                feedbackForm.append("file", selectedFile);
+                const feedbackRes = await fetch("http://localhost:8081/feedback/enhanced-overall-feedback", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${accessToken}`,
+                    },
+                    body: feedbackForm,
+                });
+                if (feedbackRes.ok) {
+                    const feedbackData = await feedbackRes.json();
+                    localStorage.setItem("feedbackData", JSON.stringify(feedbackData));
+                    console.log("Feedback data stored in localStorage:", feedbackData);
                     router.push("/Feedback");
-                }, 2000);
+                } else {
+                    setUploadStatus("Failed to generate feedback. Please try again later.");
+                }
             } else {
                 const errorData = await response.json();
                 
