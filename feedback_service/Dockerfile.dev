@@ -1,0 +1,42 @@
+FROM python:3.11-slim
+
+# Set working directory
+WORKDIR /app
+
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    gcc g++ cmake \
+    libglib2.0-0 libsm6 libxext6 libxrender-dev libgomp1 \
+    libopencv-dev python3-opencv \
+    ffmpeg libsndfile1 libportaudio2 libasound2-dev \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Upgrade pip
+RUN pip install --upgrade pip
+
+# Install PyTorch CPU-only first (to avoid CUDA downloads)
+RUN pip install torch==2.1.2+cpu torchaudio==2.1.2+cpu --index-url https://download.pytorch.org/whl/cpu
+
+# Copy requirements and install other dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Create directories
+RUN mkdir -p /app/uploads /app/temp /app/logs
+
+# Expose port
+EXPOSE 8082
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8082/health || exit 1
+
+# Copy the application code
+# Run application with hot reload for development
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8082", "--reload", "--log-level", "debug"]
