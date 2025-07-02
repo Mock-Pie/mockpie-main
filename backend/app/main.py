@@ -7,7 +7,7 @@ import traceback
 import os
 
 from backend.app.middleware.redis_middleware import RedisMiddleware
-from backend.app.routers import auth, health, presentations, utils, users, upcoming_presentations
+from backend.app.routers import auth, health, presentations, utils, users, upcoming_presentations, feedback
 
 
 # Set up logging
@@ -40,6 +40,7 @@ app.include_router(utils.ai_router)  # Include AI service router
 app.include_router(presentations.router)
 app.include_router(users.router)
 app.include_router(upcoming_presentations.router)
+app.include_router(feedback.router)
 
 # Mount static files for uploaded videos
 uploads_dir = "uploads"  # Relative to the app working directory
