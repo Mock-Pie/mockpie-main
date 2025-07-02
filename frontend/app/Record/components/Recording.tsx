@@ -300,13 +300,22 @@ const Recording = () => {
 
             if (uploadResponse.ok) {
                 const data = await uploadResponse.json();
+                // Save presentationId to localStorage before anything else
+                if (data && data.id) {
+                    localStorage.setItem("presentationId", data.id.toString());
+                }
                 setUploadStatus("Upload successful! Generating feedback...");
                 // POST to feedback API
                 const feedbackForm = new FormData();
                 // Assume the recorded video is available as a Blob in chunksRef.current
                 const videoBlob = new Blob(chunksRef.current, { type: videoFormat.mimeType });
                 feedbackForm.append("file", videoBlob, "recorded_video.mp4");
-                const feedbackRes = await fetch("http://localhost:8081/feedback/enhanced-overall-feedback", {
+                feedbackForm.append("services", JSON.stringify(selectedFocus));
+                const presentationId = localStorage.getItem("presentationId");
+                if (presentationId) {
+                    feedbackForm.append("presentation_id", presentationId);
+                }
+                const feedbackRes = await fetch("http://localhost:8081/feedback/custom-feedback", {
                     method: "POST",
                     headers: {
                         "Authorization": `Bearer ${accessToken}`,

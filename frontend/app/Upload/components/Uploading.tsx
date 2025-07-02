@@ -144,11 +144,20 @@ const Uploading = () => {
             });
             if (response.ok) {
                 const data = await response.json();
+                // Save presentationId to localStorage before anything else
+                if (data && data.presentation_id) {
+                    localStorage.setItem("presentationId", data.presentation_id);
+                }
                 setUploadStatus("Upload successful! Generating feedback...");
                 // POST to feedback API
                 const feedbackForm = new FormData();
                 feedbackForm.append("file", selectedFile);
-                const feedbackRes = await fetch("http://localhost:8081/feedback/enhanced-overall-feedback", {
+                feedbackForm.append("services", selectedFocus.join(","));
+                feedbackForm.append("presentation_id", data.presentation_id);
+                console.log(data.presentation_id);
+                console.log(JSON.stringify(selectedFocus));
+                console.log(selectedFile);
+                const feedbackRes = await fetch("http://localhost:8081/feedback/custom-feedback", {
                     method: "POST",
                     headers: {
                         "Authorization": `Bearer ${accessToken}`,

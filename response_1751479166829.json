@@ -1,0 +1,2102 @@
+{
+  "eye_contact": {
+    "raw_data": [
+      {
+        "timestamp": 0,
+        "attention_zone": "no_face",
+        "pupils_detected": false,
+        "engagement_score": 0
+      },
+      {
+        "timestamp": 1,
+        "attention_zone": "no_face",
+        "pupils_detected": false,
+        "engagement_score": 0
+      },
+      {
+        "timestamp": 2,
+        "attention_zone": "no_face",
+        "pupils_detected": false,
+        "engagement_score": 0
+      },
+      {
+        "timestamp": 3,
+        "attention_zone": "no_face",
+        "pupils_detected": false,
+        "engagement_score": 0
+      },
+      {
+        "timestamp": 4,
+        "attention_zone": "no_face",
+        "pupils_detected": false,
+        "engagement_score": 0
+      },
+      {
+        "timestamp": 5,
+        "attention_zone": "no_face",
+        "pupils_detected": false,
+        "engagement_score": 0
+      },
+      {
+        "timestamp": 6,
+        "attention_zone": "no_face",
+        "pupils_detected": false,
+        "engagement_score": 0
+      },
+      {
+        "timestamp": 7,
+        "attention_zone": "no_face",
+        "pupils_detected": false,
+        "engagement_score": 0
+      },
+      {
+        "timestamp": 8,
+        "attention_zone": "no_face",
+        "pupils_detected": false,
+        "engagement_score": 0
+      },
+      {
+        "timestamp": 9,
+        "attention_zone": "no_face",
+        "pupils_detected": false,
+        "engagement_score": 0
+      }
+    ],
+    "attention_score": 10,
+    "confidence_metrics": {
+      "average_confidence": 6.774193548387096,
+      "center_attention_ratio": 0.6774193548387096
+    },
+    "engagement_metrics": {
+      "frames_with_face": 21,
+      "zone_distribution": {
+        "center": 21,
+        "no_face": 10
+      },
+      "face_detection_rate": 0.6774193548387096,
+      "total_frames_analyzed": 31,
+      "average_engagement_score": 10
+    },
+    "presentation_patterns": {
+      "zone_distribution": {
+        "center": 21,
+        "no_face": 10
+      },
+      "pattern_quality_score": 6.774193548387096
+    }
+  },
+  "filler_words": {
+    "error": "Unknown service: filler_words"
+  },
+  "hand_gestures": {
+    "error": "Unknown service: hand_gestures"
+  },
+  "speaking_rate": {
+    "error": "Unknown service: speaking_rate"
+  },
+  "used_criteria": [
+    "speech_emotion",
+    "speaking_rate",
+    "pitch_analysis",
+    "filler_words",
+    "stutter_detection",
+    "facial_emotion",
+    "eye_contact",
+    "hand_gestures",
+    "posture_analysis",
+    "lexical_richness",
+    "keyword_relevance"
+  ],
+  "facial_emotion": {
+    "overall_score": 10,
+    "analysis_method": "heuristic",
+    "recommendations": [
+      "Good facial expression control! Keep up the engaging presentation style"
+    ],
+    "temporal_analysis": {
+      "total_duration": 20,
+      "emotion_changes": [],
+      "change_frequency": 0,
+      "emotional_consistency": "high"
+    },
+    "emotion_statistics": {
+      "dominant_emotion": {
+        "emotion": "neutral",
+        "probability": 0.5999999999999999
+      },
+      "emotion_averages": {
+        "sad": 0.20000000000000004,
+        "fear": 0,
+        "angry": 0,
+        "happy": 0.20000000000000004,
+        "disgust": 0,
+        "neutral": 0.5999999999999999,
+        "surprise": 0
+      },
+      "negativity_score": 0.20000000000000004,
+      "neutrality_score": 0.5999999999999999,
+      "positivity_score": 0.20000000000000004,
+      "emotional_variability": 0.2060315014550851
+    },
+    "engagement_metrics": {
+      "visual_appeal": "medium",
+      "engagement_level": "high",
+      "engagement_score": 10
+    },
+    "face_detection_rate": 0.6774193548387096,
+    "total_analyzed_frames": 21
+  },
+  "pitch_analysis": {
+    "overall_score": 10,
+    "speaking_style": {
+      "monotone_risk": false,
+      "speaking_style": "highly_dynamic",
+      "engagement_score": 10,
+      "expressiveness_level": "high"
+    },
+    "recommendations": [
+      "Work on maintaining consistent voicing throughout speech"
+    ],
+    "pitch_statistics": {
+      "max_pitch": 478.5698910403223,
+      "min_pitch": 75.29244318001734,
+      "std_pitch": 35.282850643409844,
+      "mean_pitch": 119.0820967189251,
+      "pitch_range": 403.27744786030496,
+      "median_pitch": 112.21985796485906,
+      "voiced_frames_percentage": 51.554232804232804
+    },
+    "variation_metrics": {
+      "pitch_dynamism": 4.846378040914926,
+      "semitone_range": 32.01783184780395,
+      "coefficient_of_variation": 29.6290136095685
+    },
+    "intonation_patterns": {
+      "contour_type": "flat",
+      "overall_slope": -0.0037874882251094457,
+      "stress_pattern": {
+        "stress_points": 25,
+        "stress_frequency": 1.603592046183451,
+        "average_stress_height": 205.45697363274496
+      },
+      "pitch_movements": {
+        "falls": 340,
+        "rises": 339,
+        "total_movements": 679
+      },
+      "intonation_variability": 7.28875234039964
+    }
+  },
+  "speech_emotion": {
+    "emotions": {
+      "fear": 0.4081906278928121,
+      "angry": 0.491778035958608,
+      "happy": 0.005225825332066354,
+      "disgust": 0.09480551133553188
+    },
+    "overall_score": 1.9973426329506276,
+    "analysis_method": "enhanced_wav2vec2_presentation_analysis",
+    "dominant_emotion": {
+      "emotion": "angry",
+      "confidence": 0.491778035958608
+    },
+    "emotion_analysis": {
+      "fear": {
+        "max": 0.541847288608551,
+        "min": 0.16361021995544434,
+        "std": 0.17319329913729262,
+        "mean": 0.4081906278928121
+      },
+      "angry": {
+        "max": 0.8196030259132385,
+        "min": 0.2975150942802429,
+        "std": 0.2331281016151399,
+        "mean": 0.491778035958608
+      },
+      "happy": {
+        "max": 0.010859203524887562,
+        "min": 0.00013976234185975045,
+        "std": 0.0043932729080840525,
+        "mean": 0.005225825332066354
+      },
+      "disgust": {
+        "max": 0.17869199812412262,
+        "min": 0.016647033393383026,
+        "std": 0.06627845407901096,
+        "mean": 0.09480551133553188
+      }
+    },
+    "neutrality_score": 0,
+    "temporal_analysis": {
+      "confidence_trend": [
+        0,
+        0,
+        0
+      ],
+      "engagement_trend": [
+        4.378244018851546,
+        0,
+        0.3651135880500078
+      ],
+      "segments_analyzed": 3
+    },
+    "emotional_intensity": 0.491778035958608,
+    "presentation_metrics": {
+      "emotional_range": 0.48655221062654164,
+      "confidence_score": 0,
+      "engagement_score": 1.5811192023005178,
+      "emotion_consistency": 7.615034361302362
+    }
+  },
+  "lexical_richness": {
+    "language": "english",
+    "assessment": {
+      "richness_level": "good",
+      "richness_score": 6,
+      "language_variety": "moderate",
+      "vocabulary_sophistication": "medium"
+    },
+    "overall_score": 6,
+    "recommendations": [
+      "Expand your vocabulary - use more diverse terminology",
+      "Use more content words and fewer filler words"
+    ],
+    "richness_metrics": {
+      "hdd": 0.7306506038890015,
+      "mtld": 56.72803792569658,
+      "type_token_ratio": 0.5925925925925926
+    },
+    "transcript_length": 81,
+    "complexity_analysis": {
+      "total_sentences": 1,
+      "sentence_variety": "medium",
+      "complex_word_ratio": 0.20987654320987653,
+      "average_syllables_per_word": 1.4197530864197532,
+      "average_words_per_sentence": 81
+    },
+    "vocabulary_statistics": {
+      "total_words": 81,
+      "unique_words": 48,
+      "content_words": 42,
+      "hapax_legomena": 30,
+      "vocabulary_size": 48,
+      "content_word_ratio": 0.5185185185185185,
+      "average_word_length": 4.679012345679013,
+      "most_frequent_words": [
+        [
+          "the",
+          7
+        ],
+        [
+          "in",
+          4
+        ],
+        [
+          "you",
+          4
+        ],
+        [
+          "of",
+          4
+        ],
+        [
+          "learn",
+          3
+        ],
+        [
+          "and",
+          3
+        ],
+        [
+          "learning",
+          3
+        ],
+        [
+          "algorithms",
+          3
+        ],
+        [
+          "this",
+          2
+        ],
+        [
+          "class",
+          2
+        ]
+      ],
+      "unique_content_words": 28
+    }
+  },
+  "posture_analysis": {
+    "overall_score": 9.076923076923077,
+    "pose_segments": {
+      "Hands Behind Back": [
+        {
+          "duration": 10,
+          "end_time": 10,
+          "pose_type": "Hands Behind Back",
+          "start_time": 0
+        }
+      ]
+    },
+    "posture_metrics": {
+      "main_issues": [
+        "Hands Behind Back"
+      ],
+      "posture_quality": "excellent",
+      "most_problematic": "Hands Behind Back",
+      "total_penalty_points": 0.923076923076923,
+      "overall_posture_score": 9.076923076923077,
+      "professionalism_impact": "low"
+    },
+    "recommendations": [
+      "Bring hands into view - hidden hands reduce trust and engagement",
+      "Use visible hand gestures to support your message"
+    ],
+    "posture_timeline": [
+      {
+        "bad_poses": [
+          "Hands Behind Back"
+        ],
+        "timestamp": 0,
+        "frame_number": 0,
+        "pose_durations": {
+          "Hands Behind Back": 0
+        }
+      },
+      {
+        "bad_poses": [
+          "Hands Behind Back"
+        ],
+        "timestamp": 0.3333333333333333,
+        "frame_number": 10,
+        "pose_durations": {
+          "Hands Behind Back": 0.3333333333333333
+        }
+      },
+      {
+        "bad_poses": [
+          "Hands Behind Back"
+        ],
+        "timestamp": 0.6666666666666666,
+        "frame_number": 20,
+        "pose_durations": {
+          "Hands Behind Back": 0.6666666666666666
+        }
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 1,
+        "frame_number": 30,
+        "pose_durations": {
+          "Hands Behind Back": 0.6666666666666666
+        }
+      },
+      {
+        "bad_poses": [
+          "Hands Behind Back"
+        ],
+        "timestamp": 1.3333333333333333,
+        "frame_number": 40,
+        "pose_durations": {
+          "Hands Behind Back": 1.3333333333333333
+        }
+      },
+      {
+        "bad_poses": [
+          "Hands Behind Back"
+        ],
+        "timestamp": 1.6666666666666667,
+        "frame_number": 50,
+        "pose_durations": {
+          "Hands Behind Back": 1.6666666666666667
+        }
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 2,
+        "frame_number": 60,
+        "pose_durations": {
+          "Hands Behind Back": 1.6666666666666667
+        }
+      },
+      {
+        "bad_poses": [
+          "Hands Behind Back"
+        ],
+        "timestamp": 2.3333333333333335,
+        "frame_number": 70,
+        "pose_durations": {
+          "Hands Behind Back": 2.3333333333333335
+        }
+      },
+      {
+        "bad_poses": [
+          "Hands Behind Back"
+        ],
+        "timestamp": 2.6666666666666665,
+        "frame_number": 80,
+        "pose_durations": {
+          "Hands Behind Back": 2.6666666666666665
+        }
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 3,
+        "frame_number": 90,
+        "pose_durations": {
+          "Hands Behind Back": 2.6666666666666665
+        }
+      },
+      {
+        "bad_poses": [
+          "Hands Behind Back"
+        ],
+        "timestamp": 3.3333333333333335,
+        "frame_number": 100,
+        "pose_durations": {
+          "Hands Behind Back": 3.3333333333333335
+        }
+      },
+      {
+        "bad_poses": [
+          "Hands Behind Back"
+        ],
+        "timestamp": 3.6666666666666665,
+        "frame_number": 110,
+        "pose_durations": {
+          "Hands Behind Back": 3.6666666666666665
+        }
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 4,
+        "frame_number": 120,
+        "pose_durations": {
+          "Hands Behind Back": 3.6666666666666665
+        }
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 4.333333333333333,
+        "frame_number": 130,
+        "pose_durations": {
+          "Hands Behind Back": 3.6666666666666665
+        }
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 4.666666666666667,
+        "frame_number": 140,
+        "pose_durations": {
+          "Hands Behind Back": 3.6666666666666665
+        }
+      },
+      {
+        "bad_poses": [
+          "Hands Behind Back"
+        ],
+        "timestamp": 5,
+        "frame_number": 150,
+        "pose_durations": {
+          "Hands Behind Back": 5
+        }
+      },
+      {
+        "bad_poses": [
+          "Hands Behind Back"
+        ],
+        "timestamp": 5.333333333333333,
+        "frame_number": 160,
+        "pose_durations": {
+          "Hands Behind Back": 5.333333333333333
+        }
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 5.666666666666667,
+        "frame_number": 170,
+        "pose_durations": {
+          "Hands Behind Back": 5.333333333333333
+        }
+      },
+      {
+        "bad_poses": [
+          "Hands Behind Back"
+        ],
+        "timestamp": 6,
+        "frame_number": 180,
+        "pose_durations": {
+          "Hands Behind Back": 6
+        }
+      },
+      {
+        "bad_poses": [
+          "Hands Behind Back"
+        ],
+        "timestamp": 6.333333333333333,
+        "frame_number": 190,
+        "pose_durations": {
+          "Hands Behind Back": 6.333333333333333
+        }
+      },
+      {
+        "bad_poses": [
+          "Hands Behind Back"
+        ],
+        "timestamp": 6.666666666666667,
+        "frame_number": 200,
+        "pose_durations": {
+          "Hands Behind Back": 6.666666666666667
+        }
+      },
+      {
+        "bad_poses": [
+          "Hands Behind Back"
+        ],
+        "timestamp": 7,
+        "frame_number": 210,
+        "pose_durations": {
+          "Hands Behind Back": 7
+        }
+      },
+      {
+        "bad_poses": [
+          "Hands Behind Back"
+        ],
+        "timestamp": 7.333333333333333,
+        "frame_number": 220,
+        "pose_durations": {
+          "Hands Behind Back": 7.333333333333333
+        }
+      },
+      {
+        "bad_poses": [
+          "Hands Behind Back"
+        ],
+        "timestamp": 7.666666666666667,
+        "frame_number": 230,
+        "pose_durations": {
+          "Hands Behind Back": 7.666666666666667
+        }
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 8,
+        "frame_number": 240,
+        "pose_durations": {
+          "Hands Behind Back": 7.666666666666667
+        }
+      },
+      {
+        "bad_poses": [
+          "Hands Behind Back"
+        ],
+        "timestamp": 8.333333333333334,
+        "frame_number": 250,
+        "pose_durations": {
+          "Hands Behind Back": 8.333333333333334
+        }
+      },
+      {
+        "bad_poses": [
+          "Hands Behind Back"
+        ],
+        "timestamp": 8.666666666666666,
+        "frame_number": 260,
+        "pose_durations": {
+          "Hands Behind Back": 8.666666666666666
+        }
+      },
+      {
+        "bad_poses": [
+          "Hands Behind Back"
+        ],
+        "timestamp": 9,
+        "frame_number": 270,
+        "pose_durations": {
+          "Hands Behind Back": 9
+        }
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 9.333333333333334,
+        "frame_number": 280,
+        "pose_durations": {
+          "Hands Behind Back": 9
+        }
+      },
+      {
+        "bad_poses": [
+          "Hands Behind Back"
+        ],
+        "timestamp": 9.666666666666666,
+        "frame_number": 290,
+        "pose_durations": {
+          "Hands Behind Back": 9.666666666666666
+        }
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 10,
+        "frame_number": 300,
+        "pose_durations": {}
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 10.333333333333334,
+        "frame_number": 310,
+        "pose_durations": {}
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 10.666666666666666,
+        "frame_number": 320,
+        "pose_durations": {}
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 11,
+        "frame_number": 330,
+        "pose_durations": {}
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 11.333333333333334,
+        "frame_number": 340,
+        "pose_durations": {}
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 11.666666666666666,
+        "frame_number": 350,
+        "pose_durations": {}
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 12,
+        "frame_number": 360,
+        "pose_durations": {}
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 12.333333333333334,
+        "frame_number": 370,
+        "pose_durations": {}
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 12.666666666666666,
+        "frame_number": 380,
+        "pose_durations": {}
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 13,
+        "frame_number": 390,
+        "pose_durations": {}
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 13.333333333333334,
+        "frame_number": 400,
+        "pose_durations": {}
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 13.666666666666666,
+        "frame_number": 410,
+        "pose_durations": {}
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 14,
+        "frame_number": 420,
+        "pose_durations": {}
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 14.333333333333334,
+        "frame_number": 430,
+        "pose_durations": {}
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 14.666666666666666,
+        "frame_number": 440,
+        "pose_durations": {}
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 15,
+        "frame_number": 450,
+        "pose_durations": {}
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 15.333333333333334,
+        "frame_number": 460,
+        "pose_durations": {}
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 15.666666666666666,
+        "frame_number": 470,
+        "pose_durations": {}
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 16,
+        "frame_number": 480,
+        "pose_durations": {}
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 16.333333333333332,
+        "frame_number": 490,
+        "pose_durations": {}
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 16.666666666666668,
+        "frame_number": 500,
+        "pose_durations": {}
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 17,
+        "frame_number": 510,
+        "pose_durations": {}
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 17.333333333333332,
+        "frame_number": 520,
+        "pose_durations": {}
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 17.666666666666668,
+        "frame_number": 530,
+        "pose_durations": {}
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 18,
+        "frame_number": 540,
+        "pose_durations": {}
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 18.333333333333332,
+        "frame_number": 550,
+        "pose_durations": {}
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 18.666666666666668,
+        "frame_number": 560,
+        "pose_durations": {}
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 19,
+        "frame_number": 570,
+        "pose_durations": {}
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 19.333333333333332,
+        "frame_number": 580,
+        "pose_durations": {}
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 19.666666666666668,
+        "frame_number": 590,
+        "pose_durations": {}
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 20,
+        "frame_number": 600,
+        "pose_durations": {}
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 20.333333333333332,
+        "frame_number": 610,
+        "pose_durations": {}
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 20.666666666666668,
+        "frame_number": 620,
+        "pose_durations": {}
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 21,
+        "frame_number": 630,
+        "pose_durations": {}
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 21.333333333333332,
+        "frame_number": 640,
+        "pose_durations": {}
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 21.666666666666668,
+        "frame_number": 650,
+        "pose_durations": {}
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 22,
+        "frame_number": 660,
+        "pose_durations": {}
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 22.333333333333332,
+        "frame_number": 670,
+        "pose_durations": {}
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 22.666666666666668,
+        "frame_number": 680,
+        "pose_durations": {}
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 23,
+        "frame_number": 690,
+        "pose_durations": {}
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 23.333333333333332,
+        "frame_number": 700,
+        "pose_durations": {}
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 23.666666666666668,
+        "frame_number": 710,
+        "pose_durations": {}
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 24,
+        "frame_number": 720,
+        "pose_durations": {}
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 24.333333333333332,
+        "frame_number": 730,
+        "pose_durations": {}
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 24.666666666666668,
+        "frame_number": 740,
+        "pose_durations": {}
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 25,
+        "frame_number": 750,
+        "pose_durations": {}
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 25.333333333333332,
+        "frame_number": 760,
+        "pose_durations": {}
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 25.666666666666668,
+        "frame_number": 770,
+        "pose_durations": {}
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 26,
+        "frame_number": 780,
+        "pose_durations": {}
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 26.333333333333332,
+        "frame_number": 790,
+        "pose_durations": {}
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 26.666666666666668,
+        "frame_number": 800,
+        "pose_durations": {}
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 27,
+        "frame_number": 810,
+        "pose_durations": {}
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 27.333333333333332,
+        "frame_number": 820,
+        "pose_durations": {}
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 27.666666666666668,
+        "frame_number": 830,
+        "pose_durations": {}
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 28,
+        "frame_number": 840,
+        "pose_durations": {}
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 28.333333333333332,
+        "frame_number": 850,
+        "pose_durations": {}
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 28.666666666666668,
+        "frame_number": 860,
+        "pose_durations": {}
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 29,
+        "frame_number": 870,
+        "pose_durations": {}
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 29.333333333333332,
+        "frame_number": 880,
+        "pose_durations": {}
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 29.666666666666668,
+        "frame_number": 890,
+        "pose_durations": {}
+      },
+      {
+        "bad_poses": [],
+        "timestamp": 30,
+        "frame_number": 900,
+        "pose_durations": {}
+      }
+    ],
+    "flat_pose_segments": [
+      {
+        "bad_pose": "Hands Behind Back",
+        "duration": 10,
+        "end_time": 10,
+        "start_time": 0
+      }
+    ],
+    "bad_posture_summary": {
+      "pose_counts": {
+        "Hands Behind Back": 21
+      },
+      "pose_segments": {
+        "Hands Behind Back": [
+          {
+            "duration": 10,
+            "end_time": 10,
+            "pose_type": "Hands Behind Back",
+            "start_time": 0
+          }
+        ]
+      },
+      "pose_percentages": {
+        "Hands Behind Back": 23.076923076923077
+      },
+      "most_common_issues": [
+        [
+          "Hands Behind Back",
+          21
+        ]
+      ],
+      "pose_max_durations": {
+        "Hands Behind Back": 9.666666666666666
+      },
+      "total_frames_analyzed": 91
+    }
+  },
+  "enhanced_feedback": {
+    "summary": {
+      "key_highlights": [
+        "Strong speech performance",
+        "Strong visual performance"
+      ],
+      "overall_performance": "Exceptional",
+      "primary_focus_areas": [
+        "content development",
+        "confidence development"
+      ]
+    },
+    "overall_score": 11.13,
+    "category_scores": {
+      "speech": {
+        "score": 16.24,
+        "weight": 0.4,
+        "description": "Speech and vocal delivery analysis",
+        "models_used": 4,
+        "total_models": 7
+      },
+      "visual": {
+        "score": 9.67,
+        "weight": 0.35,
+        "description": "Visual presentation and body language",
+        "models_used": 3,
+        "total_models": 4
+      },
+      "content": {
+        "score": 5,
+        "weight": 0.15,
+        "description": "Content relevance and focus",
+        "models_used": 1,
+        "total_models": 1
+      },
+      "confidence": {
+        "score": 5,
+        "weight": 0.1,
+        "description": "Overall presenter confidence assessment",
+        "models_used": 0,
+        "total_models": 1
+      }
+    },
+    "recommendations": [
+      "Practice varying your tone and pitch to express different emotions",
+      "Record yourself and listen for emotional engagement",
+      "Work on connecting emotionally with your audience"
+    ],
+    "score_breakdown": {
+      "overall_score": 11.13,
+      "model_breakdown": {
+        "eye_contact": {
+          "score": 10,
+          "weight": 0.12,
+          "contribution": 1.2
+        },
+        "facial_emotion": {
+          "score": 10,
+          "weight": 0.1,
+          "contribution": 1
+        },
+        "pitch_analysis": {
+          "score": 10,
+          "weight": 0.09,
+          "contribution": 0.8999999999999999
+        },
+        "speech_emotion": {
+          "score": 4.91778035958608,
+          "weight": 0.12,
+          "contribution": 0.5901336431503296
+        },
+        "lexical_richness": {
+          "score": 60,
+          "weight": 0.08,
+          "contribution": 4.8
+        },
+        "posture_analysis": {
+          "score": 9.076923076923077,
+          "weight": 0.12,
+          "contribution": 1.0892307692307692
+        },
+        "keyword_relevance": {
+          "score": 5,
+          "weight": 0.05,
+          "contribution": 0.25
+        },
+        "stutter_detection": {
+          "score": 3.0758109129965305,
+          "weight": 0.12,
+          "contribution": 0.36909730955958364
+        }
+      },
+      "category_breakdown": {
+        "speech": {
+          "score": 16.24,
+          "weight": 0.4,
+          "contribution": 6.4959999999999996
+        },
+        "visual": {
+          "score": 9.67,
+          "weight": 0.35,
+          "contribution": 3.3844999999999996
+        },
+        "content": {
+          "score": 5,
+          "weight": 0.15,
+          "contribution": 0.75
+        },
+        "confidence": {
+          "score": 5,
+          "weight": 0.1,
+          "contribution": 0.5
+        }
+      },
+      "score_distribution": {
+        "good": 0,
+        "poor": 1,
+        "average": 1,
+        "excellent": 5,
+        "below_average": 1
+      }
+    },
+    "detailed_feedback": {
+      "strengths": [
+        "Strong vocal variety and emphasis",
+        "Strong vocabulary sophistication",
+        "Strong facial expression and emotional connection",
+        "Excellent speech skills",
+        "Excellent visual skills"
+      ],
+      "speech_feedback": {
+        "key_metrics": {
+          "average_score": 16.24,
+          "weighted_average": true,
+          "components_analyzed": 4
+        },
+        "specific_feedback": {
+          "pitch_analysis": {
+            "score": 10,
+            "status": "excellent",
+            "feedback": "Excellent pitch analysis performance.",
+            "assessment": "Excellent"
+          },
+          "speech_emotion": {
+            "score": 4.91778035958608,
+            "status": "needs_improvement",
+            "feedback": "Work on expressing emotions more naturally and connecting with your audience.",
+            "assessment": "Below Average"
+          },
+          "lexical_richness": {
+            "score": 60,
+            "status": "excellent",
+            "feedback": "Excellent lexical richness performance.",
+            "assessment": "Excellent"
+          },
+          "stutter_detection": {
+            "score": 3.0758109129965305,
+            "status": "poor",
+            "feedback": "Needs improvement in stutter detection.",
+            "assessment": "Needs Significant Improvement"
+          }
+        },
+        "overall_assessment": "Exceptional speech delivery with excellent vocal variety and clarity."
+      },
+      "visual_feedback": {
+        "key_metrics": {
+          "average_score": 9.67,
+          "weighted_average": true,
+          "components_analyzed": 3
+        },
+        "specific_feedback": {
+          "eye_contact": {
+            "score": 10,
+            "status": "excellent",
+            "feedback": "Limited eye contact (0%). Practice looking at your audience more.",
+            "assessment": "Excellent"
+          },
+          "facial_emotion": {
+            "score": 10,
+            "status": "excellent",
+            "feedback": "Excellent facial expressions and emotional engagement. Face detection rate: 67.7%.",
+            "assessment": "Excellent"
+          },
+          "posture_analysis": {
+            "score": 9.076923076923077,
+            "status": "excellent",
+            "feedback": "Excellent posture and professional appearance. Projects confidence.",
+            "assessment": "Excellent"
+          }
+        },
+        "overall_assessment": "Outstanding visual presentation with excellent body language and engagement."
+      },
+      "content_feedback": {
+        "key_metrics": {
+          "relevance_score": 5
+        },
+        "specific_feedback": {
+          "keyword_relevance": {
+            "score": 5,
+            "status": "needs_improvement",
+            "feedback": "Content could be more focused and relevant to the main topic (relevance score: 0.0/10).",
+            "assessment": "Average"
+          }
+        },
+        "overall_assessment": "Content could be more focused and relevant to the main topic."
+      },
+      "areas_for_improvement": [
+        "Improve emotional expression and engagement",
+        "Improve speech fluency and confidence",
+        "Improve content relevance and focus",
+        "Focus on content development",
+        "Focus on confidence development"
+      ]
+    },
+    "individual_model_scores": {
+      "eye_contact": {
+        "score": 10,
+        "weight": 0.12,
+        "details": {
+          "gaze_patterns": {},
+          "attention_score": 10,
+          "eye_contact_percentage": 0
+        },
+        "category": "visual",
+        "description": "Audience engagement through eye contact",
+        "normalized_score": 10
+      },
+      "facial_emotion": {
+        "score": 10,
+        "weight": 0.1,
+        "details": {
+          "analysis_method": "heuristic",
+          "confidence_score": 0,
+          "dominant_emotion": {
+            "emotion": "neutral",
+            "probability": 0.5999999999999999
+          },
+          "engagement_score": 10,
+          "positivity_score": 0.20000000000000004,
+          "face_detection_rate": 0.6774193548387096
+        },
+        "category": "visual",
+        "description": "Facial expression and emotional connection",
+        "normalized_score": 10
+      },
+      "pitch_analysis": {
+        "score": 10,
+        "weight": 0.09,
+        "details": {},
+        "category": "speech",
+        "description": "Vocal variety and emphasis",
+        "normalized_score": 10
+      },
+      "speech_emotion": {
+        "score": 0.491778035958608,
+        "weight": 0.12,
+        "details": {
+          "emotions": {
+            "fear": 0.4081906278928121,
+            "angry": 0.491778035958608,
+            "happy": 0.005225825332066354,
+            "disgust": 0.09480551133553188
+          },
+          "dominant_emotion": {
+            "emotion": "angry",
+            "confidence": 0.491778035958608
+          },
+          "emotional_variance": 0
+        },
+        "category": "speech",
+        "description": "Emotional expression and engagement",
+        "normalized_score": 4.91778035958608
+      },
+      "lexical_richness": {
+        "score": 6,
+        "weight": 0.08,
+        "details": {},
+        "category": "speech",
+        "description": "Vocabulary sophistication",
+        "normalized_score": 60
+      },
+      "posture_analysis": {
+        "score": 9.076923076923077,
+        "weight": 0.12,
+        "details": {
+          "posture_score": 0,
+          "posture_issues": [],
+          "confidence_score": 0
+        },
+        "category": "visual",
+        "description": "Professional appearance and confidence",
+        "normalized_score": 9.076923076923077
+      },
+      "keyword_relevance": {
+        "score": null,
+        "status": "no_score_available",
+        "weight": 0.05,
+        "details": {
+          "language": "english",
+          "recommendations": [
+            "Use more specific and technical vocabulary related to your topic"
+          ],
+          "topic_coherence": {
+            "topic_focus": "highly_focused",
+            "top_keywords": [
+              "learning algorithms class",
+              "algorithms class learn",
+              "implementing machine learning",
+              "ai learning algorithms",
+              "algorithms learn important",
+              "algorithms learn",
+              "learning algorithms learn",
+              "learning algorithms exactly",
+              "important machine learning",
+              "machine learning algorithms"
+            ],
+            "coherence_score": 0.546448380947113,
+            "keyword_mentions": {
+              "algorithms learn": 0,
+              "ai learning algorithms": 0,
+              "algorithms class learn": 0,
+              "learning algorithms class": 0,
+              "learning algorithms learn": 0,
+              "algorithms learn important": 0,
+              "important machine learning": 1,
+              "learning algorithms exactly": 0,
+              "machine learning algorithms": 2,
+              "implementing machine learning": 1
+            },
+            "semantic_coherence": 0.7107473015785217,
+            "keyword_coverage_percentage": 30
+          },
+          "keyword_diversity": {
+            "score_range": 0.12270000000000003,
+            "score_variance": 0.0012544379555555554,
+            "diversity_score": 0.012544379555555554,
+            "keyword_distribution": "low_diversity",
+            "total_unique_keywords": 15,
+            "average_keyword_length": 2.7333333333333334
+          },
+          "transcript_length": 81,
+          "extracted_keywords": {
+            "yake": [
+              {
+                "score": 0.5,
+                "keyword": "0.007356034450918729"
+              },
+              {
+                "score": 0.5,
+                "keyword": "0.010789150149438433"
+              },
+              {
+                "score": 0.5,
+                "keyword": "0.011702608477945303"
+              },
+              {
+                "score": 0.5,
+                "keyword": "0.03220103098165912"
+              },
+              {
+                "score": 0.5,
+                "keyword": "0.04092131603467187"
+              },
+              {
+                "score": 0.5,
+                "keyword": "0.08696912336096806"
+              },
+              {
+                "score": 0.5,
+                "keyword": "0.08696912336096806"
+              },
+              {
+                "score": 0.5,
+                "keyword": "0.0945348059882261"
+              },
+              {
+                "score": 0.5,
+                "keyword": "0.09825007314012547"
+              },
+              {
+                "score": 0.5,
+                "keyword": "0.09860998442066002"
+              },
+              {
+                "score": 0.5,
+                "keyword": "0.1017420597541625"
+              },
+              {
+                "score": 0.5,
+                "keyword": "0.10939768880985613"
+              },
+              {
+                "score": 0.5,
+                "keyword": "0.11004932132024121"
+              },
+              {
+                "score": 0.5,
+                "keyword": "0.1159518607368357"
+              },
+              {
+                "score": 0.5,
+                "keyword": "0.1159518607368357"
+              }
+            ],
+            "keybert": [
+              {
+                "score": 0.657,
+                "keyword": "learning algorithms class"
+              },
+              {
+                "score": 0.6304,
+                "keyword": "algorithms class learn"
+              },
+              {
+                "score": 0.6301,
+                "keyword": "implementing machine learning"
+              },
+              {
+                "score": 0.6256,
+                "keyword": "ai learning algorithms"
+              },
+              {
+                "score": 0.6254,
+                "keyword": "algorithms learn important"
+              },
+              {
+                "score": 0.618,
+                "keyword": "algorithms learn"
+              },
+              {
+                "score": 0.6165,
+                "keyword": "learning algorithms learn"
+              },
+              {
+                "score": 0.6068,
+                "keyword": "learning algorithms exactly"
+              },
+              {
+                "score": 0.5968,
+                "keyword": "important machine learning"
+              },
+              {
+                "score": 0.5922,
+                "keyword": "machine learning algorithms"
+              },
+              {
+                "score": 0.5803,
+                "keyword": "ai learning"
+              },
+              {
+                "score": 0.5679,
+                "keyword": "learn important machine"
+              },
+              {
+                "score": 0.5548,
+                "keyword": "learning algorithms"
+              },
+              {
+                "score": 0.5368,
+                "keyword": "ai large tech"
+              },
+              {
+                "score": 0.5343,
+                "keyword": "algorithms class"
+              }
+            ],
+            "combined": [
+              {
+                "score": 0.657,
+                "keyword": "learning algorithms class"
+              },
+              {
+                "score": 0.6304,
+                "keyword": "algorithms class learn"
+              },
+              {
+                "score": 0.6301,
+                "keyword": "implementing machine learning"
+              },
+              {
+                "score": 0.6256,
+                "keyword": "ai learning algorithms"
+              },
+              {
+                "score": 0.6254,
+                "keyword": "algorithms learn important"
+              },
+              {
+                "score": 0.618,
+                "keyword": "algorithms learn"
+              },
+              {
+                "score": 0.6165,
+                "keyword": "learning algorithms learn"
+              },
+              {
+                "score": 0.6068,
+                "keyword": "learning algorithms exactly"
+              },
+              {
+                "score": 0.5968,
+                "keyword": "important machine learning"
+              },
+              {
+                "score": 0.5922,
+                "keyword": "machine learning algorithms"
+              },
+              {
+                "score": 0.5803,
+                "keyword": "ai learning"
+              },
+              {
+                "score": 0.5679,
+                "keyword": "learn important machine"
+              },
+              {
+                "score": 0.5548,
+                "keyword": "learning algorithms"
+              },
+              {
+                "score": 0.5368,
+                "keyword": "ai large tech"
+              },
+              {
+                "score": 0.5343,
+                "keyword": "algorithms class"
+              }
+            ]
+          },
+          "relevance_assessment": {
+            "keyword_quality": "low",
+            "assessment_level": "fair",
+            "content_alignment": "no_target",
+            "topic_focus_quality": "highly_focused",
+            "overall_relevance_score": 3.3288678039049002
+          },
+          "target_keyword_analysis": {}
+        },
+        "category": "content",
+        "description": "Content relevance and focus",
+        "normalized_score": 5
+      },
+      "stutter_detection": {
+        "score": 3.0758109129965305,
+        "weight": 0.12,
+        "details": {
+          "stutter_count": 0,
+          "fluency_issues": [],
+          "stutter_frequency": 0
+        },
+        "category": "speech",
+        "description": "Speech fluency and confidence",
+        "normalized_score": 3.0758109129965305
+      }
+    }
+  },
+  "keyword_relevance": {
+    "language": "english",
+    "recommendations": [
+      "Use more specific and technical vocabulary related to your topic"
+    ],
+    "topic_coherence": {
+      "topic_focus": "highly_focused",
+      "top_keywords": [
+        "learning algorithms class",
+        "algorithms class learn",
+        "implementing machine learning",
+        "ai learning algorithms",
+        "algorithms learn important",
+        "algorithms learn",
+        "learning algorithms learn",
+        "learning algorithms exactly",
+        "important machine learning",
+        "machine learning algorithms"
+      ],
+      "coherence_score": 0.546448380947113,
+      "keyword_mentions": {
+        "algorithms learn": 0,
+        "ai learning algorithms": 0,
+        "algorithms class learn": 0,
+        "learning algorithms class": 0,
+        "learning algorithms learn": 0,
+        "algorithms learn important": 0,
+        "important machine learning": 1,
+        "learning algorithms exactly": 0,
+        "machine learning algorithms": 2,
+        "implementing machine learning": 1
+      },
+      "semantic_coherence": 0.7107473015785217,
+      "keyword_coverage_percentage": 30
+    },
+    "keyword_diversity": {
+      "score_range": 0.12270000000000003,
+      "score_variance": 0.0012544379555555554,
+      "diversity_score": 0.012544379555555554,
+      "keyword_distribution": "low_diversity",
+      "total_unique_keywords": 15,
+      "average_keyword_length": 2.7333333333333334
+    },
+    "transcript_length": 81,
+    "extracted_keywords": {
+      "yake": [
+        {
+          "score": 0.5,
+          "keyword": "0.007356034450918729"
+        },
+        {
+          "score": 0.5,
+          "keyword": "0.010789150149438433"
+        },
+        {
+          "score": 0.5,
+          "keyword": "0.011702608477945303"
+        },
+        {
+          "score": 0.5,
+          "keyword": "0.03220103098165912"
+        },
+        {
+          "score": 0.5,
+          "keyword": "0.04092131603467187"
+        },
+        {
+          "score": 0.5,
+          "keyword": "0.08696912336096806"
+        },
+        {
+          "score": 0.5,
+          "keyword": "0.08696912336096806"
+        },
+        {
+          "score": 0.5,
+          "keyword": "0.0945348059882261"
+        },
+        {
+          "score": 0.5,
+          "keyword": "0.09825007314012547"
+        },
+        {
+          "score": 0.5,
+          "keyword": "0.09860998442066002"
+        },
+        {
+          "score": 0.5,
+          "keyword": "0.1017420597541625"
+        },
+        {
+          "score": 0.5,
+          "keyword": "0.10939768880985613"
+        },
+        {
+          "score": 0.5,
+          "keyword": "0.11004932132024121"
+        },
+        {
+          "score": 0.5,
+          "keyword": "0.1159518607368357"
+        },
+        {
+          "score": 0.5,
+          "keyword": "0.1159518607368357"
+        }
+      ],
+      "keybert": [
+        {
+          "score": 0.657,
+          "keyword": "learning algorithms class"
+        },
+        {
+          "score": 0.6304,
+          "keyword": "algorithms class learn"
+        },
+        {
+          "score": 0.6301,
+          "keyword": "implementing machine learning"
+        },
+        {
+          "score": 0.6256,
+          "keyword": "ai learning algorithms"
+        },
+        {
+          "score": 0.6254,
+          "keyword": "algorithms learn important"
+        },
+        {
+          "score": 0.618,
+          "keyword": "algorithms learn"
+        },
+        {
+          "score": 0.6165,
+          "keyword": "learning algorithms learn"
+        },
+        {
+          "score": 0.6068,
+          "keyword": "learning algorithms exactly"
+        },
+        {
+          "score": 0.5968,
+          "keyword": "important machine learning"
+        },
+        {
+          "score": 0.5922,
+          "keyword": "machine learning algorithms"
+        },
+        {
+          "score": 0.5803,
+          "keyword": "ai learning"
+        },
+        {
+          "score": 0.5679,
+          "keyword": "learn important machine"
+        },
+        {
+          "score": 0.5548,
+          "keyword": "learning algorithms"
+        },
+        {
+          "score": 0.5368,
+          "keyword": "ai large tech"
+        },
+        {
+          "score": 0.5343,
+          "keyword": "algorithms class"
+        }
+      ],
+      "combined": [
+        {
+          "score": 0.657,
+          "keyword": "learning algorithms class"
+        },
+        {
+          "score": 0.6304,
+          "keyword": "algorithms class learn"
+        },
+        {
+          "score": 0.6301,
+          "keyword": "implementing machine learning"
+        },
+        {
+          "score": 0.6256,
+          "keyword": "ai learning algorithms"
+        },
+        {
+          "score": 0.6254,
+          "keyword": "algorithms learn important"
+        },
+        {
+          "score": 0.618,
+          "keyword": "algorithms learn"
+        },
+        {
+          "score": 0.6165,
+          "keyword": "learning algorithms learn"
+        },
+        {
+          "score": 0.6068,
+          "keyword": "learning algorithms exactly"
+        },
+        {
+          "score": 0.5968,
+          "keyword": "important machine learning"
+        },
+        {
+          "score": 0.5922,
+          "keyword": "machine learning algorithms"
+        },
+        {
+          "score": 0.5803,
+          "keyword": "ai learning"
+        },
+        {
+          "score": 0.5679,
+          "keyword": "learn important machine"
+        },
+        {
+          "score": 0.5548,
+          "keyword": "learning algorithms"
+        },
+        {
+          "score": 0.5368,
+          "keyword": "ai large tech"
+        },
+        {
+          "score": 0.5343,
+          "keyword": "algorithms class"
+        }
+      ]
+    },
+    "relevance_assessment": {
+      "keyword_quality": "low",
+      "assessment_level": "fair",
+      "content_alignment": "no_target",
+      "topic_focus_quality": "highly_focused",
+      "overall_relevance_score": 3.3288678039049002
+    },
+    "target_keyword_analysis": {}
+  },
+  "stutter_detection": {
+    "assessment": "Significant stuttering detected, speech therapy recommended",
+    "confidence": 0.692418908700347,
+    "all_segments": [
+      {
+        "duration": 5,
+        "end_time": 5,
+        "confidence": 0.12272906303405762,
+        "segment_id": 1,
+        "start_time": 0,
+        "model_output": [
+          {
+            "label": "repetition",
+            "score": 0.8703991174697876
+          },
+          {
+            "label": "nonstutter",
+            "score": 0.12272906303405762
+          },
+          {
+            "label": "blocks",
+            "score": 0.004349101800471544
+          },
+          {
+            "label": "prolongation",
+            "score": 0.002522728405892849
+          }
+        ],
+        "analysis_method": "huggingface_pipeline",
+        "stutter_detected": false,
+        "stutter_probability": 0.12272906303405762
+      },
+      {
+        "duration": 5,
+        "end_time": 10,
+        "confidence": 0.9961699843406677,
+        "segment_id": 2,
+        "start_time": 5,
+        "model_output": [
+          {
+            "label": "nonstutter",
+            "score": 0.9961699843406677
+          },
+          {
+            "label": "repetition",
+            "score": 0.0018374890787526965
+          },
+          {
+            "label": "blocks",
+            "score": 0.00099758745636791
+          },
+          {
+            "label": "prolongation",
+            "score": 0.0009949456434696913
+          }
+        ],
+        "analysis_method": "huggingface_pipeline",
+        "stutter_detected": true,
+        "stutter_probability": 0.9961699843406677
+      },
+      {
+        "duration": 5,
+        "end_time": 15,
+        "confidence": 0.9965571165084839,
+        "segment_id": 3,
+        "start_time": 10,
+        "model_output": [
+          {
+            "label": "nonstutter",
+            "score": 0.9965571165084839
+          },
+          {
+            "label": "repetition",
+            "score": 0.001343284035101533
+          },
+          {
+            "label": "prolongation",
+            "score": 0.0010654851794242859
+          },
+          {
+            "label": "blocks",
+            "score": 0.0010341998422518373
+          }
+        ],
+        "analysis_method": "huggingface_pipeline",
+        "stutter_detected": true,
+        "stutter_probability": 0.9965571165084839
+      },
+      {
+        "duration": 5,
+        "end_time": 20,
+        "confidence": 0.9920933842658997,
+        "segment_id": 4,
+        "start_time": 15,
+        "model_output": [
+          {
+            "label": "nonstutter",
+            "score": 0.9920933842658997
+          },
+          {
+            "label": "repetition",
+            "score": 0.006077148951590061
+          },
+          {
+            "label": "prolongation",
+            "score": 0.0010741222649812698
+          },
+          {
+            "label": "blocks",
+            "score": 0.0007554104668088257
+          }
+        ],
+        "analysis_method": "huggingface_pipeline",
+        "stutter_detected": true,
+        "stutter_probability": 0.9920933842658997
+      },
+      {
+        "duration": 5,
+        "end_time": 25,
+        "confidence": 0.7275928854942322,
+        "segment_id": 5,
+        "start_time": 20,
+        "model_output": [
+          {
+            "label": "nonstutter",
+            "score": 0.7275928854942322
+          },
+          {
+            "label": "repetition",
+            "score": 0.26531848311424255
+          },
+          {
+            "label": "blocks",
+            "score": 0.004055511672049761
+          },
+          {
+            "label": "prolongation",
+            "score": 0.0030331129673868418
+          }
+        ],
+        "analysis_method": "huggingface_pipeline",
+        "stutter_detected": true,
+        "stutter_probability": 0.7275928854942322
+      },
+      {
+        "duration": 5,
+        "end_time": 30,
+        "confidence": 0.9961450099945068,
+        "segment_id": 6,
+        "start_time": 25,
+        "model_output": [
+          {
+            "label": "nonstutter",
+            "score": 0.9961450099945068
+          },
+          {
+            "label": "repetition",
+            "score": 0.0018178763566538692
+          },
+          {
+            "label": "prolongation",
+            "score": 0.0010463664075359702
+          },
+          {
+            "label": "blocks",
+            "score": 0.0009907502681016922
+          }
+        ],
+        "analysis_method": "huggingface_pipeline",
+        "stutter_detected": true,
+        "stutter_probability": 0.9961450099945068
+      },
+      {
+        "duration": 0.27206250000000054,
+        "end_time": 30.2720625,
+        "confidence": 0.015644917264580727,
+        "segment_id": 7,
+        "start_time": 30,
+        "model_output": [
+          {
+            "label": "repetition",
+            "score": 0.7397980690002441
+          },
+          {
+            "label": "blocks",
+            "score": 0.24125570058822632
+          },
+          {
+            "label": "nonstutter",
+            "score": 0.015644917264580727
+          },
+          {
+            "label": "prolongation",
+            "score": 0.0033013038337230682
+          }
+        ],
+        "analysis_method": "huggingface_pipeline",
+        "stutter_detected": false,
+        "stutter_probability": 0.015644917264580727
+      }
+    ],
+    "fluency_score": 3.0758109129965305,
+    "overall_score": 3.0758109129965305,
+    "total_segments": 7,
+    "analysis_method": "huggingface_pipeline",
+    "recommendations": [
+      "Practice speaking at a slower pace, especially during presentations",
+      "Use relaxation techniques before speaking engagements",
+      "Consider joining a speech improvement group or workshop",
+      "Focus on maintaining steady breathing while speaking",
+      "Focus on the 5 segments where stuttering was detected"
+    ],
+    "segment_duration": 5,
+    "stutter_detected": true,
+    "stutter_timeline": [
+      {
+        "duration": 5,
+        "end_time": 10,
+        "confidence": 0.9961699843406677,
+        "segment_id": 2,
+        "start_time": 5,
+        "stutter_probability": 0.9961699843406677
+      },
+      {
+        "duration": 5,
+        "end_time": 15,
+        "confidence": 0.9965571165084839,
+        "segment_id": 3,
+        "start_time": 10,
+        "stutter_probability": 0.9965571165084839
+      },
+      {
+        "duration": 5,
+        "end_time": 20,
+        "confidence": 0.9920933842658997,
+        "segment_id": 4,
+        "start_time": 15,
+        "stutter_probability": 0.9920933842658997
+      },
+      {
+        "duration": 5,
+        "end_time": 25,
+        "confidence": 0.7275928854942322,
+        "segment_id": 5,
+        "start_time": 20,
+        "stutter_probability": 0.7275928854942322
+      },
+      {
+        "duration": 5,
+        "end_time": 30,
+        "confidence": 0.9961450099945068,
+        "segment_id": 6,
+        "start_time": 25,
+        "stutter_probability": 0.9961450099945068
+      }
+    ],
+    "stutter_percentage": 71.42857142857143,
+    "stutter_probability": 0.692418908700347,
+    "total_audio_duration": 30.2720625,
+    "stutter_segments_count": 5,
+    "stutter_frequency_per_minute": 9.910127530953664
+  }
+}
