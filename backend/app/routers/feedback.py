@@ -1,8 +1,11 @@
-from fastapi import APIRouter, UploadFile, File, Form, HTTPException, status
+from fastapi import APIRouter, UploadFile, File, Form, HTTPException, status, Depends
 from fastapi.responses import JSONResponse
 import httpx
 from typing import Optional
 import os
+from sqlalchemy.orm import Session
+from backend.database.database import get_db
+from backend.app.crud.feedback import create_feedback
 
 router = APIRouter(prefix="/feedback", tags=["Feedback Service"])
 
@@ -82,5 +85,25 @@ async def audio_only_feedback(file: UploadFile = File(...)):
     return await proxy_to_feedback_service("audio-only-feedback", file)
 
 @router.post("/custom-feedback")
-async def custom_feedback(file: UploadFile = File(...), services: str = Form(...)):
-    return await proxy_to_feedback_service("custom-feedback", file, {"services": services}) 
+async def custom_feedback(
+    file: UploadFile = File(...),
+    services: str = Form(...),
+    presentation_id: int = Form(...),
+    db: Session = Depends(get_db)
+):
+    # Call feedback service
+    url = f"{FEEDBACK_SERVICE_URL}/custom-feedback"
+    try:
+        async with httpx.AsyncClient(timeout=120) as client:
+            form_data = {"services": services, "presentation_id": str(presentation_id)}
+            files = {"file": (file.filename, await file.read(), file.content_type)}
+            resp = await client.post(url, files=files, data=form_data)
+            feedback_data = resp.json()
+            # Add used_criteria
+            used_criteria = [s.strip() for s in services.split(",") if s.strip()]
+            feedback_data["used_criteria"] = used_criteria
+            # Store feedback in DB
+            create_feedback(db, presentation_id, feedback_data)
+            return JSONResponse(status_code=resp.status_code, content=feedback_data)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to contact feedback service: {str(e)}") 

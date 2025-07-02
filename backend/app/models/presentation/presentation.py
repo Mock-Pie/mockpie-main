@@ -22,3 +22,6 @@ class Presentation(Base):
     # Analysis relationships
     voice_analysis = relationship("VoiceAnalysis", back_populates="presentation", uselist=False)
     body_analysis = relationship("BodyAnalysis", back_populates="presentation", uselist=False)
+    
+    # Feedback relationship
+    feedback = relationship("Feedback", back_populates="presentation", uselist=False)
