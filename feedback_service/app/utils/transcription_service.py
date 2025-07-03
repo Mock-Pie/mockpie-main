@@ -29,7 +29,7 @@ class TranscriptionService:
         }
         logger.info(f"Transcription service configured: method={method}, language={language}")
     
-    async def get_transcription(self, audio_path: str, language: str = "english", force_refresh: bool = False) -> Optional[str]:
+    async def get_transcription(self, audio_path: str, language: str, force_refresh: bool = False) -> Optional[str]:
         """
         Get transcription for audio file, always perform a fresh transcription (no cache)
         """
@@ -166,7 +166,7 @@ class TranscriptionService:
             "config": self._transcription_config
         }
     
-    async def batch_transcribe(self, audio_paths: list) -> Dict[str, Optional[str]]:
+    async def batch_transcribe(self, audio_paths: list, language: str) -> Dict[str, Optional[str]]:
         """
         Transcribe multiple audio files in batch
         
@@ -180,7 +180,8 @@ class TranscriptionService:
         
         for audio_path in audio_paths:
             try:
-                transcription = await self.get_transcription(audio_path)
+                print(f"Transcribing audio: {audio_path} with language: {language}")
+                transcription = await self.get_transcription(audio_path, language)
                 results[audio_path] = transcription
             except Exception as e:
                 logger.error(f"Batch transcription failed for {audio_path}: {e}")

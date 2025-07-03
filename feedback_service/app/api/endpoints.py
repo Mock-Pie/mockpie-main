@@ -82,7 +82,8 @@ async def api_lexical_richness(file: UploadFile = File(...), language: str = For
         return JSONResponse(content={"error": str(e), "status": "failed"}, status_code=500)
 
 @router.post("/api/keyword-relevance")
-async def api_keyword_relevance(file: UploadFile = File(...), keywords: str = Form(""), language: str = Form('english')):
+async def api_keyword_relevance(file: UploadFile = File(...), language: str = Form("english"), keywords: str = Form("")):
+    print(f"Language: {language}, Keywords: {keywords}")
     try:
         file_path = await analyzers["file_processor"].save_uploaded_file(file)
         audio_path, _, _ = await analyzers["file_processor"].extract_components(file_path)

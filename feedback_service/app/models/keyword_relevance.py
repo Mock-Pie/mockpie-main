@@ -80,9 +80,9 @@ class KeywordRelevanceAnalyzer:
         try:
             # Get transcript using centralized service
             if language == 'arabic' and self.transcription_service_arabic:
-                transcript = await self.transcription_service_arabic.get_transcription(audio_path)
+                transcript = await self.transcription_service_arabic.get_transcription(audio_path, language)
             elif self.transcription_service_english:
-                transcript = await self.transcription_service_english.get_transcription(audio_path)
+                transcript = await self.transcription_service_english.get_transcription(audio_path, language)
             else:
                 transcript = None
             
