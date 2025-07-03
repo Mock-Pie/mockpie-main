@@ -8,6 +8,7 @@ import asyncio
 import logging
 from typing import Dict, List, Any, Tuple, Optional
 import os
+import scipy.stats
 
 logger = logging.getLogger(__name__)
 
@@ -155,21 +156,61 @@ class FacialEmotionAnalyzer:
             # Calculate face detection rate
             face_detection_rate = len([d for d in face_detections if d["face_detected"]]) / len(face_detections)
             
-            # Calculate engagement metrics
-            engagement_metrics = await self._calculate_engagement_metrics(emotion_stats)
+            # --- Segment-based analysis ---
+            segment_length = 5.0  # seconds
+            segments = self._group_emotions_by_segment(emotions_over_time, segment_length)
+            segment_analysis = []
+            segment_variabilities = []
+            segment_entropies = []
+            prev_dominant = None
+            all_dominants = []
+            for seg in segments:
+                seg_stats = await self._calculate_emotion_statistics(seg)
+                # Compute entropy for this segment
+                if seg_stats and "emotion_averages" in seg_stats:
+                    entropy = self._emotion_entropy(seg_stats["emotion_averages"])
+                    seg_stats["emotion_entropy"] = entropy
+                    segment_entropies.append(entropy)
+                else:
+                    entropy = 0.0
+                seg_stats["num_frames"] = len(seg)
+                dominant = seg_stats["dominant_emotion"]["emotion"] if seg_stats and "dominant_emotion" in seg_stats else None
+                emotion_change = (prev_dominant is not None and dominant != prev_dominant)
+                seg_stats["emotion_change_from_previous"] = emotion_change
+                segment_analysis.append({
+                    "start_time": seg[0]["timestamp"] if seg else None,
+                    "end_time": seg[-1]["timestamp"] if seg else None,
+                    "emotion_statistics": seg_stats
+                })
+                if seg_stats and "emotional_variability" in seg_stats:
+                    segment_variabilities.append(seg_stats["emotional_variability"])
+                prev_dominant = dominant
+                all_dominants.append(dominant)
+            # Aggregate segment variability and entropy
+            overall_segment_variability = float(np.mean(segment_variabilities)) if segment_variabilities else 0.0
+            overall_segment_entropy = float(np.mean(segment_entropies)) if segment_entropies else 0.0
+            # Calculate engagement metrics (use segment variability and entropy)
+            engagement_metrics = await self._calculate_engagement_metrics(emotion_stats, overall_segment_variability, overall_segment_entropy)
             overall_score = engagement_metrics.get("engagement_score", 5.0)
-            
+            # Check for monotony (all segments have same dominant emotion and low entropy)
+            monotone = (len(set(all_dominants)) == 1 and overall_segment_entropy < 0.5)
+            recommendations = await self._generate_recommendations(emotion_stats, temporal_analysis)
+            if monotone:
+                recommendations.append("Try to vary your facial expressions more throughout your presentation.")
             return {
                 "face_detection_rate": float(face_detection_rate),
                 "total_analyzed_frames": len(emotions_over_time),
                 "emotion_statistics": emotion_stats,
                 "temporal_analysis": temporal_analysis,
+                "segment_analysis": segment_analysis,
+                "segment_variability": overall_segment_variability,
+                "segment_entropy": overall_segment_entropy,
                 "engagement_metrics": engagement_metrics,
                 "overall_score": float(overall_score),
-                "recommendations": await self._generate_recommendations(emotion_stats, temporal_analysis),
+                "recommendations": recommendations,
                 "analysis_method": "transformer" if self._is_emotion_classifier_ready() else "heuristic"
             }
-            
+        
         except Exception as e:
             logger.error(f"Error in facial emotion analysis: {e}")
             return self._get_fallback_result(f"Analysis failed: {str(e)}")
@@ -426,42 +467,34 @@ class FacialEmotionAnalyzer:
             logger.error(f"Error analyzing temporal patterns: {e}")
             return {"pattern": "error", "error": str(e)}
     
-    async def _calculate_engagement_metrics(self, emotion_stats: Dict) -> Dict[str, Any]:
-        """Calculate engagement metrics based on facial emotions"""
+    async def _calculate_engagement_metrics(self, emotion_stats: Dict, segment_variability: float = None, segment_entropy: float = None) -> Dict[str, Any]:
+        """Calculate engagement metrics based on facial emotions, segment variability, and entropy"""
         try:
             if not emotion_stats:
                 return {"engagement_score": 0, "engagement_level": "unknown"}
-            
-            # Calculate engagement score based on emotion distribution
             positivity = emotion_stats.get("positivity_score", 0)
-            variability = emotion_stats.get("emotional_variability", 0)
+            variability = segment_variability if segment_variability is not None else emotion_stats.get("emotional_variability", 0)
+            entropy = segment_entropy if segment_entropy is not None else 0.0
             neutrality = emotion_stats.get("neutrality_score", 0)
-            
-            # High positivity and some variability indicate good engagement
-            # Too much neutrality or negativity reduces engagement
+            # Use entropy as part of engagement (expressiveness)
             engagement_score = (
-                positivity * 4 +  # Positive emotions boost engagement
-                variability * 2 +  # Some emotion variety is good
-                max(0, 0.5 - neutrality) * 2  # Too much neutrality is bad
+                positivity * 4 +
+                variability * 1.5 +
+                entropy * 2 +
+                max(0, 0.5 - neutrality) * 2
             )
-            
-            # Normalize to 0-10 scale
             engagement_score = min(10, max(0, engagement_score * 10))
-            
-            # Classify engagement level
             if engagement_score >= 7:
                 engagement_level = "high"
             elif engagement_score >= 4:
                 engagement_level = "medium"
             else:
                 engagement_level = "low"
-            
             return {
                 "engagement_score": float(engagement_score),
                 "engagement_level": engagement_level,
                 "visual_appeal": "high" if positivity > 0.3 else "medium" if positivity > 0.1 else "low"
             }
-            
         except Exception as e:
             logger.error(f"Error calculating engagement metrics: {e}")
             return {"engagement_score": 0, "engagement_level": "unknown"}
@@ -501,22 +534,30 @@ class FacialEmotionAnalyzer:
             return ["Unable to generate recommendations due to analysis error"]
 
     def _get_fallback_result(self, error_message: str) -> Dict[str, Any]:
-        """Return a fallback result when analysis fails"""
-        return {
-            "error": error_message,
-            "face_detection_rate": 0.0,
-            "total_analyzed_frames": 0,
-            "emotion_statistics": {
-                "emotion_averages": {emotion: 0.0 for emotion in self.emotion_labels},
-                "dominant_emotion": {"emotion": "neutral", "probability": 1.0},
-                "emotional_variability": 0.0,
-                "positivity_score": 0.0,
-                "negativity_score": 0.0,
-                "neutrality_score": 1.0
-            },
-            "temporal_analysis": {"pattern": "no_data"},
-            "engagement_metrics": {"engagement_score": 5.0, "engagement_level": "unknown"},
-            "overall_score": 5.0,
-            "recommendations": ["Unable to analyze facial emotions due to technical issues"],
-            "analysis_method": "fallback"
-        }
+        # Remove this method and all calls to it
+        pass
+
+    def _group_emotions_by_segment(self, emotions_over_time: List[Dict], segment_length: float) -> List[List[Dict]]:
+        """Group frame emotion results into segments of segment_length seconds"""
+        if not emotions_over_time:
+            return []
+        segments = []
+        current_segment = []
+        current_start = emotions_over_time[0]["timestamp"]
+        for frame in emotions_over_time:
+            if frame["timestamp"] - current_start < segment_length:
+                current_segment.append(frame)
+            else:
+                if current_segment:
+                    segments.append(current_segment)
+                current_segment = [frame]
+                current_start = frame["timestamp"]
+        if current_segment:
+            segments.append(current_segment)
+        return segments
+
+    def _emotion_entropy(self, emotion_probs):
+        # emotion_probs: dict of emotion -> probability
+        probs = np.array(list(emotion_probs.values()))
+        probs = np.clip(probs, 1e-8, 1.0)
+        return float(scipy.stats.entropy(probs))

@@ -97,7 +97,7 @@ async def api_wpm_calculator(file: UploadFile = File(...)):
     try:
         file_path = await analyzers["file_processor"].save_uploaded_file(file)
         audio_path, _, _ = await analyzers["file_processor"].extract_components(file_path)
-        result = analyzers["wpm_calculator"].analyze(audio_path, context='presentation')
+        result = await analyzers["wpm_calculator"].analyze_async(audio_path, context='presentation')
         return JSONResponse(content=result, status_code=200)
     except Exception as e:
         logger.error(f"WPM calculator API error: {e}")
@@ -182,7 +182,7 @@ async def api_enhanced_overall_feedback(file: UploadFile = File(...)):
         results = {}
         analysis_tasks = [
             ("speech_emotion", analyzers["speech_emotion"].analyze(audio_path)),
-            ("wpm_analysis", asyncio.create_task(asyncio.to_thread(analyzers["wpm_calculator"].analyze, audio_path, 'presentation'))),
+            ("wpm_analysis", analyzers["wpm_calculator"].analyze_async(audio_path, 'presentation')),
             ("pitch_analysis", analyzers["pitch_analysis"].analyze(audio_path)),
             ("volume_consistency", analyzers["volume_consistency"].analyze(audio_path)),
             ("filler_detection", analyzers["filler_detection"].analyze(audio_path)),
@@ -254,7 +254,7 @@ async def api_overall_feedback(file: UploadFile = File(...)):
         results = {}
         analysis_tasks = [
             ("speech_emotion", analyzers["speech_emotion"].analyze(audio_path)),
-            ("wpm_analysis", asyncio.create_task(asyncio.to_thread(analyzers["wpm_calculator"].analyze, audio_path, 'presentation'))),
+            ("wpm_analysis", analyzers["wpm_calculator"].analyze_async(audio_path, 'presentation')),
             ("pitch_analysis", analyzers["pitch_analysis"].analyze(audio_path)),
             ("volume_consistency", analyzers["volume_consistency"].analyze(audio_path)),
             ("filler_detection", analyzers["filler_detection"].analyze(audio_path)),
@@ -324,7 +324,7 @@ async def api_audio_only_feedback(file: UploadFile = File(...)):
         results = {}
         analysis_tasks = [
             ("speech_emotion", analyzers["speech_emotion"].analyze(audio_path)),
-            ("wpm_analysis", asyncio.create_task(asyncio.to_thread(analyzers["wpm_calculator"].analyze, audio_path, 'presentation'))),
+            ("wpm_analysis", analyzers["wpm_calculator"].analyze_async(audio_path, 'presentation')),
             ("pitch_analysis", analyzers["pitch_analysis"].analyze(audio_path)),
             ("volume_consistency", analyzers["volume_consistency"].analyze(audio_path)),
             ("filler_detection", analyzers["filler_detection"].analyze(audio_path)),

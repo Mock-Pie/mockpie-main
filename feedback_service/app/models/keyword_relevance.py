@@ -45,31 +45,6 @@ class KeywordRelevanceAnalyzer:
             logger.warning(f"Could not load Arabic sentence transformer: {e}")
             self.arabic_sentence_model = None
         
-        # Initialize YAKE extractors for both
-        try:
-            self.english_yake = yake.KeywordExtractor(
-                lan="en",
-                n=3,  # n-gram size
-                dedupLim=0.7,
-                top=20
-            )
-            logger.info("English YAKE extractor initialized")
-        except Exception as e:
-            logger.warning(f"Could not initialize English YAKE: {e}")
-            self.english_yake = None
-        
-        try:
-            self.arabic_yake = yake.KeywordExtractor(
-                lan="ar",
-                n=3,  # n-gram size
-                dedupLim=0.7,
-                top=20
-            )
-            logger.info("Arabic YAKE extractor initialized")
-        except Exception as e:
-            logger.warning(f"Could not initialize Arabic YAKE: {e}")
-            self.arabic_yake = None
-        
         # Arabic text processing patterns
         self.arabic_patterns = {
             'tashkeel': re.compile(r'[\u064B-\u065F\u0670\u06D6-\u06ED\u08D4-\u08FE]'),  # Arabic diacritics
@@ -171,35 +146,18 @@ class KeywordRelevanceAnalyzer:
             if self.transcription_service:
                 # Use centralized transcription service
                 transcription = await self.transcription_service.get_transcription(audio_path)
-                
                 if transcription and isinstance(transcription, str):
                     logger.info(f"Transcription successful: {transcription[:100]}...")
                     return transcription
                 else:
-                    logger.warning("Transcription failed or returned invalid format, using fallback")
-            
-            # Fallback to placeholder transcript
-            fallback = await self._get_fallback_transcript()
-            return fallback if isinstance(fallback, str) else str(fallback)
-            
+                    logger.warning("Transcription failed or returned invalid format")
+                    return ""
+            else:
+                logger.warning("No transcription service provided")
+                return ""
         except Exception as e:
             logger.error(f"Error getting transcript: {e}")
-            try:
-                fallback = await self._get_fallback_transcript()
-                return fallback if isinstance(fallback, str) else str(fallback)
-            except Exception as e2:
-                logger.error(f"Fallback transcript also failed: {e2}")
-                return "Error: Could not generate transcript"
-    
-    async def _get_fallback_transcript(self) -> str:
-        """Fallback transcript for testing"""
-        # Default to English fallback transcript
-        return """
-        Today I want to discuss artificial intelligence and machine learning technologies. 
-        We're focusing on neural networks, deep learning algorithms, and their applications 
-        in natural language processing. These innovative technologies are transforming 
-        how we approach data analysis, pattern recognition, and automated decision making.
-        """
+            return ""
     
     def _detect_language(self, text: str) -> str:
         """Detect language of the text"""
@@ -217,21 +175,16 @@ class KeywordRelevanceAnalyzer:
             return 'english'  # Default to English
     
     async def _extract_keywords(self, text: str, language: str) -> Dict[str, List]:
-        """Extract keywords using multiple methods"""
+        """Extract keywords using only KeyBERT"""
         try:
             keywords = {
                 "keybert": [],
-                "yake": [],
                 "combined": []
             }
-            
             # Extract with KeyBERT
             if language == 'english' and self.english_keybert:
                 try:
-                    # Try different KeyBERT API versions
                     keybert_keywords = []
-                    
-                    # Method 1: Try with top_k (older versions)
                     try:
                         keybert_keywords = self.english_keybert.extract_keywords(
                             text, 
@@ -240,7 +193,6 @@ class KeywordRelevanceAnalyzer:
                             top_k=15
                         )
                     except TypeError:
-                        # Method 2: Try with top_n (newer versions)
                         try:
                             keybert_keywords = self.english_keybert.extract_keywords(
                                 text, 
@@ -249,85 +201,44 @@ class KeywordRelevanceAnalyzer:
                                 top_n=15
                             )
                         except TypeError:
-                            # Method 3: Try simple extraction
                             keybert_keywords = self.english_keybert.extract_keywords(text)
-                    
-                    # Process KeyBERT results
                     if keybert_keywords:
                         if isinstance(keybert_keywords[0], (list, tuple)) and len(keybert_keywords[0]) >= 2:
-                            # Format: [('keyword', score), ...]
                             keywords["keybert"] = [
                                 {"keyword": str(kw[0]), "score": float(kw[1])} 
                                 for kw in keybert_keywords
                             ]
                         else:
-                            # Format: ['keyword', 'keyword', ...]
                             keywords["keybert"] = [
                                 {"keyword": str(kw), "score": 1.0} 
                                 for kw in keybert_keywords
                             ]
-                    
                 except Exception as e:
                     logger.warning(f"English KeyBERT extraction failed: {e}")
-            
-            # Extract with YAKE
-            yake_extractor = self.english_yake if language == 'english' else self.arabic_yake
-            if yake_extractor:
-                try:
-                    yake_keywords = yake_extractor.extract_keywords(text)
-                    keywords["yake"] = []
-                    for kw_data in yake_keywords[:15]:
-                        try:
-                            # YAKE returns (score, keyword) tuple
-                            if isinstance(kw_data, (list, tuple)) and len(kw_data) >= 2:
-                                score = float(kw_data[0]) if isinstance(kw_data[0], (int, float)) else 1.0
-                                keyword = str(kw_data[1])
-                            else:
-                                score = 1.0
-                                keyword = str(kw_data)
-                            
-                            keywords["yake"].append({
-                                "keyword": keyword,
-                                "score": 1.0 / (1.0 + score)  # Convert YAKE score (lower is better)
-                            })
-                        except (IndexError, TypeError, ValueError) as e:
-                            logger.warning(f"Error processing YAKE keyword {kw_data}: {e}")
-                            continue
-                except Exception as e:
-                    logger.warning(f"YAKE extraction failed: {e}")
-            
-            # Combine and deduplicate keywords
+            # Combine and deduplicate keywords (KeyBERT only)
             all_keywords = {}
-            
-            for method_keywords in [keywords["keybert"], keywords["yake"]]:
-                for kw_data in method_keywords:
-                    if isinstance(kw_data, dict) and "keyword" in kw_data:
-                        kw = kw_data["keyword"].lower().strip()
-                        score = kw_data.get("score", 1.0)
-                        
-                        if kw and len(kw) > 1:  # Skip empty or single-character keywords
-                            if kw in all_keywords:
-                                all_keywords[kw] = max(all_keywords[kw], score)
-                            else:
-                                all_keywords[kw] = score
-            
-            # Sort by score
+            for kw_data in keywords["keybert"]:
+                if isinstance(kw_data, dict) and "keyword" in kw_data:
+                    kw = kw_data["keyword"].lower().strip()
+                    score = kw_data.get("score", 1.0)
+                    if kw and len(kw) > 1:
+                        if kw in all_keywords:
+                            all_keywords[kw] = max(all_keywords[kw], score)
+                        else:
+                            all_keywords[kw] = score
             sorted_keywords = sorted(
                 all_keywords.items(), 
                 key=lambda x: x[1], 
                 reverse=True
             )
-            
             keywords["combined"] = [
                 {"keyword": kw, "score": score} 
                 for kw, score in sorted_keywords[:15]
             ]
-            
             return keywords
-            
         except Exception as e:
             logger.error(f"Error extracting keywords: {e}")
-            return {"keybert": [], "yake": [], "combined": []}
+            return {"keybert": [], "combined": []}
     
     async def _analyze_topic_coherence(self, text: str, keywords: Dict, language: str) -> Dict[str, Any]:
         """Analyze topic coherence and consistency"""

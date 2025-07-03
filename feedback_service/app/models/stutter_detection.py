@@ -121,27 +121,19 @@ class StutterDetectionAnalyzer:
     async def _analyze_segment_with_pipeline(self, segment: np.ndarray) -> Dict[str, Any]:
         try:
             result = self.pipeline(segment, sampling_rate=self.sample_rate)
-            if isinstance(result, list) and len(result) > 0:
-                stutter_result = next((pred for pred in result if 'stutter' in pred['label'].lower() or pred['label'].lower() == '1'), None)
-                if stutter_result is None:
-                    stutter_result = max(result, key=lambda x: x['score'])
-                stutter_probability = stutter_result['score']
-                stutter_detected = stutter_probability > 0.7
-                return {
-                    "stutter_detected": stutter_detected,
-                    "stutter_probability": float(stutter_probability),
-                    "confidence": float(stutter_probability),
-                    "model_output": result,
-                    "analysis_method": "huggingface_pipeline"
-                }
-            else:
-                return {
-                    "stutter_detected": False,
-                    "stutter_probability": 0.0,
-                    "confidence": 0.0,
-                    "model_output": result,
-                    "analysis_method": "huggingface_pipeline"
-                }
+            # Define which labels are considered stutter
+            stutter_labels = {"repetition", "prolongation", "blocks", "stutter", "1"}
+            # Find the highest probability for any stutter label
+            stutter_probs = [pred['score'] for pred in result if pred['label'].lower() in stutter_labels]
+            stutter_probability = max(stutter_probs) if stutter_probs else 0.0
+            stutter_detected = stutter_probability > 0.7
+            return {
+                "stutter_detected": stutter_detected,
+                "stutter_probability": float(stutter_probability),
+                "confidence": float(stutter_probability),
+                "model_output": result,
+                "analysis_method": "huggingface_pipeline"
+            }
         except Exception as e:
             logger.error(f"Error in segment pipeline analysis: {e}")
             return {
@@ -293,39 +285,7 @@ class StutterDetectionAnalyzer:
         return time.time()
 
     async def _fallback_analysis(self, audio_data: np.ndarray, audio_path: str) -> Dict[str, Any]:
-        try:
-            logger.warning("Using fallback acoustic analysis for stutter detection")
-            acoustic_features = await self._extract_acoustic_features(audio_data)
-            speech_rate_variation = acoustic_features.get("speech_rate_variation", 0.0)
-            stutter_probability = min(1.0, speech_rate_variation * 0.5)
-            stutter_detected = stutter_probability > 0.3
-            fluency_score = (1.0 - stutter_probability) * 10.0
-            return {
-                "stutter_detected": stutter_detected,
-                "stutter_probability": float(stutter_probability),
-                "confidence": 0.3,
-                "fluency_score": float(fluency_score),
-                "overall_score": float(fluency_score),
-                "analysis_method": "acoustic_fallback",
-                "acoustic_features": acoustic_features,
-                "assessment": await self._generate_assessment(stutter_probability, fluency_score),
-                "recommendations": await self._generate_recommendations({
-                    "stutter_probability": stutter_probability,
-                    "fluency_score": fluency_score
-                }, acoustic_features),
-                "note": "Analysis performed using acoustic features only. ML model unavailable."
-            }
-        except Exception as e:
-            logger.error(f"Error in fallback analysis: {e}")
-            return {
-                "error": str(e),
-                "stutter_detected": False,
-                "stutter_probability": 0.0,
-                "confidence": 0.0,
-                "fluency_score": 5.0,
-                "overall_score": 5.0,
-                "analysis_method": "fallback_error"
-            }
+        pass
 
     async def _extract_acoustic_features(self, audio_data: np.ndarray) -> Dict[str, Any]:
         try:

@@ -20,15 +20,15 @@ interface FocusModalProps {
 const focusOptions: FocusOption[] = [
   // Speech Analysis
   { id: 'speech_emotion', name: 'Speech Emotion', category: 'speech', description: 'Analyze emotional tone in voice' },
-  { id: 'speaking_rate', name: 'Speaking Rate (WPM)', category: 'speech', description: 'Words per minute analysis' },
+  { id: 'wpm_analysis', name: 'Speaking Rate (WPM)', category: 'speech', description: 'Words per minute analysis' },
   { id: 'pitch_analysis', name: 'Pitch Analysis', category: 'speech', description: 'Voice pitch variation and patterns' },
-  { id: 'filler_words', name: 'Filler Word Detection', category: 'speech', description: 'Detect "um", "uh", and other fillers' },
+  { id: 'filler_detection', name: 'Filler Word Detection', category: 'speech', description: 'Detect "um", "uh", and other fillers' },
   { id: 'stutter_detection', name: 'Stutter Detection', category: 'speech', description: 'Identify speech disruptions' },
   
   // Visual Analysis
   { id: 'facial_emotion', name: 'Facial Emotion', category: 'visual', description: 'Facial expression analysis' },
   { id: 'eye_contact', name: 'Eye Contact', category: 'visual', description: 'Monitor audience engagement' },
-  { id: 'hand_gestures', name: 'Hand Gestures', category: 'visual', description: 'Hand movement and gestures' },
+  { id: 'hand_gesture', name: 'Hand Gestures', category: 'visual', description: 'Hand movement and gestures' },
   { id: 'posture_analysis', name: 'Posture Analysis', category: 'visual', description: 'Body positioning and stance' },
   
   // Content Analysis
