@@ -50,8 +50,38 @@ const SubmittedTrials = () => {
       
       if (response.success && response.data) {
         const presentationsData = (response.data as any).videos || [];
-        setPresentations(presentationsData);
-        setFilteredPresentations(presentationsData);
+        
+        // Fetch feedback data for each presentation to get overall scores
+        const presentationsWithScores = await Promise.all(
+          presentationsData.map(async (presentation: Presentation) => {
+            try {
+              const feedbackResponse = await fetch(`http://localhost:8081/feedback/presentation/${presentation.id}/feedback`, {
+                headers: {
+                  'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+                  'Content-Type': 'application/json',
+                },
+              });
+              
+              if (feedbackResponse.ok) {
+                const feedbackData = await feedbackResponse.json();
+                // Extract overall score from enhanced feedback like the Feedback page does
+                const enhanced = feedbackData.enhanced_feedback || {};
+                const overallScore = enhanced.overall_score || feedbackData.overall_score || feedbackData.score || null;
+                return { ...presentation, overall_score: overallScore };
+              } else {
+                // If no feedback available, keep the presentation without score
+                return { ...presentation, overall_score: undefined };
+              }
+            } catch (error) {
+              console.error(`Error fetching feedback for presentation ${presentation.id}:`, error);
+              return { ...presentation, overall_score: undefined };
+            }
+          })
+        );
+        
+        console.log('Presentations with scores:', presentationsWithScores.map((p: Presentation) => ({ id: p.id, title: p.title, overall_score: p.overall_score })));
+        setPresentations(presentationsWithScores);
+        setFilteredPresentations(presentationsWithScores);
       } else {
         setError(response.error || 'Failed to fetch presentations');
         if (response.error?.includes('Authentication expired')) {
@@ -272,6 +302,13 @@ const SubmittedTrials = () => {
     }
   };
 
+  const getScoreClass = (score: number): string => {
+    if (score >= 8) return styles.excellentScore;
+    if (score >= 6) return styles.goodScore;
+    if (score >= 4) return styles.averageScore;
+    return styles.poorScore;
+  };
+
   const getFeedbackText = (presentation: Presentation): string => {
     // Generate feedback based on presentation properties
     const feedbacks = [
@@ -411,7 +448,7 @@ const SubmittedTrials = () => {
                     <th className={styles.tableHeaderCell}>Presentation</th>
                     <th className={styles.tableHeaderCell}>Date</th>
                     <th className={styles.tableHeaderCell}>Size</th>
-                    <th className={styles.tableHeaderCell}>Status</th>
+                    <th className={styles.tableHeaderCell}>Overall Score</th>
                     <th className={styles.tableHeaderCell}>Actions</th>
                   </tr>
                 </thead>
@@ -451,22 +488,16 @@ const SubmittedTrials = () => {
                           'Unknown'
                         }
                       </td>
-                      <td className={styles.feedbackCell}>
-                        <div className={styles.feedbackContent}>
-                          <p className={`${styles.feedbackText} ${expandedFeedback === presentation.id.toString() ? '' : styles.feedbackTruncated}`}>
-                            {expandedFeedback === presentation.id.toString() ? 
-                              getFeedbackText(presentation) : 
-                              `${getFeedbackText(presentation).substring(0, 80)}...`
-                            }
-                          </p>
-                          <button
-                            onClick={() => toggleFeedback(presentation.id.toString())}
-                            className={styles.viewMoreButton}
-                          >
-                            <IoEyeOutline size={12} />
-                            {expandedFeedback === presentation.id.toString() ? 'Show less' : 'View more'}
-                          </button>
-                        </div>
+                      <td className={styles.scoreCell}>
+                        {presentation.overall_score !== undefined ? (
+                          <div className={styles.scoreDisplay}>
+                            <span className={`${styles.scoreValue} ${getScoreClass(presentation.overall_score)}`}>
+                              {presentation.overall_score}/10
+                            </span>
+                          </div>
+                        ) : (
+                          <span className={styles.noScore}>No score yet</span>
+                        )}
                       </td>
                       <td className={styles.actionsCell}>
                         <div className={styles.actionButtons}>

@@ -395,6 +395,53 @@
     color: var(--white);
 }
 
+.scoreCell {
+    padding: 1rem 1.5rem;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.scoreDisplay {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.scoreValue {
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-weight: 600;
+    font-size: 0.875rem;
+    min-width: 3rem;
+    text-align: center;
+}
+
+.excellentScore {
+    background-color: #10B981;
+    color: white;
+}
+
+.goodScore {
+    background-color: #3B82F6;
+    color: white;
+}
+
+.averageScore {
+    background-color: #F59E0B;
+    color: white;
+}
+
+.poorScore {
+    background-color: #EF4444;
+    color: white;
+}
+
+.noScore {
+    color: #9CA3AF;
+    font-style: italic;
+    font-size: 0.875rem;
+}
+
 .feedbackCell {
     padding: 1rem 1.5rem;
 }
@@ -569,6 +616,7 @@
     .trialCell,
     .dateCell,
     .durationCell,
+    .scoreCell,
     .feedbackCell,
     .actionsCell {
         padding: 0.75rem;

@@ -4,6 +4,7 @@ export interface Presentation {
   url: string;
   is_public: boolean;
   uploaded_at: string;
+  overall_score?: number;
   file_info?: {
     file_size?: number;
     file_exists?: boolean;
