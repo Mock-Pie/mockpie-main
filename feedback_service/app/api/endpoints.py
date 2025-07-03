@@ -49,11 +49,11 @@ async def api_volume_consistency(file: UploadFile = File(...)):
         return JSONResponse(content={"error": str(e), "status": "failed"}, status_code=500)
 
 @router.post("/api/filler-detection")
-async def api_filler_detection(file: UploadFile = File(...)):
+async def api_filler_detection(file: UploadFile = File(...), language: str = Form('english')):
     try:
         file_path = await analyzers["file_processor"].save_uploaded_file(file)
         audio_path, _, _ = await analyzers["file_processor"].extract_components(file_path)
-        result = await analyzers["filler_detection"].analyze(audio_path)
+        result = await analyzers["filler_detection"].analyze(audio_path, language=language)
         return JSONResponse(content=result, status_code=200)
     except Exception as e:
         logger.error(f"Filler detection API error: {e}")
@@ -71,22 +71,22 @@ async def api_stutter_detection(file: UploadFile = File(...)):
         return JSONResponse(content={"error": str(e), "status": "failed"}, status_code=500)
 
 @router.post("/api/lexical-richness")
-async def api_lexical_richness(file: UploadFile = File(...)):
+async def api_lexical_richness(file: UploadFile = File(...), language: str = Form('english')):
     try:
         file_path = await analyzers["file_processor"].save_uploaded_file(file)
         audio_path, _, _ = await analyzers["file_processor"].extract_components(file_path)
-        result = await analyzers["lexical_richness"].analyze(audio_path)
+        result = await analyzers["lexical_richness"].analyze(audio_path, language=language)
         return JSONResponse(content=result, status_code=200)
     except Exception as e:
         logger.error(f"Lexical richness API error: {e}")
         return JSONResponse(content={"error": str(e), "status": "failed"}, status_code=500)
 
 @router.post("/api/keyword-relevance")
-async def api_keyword_relevance(file: UploadFile = File(...), keywords: str = Form("")):
+async def api_keyword_relevance(file: UploadFile = File(...), keywords: str = Form(""), language: str = Form('english')):
     try:
         file_path = await analyzers["file_processor"].save_uploaded_file(file)
         audio_path, _, _ = await analyzers["file_processor"].extract_components(file_path)
-        result = await analyzers["keyword_relevance"].analyze(audio_path, keywords)
+        result = await analyzers["keyword_relevance"].analyze(audio_path, keywords, language=language)
         return JSONResponse(content=result, status_code=200)
     except Exception as e:
         logger.error(f"Keyword relevance API error: {e}")
@@ -163,7 +163,7 @@ async def api_posture_analysis(file: UploadFile = File(...)):
 # ============================================================================
 
 @router.post("/api/enhanced-overall-feedback")
-async def api_enhanced_overall_feedback(file: UploadFile = File(...)):
+async def api_enhanced_overall_feedback(file: UploadFile = File(...), language: str = Form('english')):
     """
     Enhanced overall feedback endpoint that provides detailed individual model scores
     and comprehensive overall feedback combining all models.
@@ -185,12 +185,12 @@ async def api_enhanced_overall_feedback(file: UploadFile = File(...)):
         results = {}
         analysis_tasks = [
             ("speech_emotion", analyzers["speech_emotion"].analyze(audio_path)),
-            ("wpm_analysis", analyzers["wpm_calculator"].analyze_async(audio_path, 'presentation')),
+            ("wpm_analysis", analyzers["wpm_calculator"].analyze_async(audio_path, 'presentation', language=language)),
             ("pitch_analysis", analyzers["pitch_analysis"].analyze(audio_path)),
             ("volume_consistency", analyzers["volume_consistency"].analyze(audio_path)),
-            ("filler_detection", analyzers["filler_detection"].analyze(audio_path)),
+            ("filler_detection", analyzers["filler_detection"].analyze(audio_path, language=language)),
             ("stutter_detection", analyzers["stutter_detection"].analyze(audio_path)),
-            ("lexical_richness", analyzers["lexical_richness"].analyze(audio_path)),
+            ("lexical_richness", analyzers["lexical_richness"].analyze(audio_path, language=language)),
         ]
         
         if has_video and video_path:
@@ -240,7 +240,7 @@ async def api_enhanced_overall_feedback(file: UploadFile = File(...)):
 # ============================================================================
 
 @router.post("/api/overall-feedback")
-async def api_overall_feedback(file: UploadFile = File(...)):
+async def api_overall_feedback(file: UploadFile = File(...), language: str = Form('english')):
     try:
         logger.info(f"Overall feedback API called for file: {file.filename}")
         file_path = await analyzers["file_processor"].save_uploaded_file(file)
@@ -257,12 +257,12 @@ async def api_overall_feedback(file: UploadFile = File(...)):
         results = {}
         analysis_tasks = [
             ("speech_emotion", analyzers["speech_emotion"].analyze(audio_path)),
-            ("wpm_analysis", analyzers["wpm_calculator"].analyze_async(audio_path, 'presentation')),
+            ("wpm_analysis", analyzers["wpm_calculator"].analyze_async(audio_path, 'presentation', language=language)),
             ("pitch_analysis", analyzers["pitch_analysis"].analyze(audio_path)),
             ("volume_consistency", analyzers["volume_consistency"].analyze(audio_path)),
-            ("filler_detection", analyzers["filler_detection"].analyze(audio_path)),
+            ("filler_detection", analyzers["filler_detection"].analyze(audio_path, language=language)),
             ("stutter_detection", analyzers["stutter_detection"].analyze(audio_path)),
-            ("lexical_richness", analyzers["lexical_richness"].analyze(audio_path)),
+            ("lexical_richness", analyzers["lexical_richness"].analyze(audio_path, language=language)),
         ]
         if has_video and video_path:
             analysis_tasks.extend([
@@ -310,7 +310,7 @@ async def api_overall_feedback(file: UploadFile = File(...)):
         return JSONResponse(content={"error": str(e), "status": "failed"}, status_code=500)
 
 @router.post("/api/audio-only-feedback")
-async def api_audio_only_feedback(file: UploadFile = File(...)):
+async def api_audio_only_feedback(file: UploadFile = File(...), language: str = Form('english')):
     try:
         logger.info(f"Audio-only feedback API called for file: {file.filename}")
         file_path = await analyzers["file_processor"].save_uploaded_file(file)
@@ -327,12 +327,12 @@ async def api_audio_only_feedback(file: UploadFile = File(...)):
         results = {}
         analysis_tasks = [
             ("speech_emotion", analyzers["speech_emotion"].analyze(audio_path)),
-            ("wpm_analysis", analyzers["wpm_calculator"].analyze_async(audio_path, 'presentation')),
+            ("wpm_analysis", analyzers["wpm_calculator"].analyze_async(audio_path, 'presentation', language=language)),
             ("pitch_analysis", analyzers["pitch_analysis"].analyze(audio_path)),
             ("volume_consistency", analyzers["volume_consistency"].analyze(audio_path)),
-            ("filler_detection", analyzers["filler_detection"].analyze(audio_path)),
+            ("filler_detection", analyzers["filler_detection"].analyze(audio_path, language=language)),
             ("stutter_detection", analyzers["stutter_detection"].analyze(audio_path)),
-            ("lexical_richness", analyzers["lexical_richness"].analyze(audio_path)),
+            ("lexical_richness", analyzers["lexical_richness"].analyze(audio_path, language=language)),
         ]
         
         for name, task in analysis_tasks:
@@ -502,7 +502,7 @@ async def get_api_endpoints():
 async def api_custom_feedback(
     file: UploadFile = File(...),
     services: str = Form(...),
-    language: str = Form('english')
+    language: str = Form(...)
 ):
     """
     Customizable feedback endpoint: upload a video/audio and specify which services to run.
@@ -520,17 +520,17 @@ async def api_custom_feedback(
         # Parse requested services
         requested_services = [s.strip() for s in services.split(",") if s.strip()]
         results = {}
-
+        print(f"Language: {language}")
         # Map of service key to (analyzer key, input type, method, extra kwargs)
         service_map = {
-            "speech_emotion": ("speech_emotion", "audio", "analyze", {}),
-            "pitch_analysis": ("pitch_analysis", "audio", "analyze", {}),
-            "volume_consistency": ("volume_consistency", "audio", "analyze", {}),
-            "filler_detection": ("filler_detection", "audio", "analyze", {}),
-            "stutter_detection": ("stutter_detection", "audio", "analyze", {}),
-            "lexical_richness": ("lexical_richness", "audio", "analyze", {}),
+            "speech_emotion": ("speech_emotion", "audio", "analyze", {"language": language}),
+            "pitch_analysis": ("pitch_analysis", "audio", "analyze", {"language": language}),
+            "volume_consistency": ("volume_consistency", "audio", "analyze", {"language": language}),
+            "filler_detection": ("filler_detection", "audio", "analyze", {"language": language}),
+            "stutter_detection": ("stutter_detection", "audio", "analyze", {"language": language}),
+            "lexical_richness": ("lexical_richness", "audio", "analyze", {"language": language}),
             "wpm_analysis": ("wpm_calculator", "audio", "analyze_async", {"context": "presentation", "language": language}),
-            "keyword_relevance": ("keyword_relevance", "audio", "analyze", {}),
+            "keyword_relevance": ("keyword_relevance", "audio", "analyze", {"language": language}),
             "facial_emotion": ("facial_emotion", "video", "analyze", {}),
             "eye_contact": ("eye_contact", "video", "analyze_eye_contact", {}),
             "hand_gesture": ("hand_gesture", "video", "analyze", {}),

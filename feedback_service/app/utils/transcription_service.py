@@ -31,40 +31,21 @@ class TranscriptionService:
     
     async def get_transcription(self, audio_path: str, language: str = "english", force_refresh: bool = False) -> Optional[str]:
         """
-        Get transcription for audio file, using cache if available
-        
-        Args:
-            audio_path: Path to the audio file
-            language: Language to use for transcription
-            force_refresh: Force re-transcription even if cached
-            
-        Returns:
-            Transcribed text or None if failed
+        Get transcription for audio file, always perform a fresh transcription (no cache)
         """
         try:
-            # Check cache first (unless force refresh)
-            cache_key = f"{audio_path}:{language}"
-            if not force_refresh and cache_key in self._transcription_cache:
-                logger.info(f"Using cached transcription for: {audio_path} (lang: {language})")
-                return self._transcription_cache[cache_key]
-            
-            # Perform transcription
-            logger.info(f"Transcribing audio: {audio_path} (lang: {language})")
+            # Always perform transcription (no cache)
+            logger.info(f"Transcribing audio: {audio_path} (lang: {language}) [no cache]")
             transcription = await self._perform_transcription(audio_path, language)
-            
-            # Cache the result
-            if transcription:
-                self._transcription_cache[cache_key] = transcription
-                logger.info(f"Transcription cached for: {audio_path} (lang: {language})")
-            
             return transcription
-            
         except Exception as e:
             logger.error(f"Error getting transcription for {audio_path}: {e}")
             return None
     
-    async def _perform_transcription(self, audio_path: str, language: str = "english") -> Optional[str]:
+    async def _perform_transcription(self, audio_path: str, language: str) -> Optional[str]:
         """Perform the actual transcription with automatic language-based routing"""
+        print("--------------------------------")
+        print(f"Performing transcription for {audio_path} with language: {language}")
         try:
             # Route to appropriate transcription service based on language
             if language.lower() in ["arabic", "ar"]:

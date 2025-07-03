@@ -14,9 +14,10 @@ class WPMCalculator:
     Analyzes speaking rate, pace consistency, and provides recommendations.
     """
     
-    def __init__(self, transcription_service=None):
+    def __init__(self, transcription_service_english=None, transcription_service_arabic=None):
         self.recognizer = sr.Recognizer()
-        self.transcription_service = transcription_service
+        self.transcription_service_english = transcription_service_english
+        self.transcription_service_arabic = transcription_service_arabic
         # Optimal WPM ranges for different contexts
         self.wpm_ranges = {
             'presentation': {'min': 120, 'max': 160, 'optimal': 140},
@@ -24,14 +25,14 @@ class WPMCalculator:
             'audiobook': {'min': 150, 'max': 200, 'optimal': 175}
         }
         
-    def analyze(self, audio_path: str, context: str = 'presentation', language: str = 'english') -> Dict:
+    def analyze(self, audio_path: str, language, context: str = 'presentation') -> Dict:
         """
         Analyze speaking rate and calculate WPM.
         
         Args:
             audio_path: Path to audio file
-            context: Speaking context ('presentation', 'conversation', 'audiobook')
             language: Language of the audio
+            context: Speaking context ('presentation', 'conversation', 'audiobook')
             
         Returns:
             Dictionary with WPM analysis results
@@ -93,14 +94,14 @@ class WPMCalculator:
             logger.error(f"Error in WPM analysis: {str(e)}")
             return self._create_error_result(f"Analysis failed: {str(e)}")
     
-    async def analyze_async(self, audio_path: str, context: str = 'presentation', language: str = 'english') -> Dict:
+    async def analyze_async(self, audio_path: str, language, context: str = 'presentation') -> Dict:
         """
         Async version of analyze method for better integration with async transcription service.
         
         Args:
             audio_path: Path to audio file
-            context: Speaking context ('presentation', 'conversation', 'audiobook')
             language: Language of the audio
+            context: Speaking context ('presentation', 'conversation', 'audiobook')
             
         Returns:
             Dictionary with WPM analysis results
@@ -166,15 +167,13 @@ class WPMCalculator:
     def _get_transcription(self, audio_path: str, language: str = 'english') -> Optional[str]:
         """Get transcription using centralized transcription service"""
         try:
-            if self.transcription_service:
-                import asyncio
-                try:
-                    loop = asyncio.get_running_loop()
-                    return self._get_transcription_fallback(audio_path, language)
-                except RuntimeError:
-                    return self._get_transcription_fallback(audio_path, language)
+            if language == 'arabic' and self.transcription_service_arabic:
+                transcription = self.transcription_service_arabic.get_transcription(audio_path)
+            elif self.transcription_service_english:
+                transcription = self.transcription_service_english.get_transcription(audio_path)
             else:
-                return self._get_transcription_fallback(audio_path, language)
+                transcription = None
+            return transcription
                 
         except Exception as e:
             logger.error(f"Transcription failed: {e}")
@@ -183,10 +182,13 @@ class WPMCalculator:
     async def _get_transcription_async(self, audio_path: str, language: str = 'english') -> Optional[str]:
         """Async version of transcription for use in async contexts"""
         try:
-            if self.transcription_service:
-                return await self.transcription_service.get_transcription(audio_path, language=language)
+            if language == 'arabic' and self.transcription_service_arabic:
+                transcription = await self.transcription_service_arabic.get_transcription(audio_path)
+            elif self.transcription_service_english:
+                transcription = await self.transcription_service_english.get_transcription(audio_path)
             else:
-                return self._get_transcription_fallback(audio_path, language)
+                transcription = None
+            return transcription
                 
         except Exception as e:
             logger.error(f"Async transcription failed: {e}")
