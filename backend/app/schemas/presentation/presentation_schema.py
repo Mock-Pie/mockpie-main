@@ -8,6 +8,8 @@ class PresentationBase(BaseModel):
     url: str
     language: Optional[str] = None
     topic: Optional[str] = None
+    is_public: bool = False
+    uploaded_at: datetime
 
 
 class PresentationResponse(BaseModel):

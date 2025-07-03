@@ -41,7 +41,7 @@ def get_user_by_email_excluding_current_user(db: Session, email: str, current_us
     return db.query(User).filter(User.email == email,User.id != current_user.id).first()   
     
     
-def get_user_by_phone_number_excluding_current_user(db: Session, phone_number: str, current_user_id: User) -> User | None:
+def get_user_by_phone_number_excluding_current_user(db: Session, phone_number: str, current_user_id: int) -> User | None:
     return db.query(User).filter(User.phone_number == phone_number, User.id != current_user_id).first()
     
     
@@ -161,6 +161,8 @@ def update_user(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Error updating user: {str(e)}"
         )
+        
+    return user
 
 
 def check_recently_deleted_user(user: Optional[User], error_message: str) -> Tuple[bool, Optional[HTTPException]]:

@@ -80,7 +80,6 @@ async def forgot_password(
 @router.post("/reset-password", status_code=status.HTTP_200_OK)
 async def reset_password(
     email: EmailStr = Form(...),
-    otp: str = Form(...),
     new_password: str = Form(...),
     confirm_password: str = Form(...),
     db: Session = Depends(get_db)
@@ -90,7 +89,6 @@ async def reset_password(
     """
     return await ResetPassword.reset_password(
         email=email, 
-        otp=otp, 
         new_password=new_password, 
         confirm_password=confirm_password, 
         db=db

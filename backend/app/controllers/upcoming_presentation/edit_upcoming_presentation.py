@@ -13,7 +13,7 @@ class EditUpcomingPresentation:
     async def edit_upcoming_presentation(
         presentation_id: int,
         topic: str,
-        presentation_date: str,
+        presentation_date: datetime,
         current_user: User = Depends(TokenHandler.get_current_user),
         db: Session = Depends(get_db)
     ):
