@@ -9,6 +9,7 @@ from backend.app.models.user.user import User
 from backend.app.utils.token_handler import TokenHandler
 from backend.app.crud.presentation import *
 from backend.app.static.lang.error_messages.exception_responses import ErrorMessage
+from backend.database.database import get_db
 
 
 class UploadPresentation:
@@ -19,6 +20,7 @@ class UploadPresentation:
         language: Optional[str] = Form(None),
         topic: Optional[str] = Form(None),
         current_user: User = Depends(TokenHandler.get_current_user),
+        db: Session = Depends(get_db),
     ):
         """
         Upload a video file
@@ -73,6 +75,7 @@ class UploadPresentation:
             
             # Create presentation record in database
             presentation = create_presentation(
+                db=db,
                 user_id=current_user.id,
                 title=video_title,
                 url=file_url,
