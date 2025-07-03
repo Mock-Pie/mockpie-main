@@ -136,7 +136,7 @@ async def logout_user(
     """
     Logout user and invalidate tokens
     """
-    return await TokenHandler.logout_user(current_user=current_user, redis=redis)
+    return await TokenHandler.revoke_tokens(user_id=current_user.id, redis=redis)
 
 
 @router.get("/me", response_model=UserResponse, status_code=status.HTTP_200_OK)
@@ -147,76 +147,6 @@ async def get_current_user(
     Get current user information
     """
     return current_user
-
-
-@router.put("/me", response_model=UserResponse)
-async def update_current_user(
-    user_update: UserUpdate = Body(...),
-    current_user: User = Depends(TokenHandler.get_current_user),
-    db: Session = Depends(get_db)
-):
-    """
-    Update current user profile information
-    """
-    # Update only the fields that are provided
-    if user_update.first_name is not None:
-        current_user.first_name = user_update.first_name
-    if user_update.last_name is not None:
-        current_user.last_name = user_update.last_name
-    if user_update.username is not None:
-        # Check if username is already taken by another user
-        existing_user = db.query(User).filter(
-            User.username == user_update.username,
-            User.id != current_user.id
-        ).first()
-        if existing_user:
-            from fastapi import HTTPException
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Username is already taken"
-            )
-        current_user.username = user_update.username
-    if user_update.email is not None:
-        # Check if email is already taken by another user
-        existing_user = db.query(User).filter(
-            User.email == user_update.email,
-            User.id != current_user.id
-        ).first()
-        if existing_user:
-            from fastapi import HTTPException
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Email is already taken"
-            )
-        current_user.email = user_update.email
-    if user_update.phone_number is not None:
-        # Check if phone number is already taken by another user
-        existing_user = db.query(User).filter(
-            User.phone_number == user_update.phone_number,
-            User.id != current_user.id
-        ).first()
-        if existing_user:
-            from fastapi import HTTPException
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Phone number is already taken"
-            )
-        current_user.phone_number = user_update.phone_number
-    
-    if user_update.gender is not None:
-        current_user.gender = user_update.gender
-    
-    try:
-        db.commit()
-        db.refresh(current_user)
-        return UserResponse.model_validate(current_user)
-    except Exception as e:
-        db.rollback()
-        from fastapi import HTTPException
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to update user profile"
-        )
 
 
 @router.delete("/cleanup-temp-user", status_code=status.HTTP_200_OK)

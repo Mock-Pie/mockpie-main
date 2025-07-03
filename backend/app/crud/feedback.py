@@ -1,5 +1,7 @@
 from sqlalchemy.orm import Session
-from backend.app.models.presentation.feedback import Feedback
+from backend.app.models.feedback.feedback import Feedback
+from fastapi import HTTPException, status
+from backend.app.static.lang.error_messages.exception_responses import ErrorMessage
 
 # Create feedback record
 def create_feedback(db: Session, presentation_id: int, data: dict) -> Feedback:
@@ -9,6 +11,28 @@ def create_feedback(db: Session, presentation_id: int, data: dict) -> Feedback:
     db.refresh(feedback)
     return feedback
 
+
 # Get feedback by presentation_id
 def get_feedback_by_presentation_id(db: Session, presentation_id: int) -> Feedback:
-    return db.query(Feedback).filter(Feedback.presentation_id == presentation_id).first() 
+    return db.query(Feedback).filter(Feedback.presentation_id == presentation_id).first()
+
+
+def delete_feedback_by_presentation_id(db: Session, presentation_id: int):
+    feedback = db.query(Feedback).filter(Feedback.presentation_id == presentation_id).first()
+    
+    if not feedback:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=ErrorMessage.FEEDBACK_NOT_FOUND.value
+        )
+    
+    try: 
+        db.delete(feedback)
+        db.commit()
+        
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error deleting body analysis: {str(e)}"
+        )

@@ -33,13 +33,17 @@ class TokenHandler:
             str: The encoded JWT token
         """
         to_encode = data.copy()
+        
         if expires_delta:
             expire = datetime.now(timezone.utc) + expires_delta
         else:
             expire = datetime.now(timezone.utc) + timedelta(minutes=15)
+            
         to_encode.update({"exp": expire})
         encoded_jwt = jwt.encode(to_encode, settings.secret_key, algorithm=settings.algorithm)
+        
         return encoded_jwt
+    
     
     @staticmethod
     def create_refresh_token(data: Dict[str, Any], expires_delta: Optional[timedelta] = None) -> str:
@@ -65,6 +69,7 @@ class TokenHandler:
         encoded_jwt = jwt.encode(to_encode, settings.secret_key, algorithm=settings.algorithm)
         return encoded_jwt
     
+    
     @staticmethod
     def decode_token(token: str) -> Dict[str, Any]:
         """
@@ -87,6 +92,7 @@ class TokenHandler:
                 detail=ErrorMessage.INVALID_TOKEN.value,
                 headers={"WWW-Authenticate": "Bearer"},
             )
+    
     
     @staticmethod
     def get_current_user(
@@ -153,6 +159,7 @@ class TokenHandler:
                 headers={"WWW-Authenticate": "Bearer"},
             )
     
+    
     @staticmethod
     def store_tokens_in_redis(
         user_id: Union[int, Any],
@@ -181,6 +188,8 @@ class TokenHandler:
         except Exception as e:
             # Log the error but don't fail - the JWT itself is still valid
             print(f"Error storing tokens in Redis: {e}")
+            
+            
     @staticmethod
     def revoke_tokens(user_id: Union[int, Any], redis: RedisClient = None):
         """

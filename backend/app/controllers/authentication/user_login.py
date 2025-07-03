@@ -1,27 +1,24 @@
-from fastapi import FastAPI, HTTPException, status, Depends, Form, Request
+from fastapi import HTTPException, status, Depends, Form
 from sqlalchemy.orm import Session
-from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordBearer
-from datetime import datetime, timedelta, timezone
+from datetime import timedelta
 import jwt
 
 from backend.database.database import get_db
 from backend.app.schemas.user.user_schema import *
-from backend.app.models.user.user import User
 from backend.app.static.lang.error_messages.exception_responses import ErrorMessage
 from backend.config import settings
 from backend.app.utils.redis_client import RedisClient
 from backend.app.utils.redis_dependency import get_redis_client
 from backend.app.utils.token_handler import TokenHandler
-from backend.app.utils.encryption_handler import EncryptionHandler
 from backend.app.crud.user import *
 
 
 # OAuth2 configuration
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
 
-class LoginUser:
 
+class LoginUser:
     @staticmethod
     async def login_user(
         email: EmailStr = Form(...),
@@ -45,7 +42,7 @@ class LoginUser:
             HTTPException: If login fails
         """        
         # Find user by email
-        user = db.query(User).filter(User.email == email, User.deleted_at == None).first()
+        user = get_user_by_email(db, email)
         
         # Check if user exists before proceeding
         if not user:
@@ -77,7 +74,7 @@ class LoginUser:
         )
         
         refresh_token_expires = timedelta(days=settings.refresh_token_expire_days)
-        refresh_token = TokenHandler.create_access_token(
+        refresh_token = TokenHandler.create_refresh_token(
             data={"sub": user.email, "refresh": True}, expires_delta=refresh_token_expires
         )
         
@@ -143,8 +140,10 @@ class LoginUser:
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     detail=ErrorMessage.INVALID_REFRESH_TOKEN.value
                 )
-              # Get user (excluding deleted users)
-            user = db.query(User).filter(User.email == email, User.deleted_at == None).first()
+                
+            # Get user (excluding deleted users)
+            user = get_user_by_email(db, email)
+            
             if not user:
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,

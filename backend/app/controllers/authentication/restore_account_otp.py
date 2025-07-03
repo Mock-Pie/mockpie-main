@@ -1,13 +1,14 @@
 from fastapi import HTTPException, Depends, Form, status
 from sqlalchemy.orm import Session
 from typing import Dict, Any
+from datetime import datetime, timezone, timedelta
 
 from backend.database.database import get_db
-from backend.app.models.user.user import User
 from backend.app.services.authentication.email_service import EmailService
 from backend.app.utils.otp_handler import OTPHandler
-from backend.app.crud.user import get_user_by_email, set_restore_otp_and_expiry_time
+from backend.app.crud.user import *
 from backend.app.static.lang.error_messages.exception_responses import ErrorMessage
+
 
 class RestoreAccountOTP:
     @staticmethod
@@ -19,17 +20,14 @@ class RestoreAccountOTP:
         Send OTP for account restoration verification
         """
         # Find the deleted user
-        user = db.query(User).filter(User.email == email, User.deleted_at != None).first()
+        user = get_deleted_user_by_email(db, email)
         
         if not user:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="No deleted account found with this email address"
+                detail=ErrorMessage.NO_DELETED_USER_FOUND.value
             )
-            
-        # Check if user was deleted within the last 30 days
-        from datetime import datetime, timezone, timedelta
-        
+       
         deleted_at = user.deleted_at
         # Ensure deleted_at has timezone info
         if deleted_at.tzinfo is None:
@@ -40,7 +38,7 @@ class RestoreAccountOTP:
         if deleted_at < thirty_days_ago:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Cannot restore accounts deleted more than 30 days ago"
+                detail=ErrorMessage.RESTORE_ACCOUNT_DENIED.value
             )
         
         # Create a unique OTP
@@ -51,7 +49,7 @@ class RestoreAccountOTP:
         if not set_restore_otp_and_expiry_time(db, user, otp, expiry):
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Failed to create restoration OTP"
+                detail=ErrorMessage.FAILED_TO_CREATE_RESTORATION_OTP.value
             )
 
         # Send the OTP email
@@ -65,5 +63,5 @@ class RestoreAccountOTP:
             db.commit()
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Failed to send restoration OTP email"
+                detail=ErrorMessage.FAILED_TO_SEND_RESTORATION_OTP_EMAIL.value
             ) 
