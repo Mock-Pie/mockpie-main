@@ -93,11 +93,14 @@ async def api_keyword_relevance(file: UploadFile = File(...), keywords: str = Fo
         return JSONResponse(content={"error": str(e), "status": "failed"}, status_code=500)
 
 @router.post("/api/wpm-calculator")
-async def api_wpm_calculator(file: UploadFile = File(...)):
+async def api_wpm_calculator(file: UploadFile = File(...), language: str = Form('english')):
+    if analyzers is None:
+        logger.error("Analyzers not initialized. Make sure analyzers are injected from main.py.")
+        return JSONResponse(content={"error": "Analyzers not initialized."}, status_code=500)
     try:
         file_path = await analyzers["file_processor"].save_uploaded_file(file)
         audio_path, _, _ = await analyzers["file_processor"].extract_components(file_path)
-        result = await analyzers["wpm_calculator"].analyze_async(audio_path, context='presentation')
+        result = await analyzers["wpm_calculator"].analyze_async(audio_path, context='presentation', language=language)
         return JSONResponse(content=result, status_code=200)
     except Exception as e:
         logger.error(f"WPM calculator API error: {e}")
@@ -498,7 +501,8 @@ async def get_api_endpoints():
 @router.post("/api/custom-feedback")
 async def api_custom_feedback(
     file: UploadFile = File(...),
-    services: str = Form(...)
+    services: str = Form(...),
+    language: str = Form('english')
 ):
     """
     Customizable feedback endpoint: upload a video/audio and specify which services to run.
@@ -525,7 +529,7 @@ async def api_custom_feedback(
             "filler_detection": ("filler_detection", "audio", "analyze", {}),
             "stutter_detection": ("stutter_detection", "audio", "analyze", {}),
             "lexical_richness": ("lexical_richness", "audio", "analyze", {}),
-            "wpm_analysis": ("wpm_calculator", "audio", "analyze", {"context": "presentation"}),
+            "wpm_analysis": ("wpm_calculator", "audio", "analyze_async", {"context": "presentation", "language": language}),
             "keyword_relevance": ("keyword_relevance", "audio", "analyze", {}),
             "facial_emotion": ("facial_emotion", "video", "analyze", {}),
             "eye_contact": ("eye_contact", "video", "analyze_eye_contact", {}),

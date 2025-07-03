@@ -24,13 +24,14 @@ class WPMCalculator:
             'audiobook': {'min': 150, 'max': 200, 'optimal': 175}
         }
         
-    def analyze(self, audio_path: str, context: str = 'presentation') -> Dict:
+    def analyze(self, audio_path: str, context: str = 'presentation', language: str = 'english') -> Dict:
         """
         Analyze speaking rate and calculate WPM.
         
         Args:
             audio_path: Path to audio file
             context: Speaking context ('presentation', 'conversation', 'audiobook')
+            language: Language of the audio
             
         Returns:
             Dictionary with WPM analysis results
@@ -43,7 +44,7 @@ class WPMCalculator:
             duration = len(audio_data) / sample_rate
             
             # Get transcription using centralized service (Whisper preferred)
-            transcription = self._get_transcription(audio_path)
+            transcription = self._get_transcription(audio_path, language)
             if not transcription:
                 return self._create_error_result("Failed to transcribe audio")
             
@@ -92,13 +93,14 @@ class WPMCalculator:
             logger.error(f"Error in WPM analysis: {str(e)}")
             return self._create_error_result(f"Analysis failed: {str(e)}")
     
-    async def analyze_async(self, audio_path: str, context: str = 'presentation') -> Dict:
+    async def analyze_async(self, audio_path: str, context: str = 'presentation', language: str = 'english') -> Dict:
         """
         Async version of analyze method for better integration with async transcription service.
         
         Args:
             audio_path: Path to audio file
             context: Speaking context ('presentation', 'conversation', 'audiobook')
+            language: Language of the audio
             
         Returns:
             Dictionary with WPM analysis results
@@ -111,7 +113,7 @@ class WPMCalculator:
             duration = len(audio_data) / sample_rate
             
             # Get transcription using async service (Whisper preferred)
-            transcription = await self._get_transcription_async(audio_path)
+            transcription = await self._get_transcription_async(audio_path, language)
             if not transcription:
                 return self._create_error_result("Failed to transcribe audio")
             
@@ -161,55 +163,50 @@ class WPMCalculator:
             logger.error(f"Error in async WPM analysis: {str(e)}")
             return self._create_error_result(f"Analysis failed: {str(e)}")
     
-    def _get_transcription(self, audio_path: str) -> Optional[str]:
+    def _get_transcription(self, audio_path: str, language: str = 'english') -> Optional[str]:
         """Get transcription using centralized transcription service"""
         try:
             if self.transcription_service:
-                # Use async transcription service
                 import asyncio
                 try:
-                    # Try to get from running event loop
                     loop = asyncio.get_running_loop()
-                    # If we're in an async context, we need to handle this differently
-                    # For now, we'll use a fallback approach
-                    return self._get_transcription_fallback(audio_path)
+                    return self._get_transcription_fallback(audio_path, language)
                 except RuntimeError:
-                    # No running event loop, use fallback
-                    return self._get_transcription_fallback(audio_path)
+                    return self._get_transcription_fallback(audio_path, language)
             else:
-                return self._get_transcription_fallback(audio_path)
+                return self._get_transcription_fallback(audio_path, language)
                 
         except Exception as e:
             logger.error(f"Transcription failed: {e}")
             return None
     
-    async def _get_transcription_async(self, audio_path: str) -> Optional[str]:
+    async def _get_transcription_async(self, audio_path: str, language: str = 'english') -> Optional[str]:
         """Async version of transcription for use in async contexts"""
         try:
             if self.transcription_service:
-                return await self.transcription_service.get_transcription(audio_path)
+                return await self.transcription_service.get_transcription(audio_path, language=language)
             else:
-                return self._get_transcription_fallback(audio_path)
+                return self._get_transcription_fallback(audio_path, language)
                 
         except Exception as e:
             logger.error(f"Async transcription failed: {e}")
             return None
     
-    def _get_transcription_fallback(self, audio_path: str) -> Optional[str]:
+    def _get_transcription_fallback(self, audio_path: str, language: str = 'english') -> Optional[str]:
         """Fallback transcription method using Whisper"""
         try:
-            from app.utils.whisper_transcriber import transcribe_with_whisper
-            # Use auto language detection for better results
-            return transcribe_with_whisper(audio_path, 'auto')
-        except Exception as e:
-            logger.error(f"Whisper transcription failed: {e}")
-            # Try Wit.ai as last resort
-            try:
+            if language.lower() == 'arabic':
                 from app.utils.wit_transcriber import transcribe_with_wit
-                return transcribe_with_wit(audio_path, 'english')
-            except Exception as wit_error:
-                logger.error(f"Wit.ai fallback also failed: {wit_error}")
-                return None
+                return transcribe_with_wit(audio_path, 'arabic')
+            elif language.lower() == 'english':
+                from app.utils.whisper_transcriber import transcribe_with_whisper
+                return transcribe_with_whisper(audio_path, 'english')
+            else:
+                from app.utils.whisper_transcriber import transcribe_with_whisper
+                return transcribe_with_whisper(audio_path, 'auto')
+        except Exception as e:
+            logger.error(f"Transcription fallback failed: {e}")
+            return None
     
     def _count_words(self, text: str) -> int:
         """Count words in transcribed text."""
