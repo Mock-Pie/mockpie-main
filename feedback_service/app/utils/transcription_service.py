@@ -29,12 +29,13 @@ class TranscriptionService:
         }
         logger.info(f"Transcription service configured: method={method}, language={language}")
     
-    async def get_transcription(self, audio_path: str, force_refresh: bool = False) -> Optional[str]:
+    async def get_transcription(self, audio_path: str, language: str = "english", force_refresh: bool = False) -> Optional[str]:
         """
         Get transcription for audio file, using cache if available
         
         Args:
             audio_path: Path to the audio file
+            language: Language to use for transcription
             force_refresh: Force re-transcription even if cached
             
         Returns:
@@ -42,18 +43,19 @@ class TranscriptionService:
         """
         try:
             # Check cache first (unless force refresh)
-            if not force_refresh and audio_path in self._transcription_cache:
-                logger.info(f"Using cached transcription for: {audio_path}")
-                return self._transcription_cache[audio_path]
+            cache_key = f"{audio_path}:{language}"
+            if not force_refresh and cache_key in self._transcription_cache:
+                logger.info(f"Using cached transcription for: {audio_path} (lang: {language})")
+                return self._transcription_cache[cache_key]
             
             # Perform transcription
-            logger.info(f"Transcribing audio: {audio_path}")
-            transcription = await self._perform_transcription(audio_path)
+            logger.info(f"Transcribing audio: {audio_path} (lang: {language})")
+            transcription = await self._perform_transcription(audio_path, language)
             
             # Cache the result
             if transcription:
-                self._transcription_cache[audio_path] = transcription
-                logger.info(f"Transcription cached for: {audio_path}")
+                self._transcription_cache[cache_key] = transcription
+                logger.info(f"Transcription cached for: {audio_path} (lang: {language})")
             
             return transcription
             
@@ -61,37 +63,29 @@ class TranscriptionService:
             logger.error(f"Error getting transcription for {audio_path}: {e}")
             return None
     
-    async def _perform_transcription(self, audio_path: str) -> Optional[str]:
+    async def _perform_transcription(self, audio_path: str, language: str = "english") -> Optional[str]:
         """Perform the actual transcription with automatic language-based routing"""
         try:
-            # First, detect the language if not specified
-            detected_language = self._transcription_config["language"]
-            
-            if detected_language == "auto":
-                # Auto-detect language using Whisper
-                detected_language = await self._detect_language_with_whisper(audio_path)
-                logger.info(f"Auto-detected language: {detected_language}")
-            
             # Route to appropriate transcription service based on language
-            if detected_language in ["arabic", "ar"]:
+            if language.lower() in ["arabic", "ar"]:
                 logger.info("Using Wit.ai for Arabic transcription")
-                return await self._transcribe_with_wit(audio_path)
+                return await self._transcribe_with_wit(audio_path, language)
             else:
                 logger.info("Using Whisper for English/other language transcription")
-                return await self._transcribe_with_whisper(audio_path)
+                return await self._transcribe_with_whisper(audio_path, language)
                 
         except Exception as e:
             logger.error(f"Transcription failed: {e}")
             # Fallback to configured method
             if self._transcription_config["method"] == "wit":
-                return await self._transcribe_with_wit(audio_path)
+                return await self._transcribe_with_wit(audio_path, language)
             elif self._transcription_config["method"] == "whisper":
-                return await self._transcribe_with_whisper(audio_path)
+                return await self._transcribe_with_whisper(audio_path, language)
             else:
                 logger.warning(f"Unknown transcription method: {self._transcription_config['method']}")
                 return None
     
-    async def _transcribe_with_wit(self, audio_path: str) -> Optional[str]:
+    async def _transcribe_with_wit(self, audio_path: str, language: str = "arabic") -> Optional[str]:
         """Transcribe using Wit.ai"""
         try:
             from app.utils.wit_transcriber import transcribe_with_wit
@@ -102,7 +96,7 @@ class TranscriptionService:
                 None, 
                 transcribe_with_wit, 
                 audio_path, 
-                self._transcription_config["language"]
+                language
             )
             
             return transcription
@@ -111,7 +105,7 @@ class TranscriptionService:
             logger.error(f"Wit.ai transcription failed: {e}")
             return None
     
-    async def _transcribe_with_whisper(self, audio_path: str) -> Optional[str]:
+    async def _transcribe_with_whisper(self, audio_path: str, language: str = "english") -> Optional[str]:
         """Transcribe using Whisper"""
         try:
             # Use the configured Whisper transcriber if available
@@ -134,10 +128,7 @@ class TranscriptionService:
                 "auto": "auto"
             }
             
-            whisper_language = language_map.get(
-                self._transcription_config["language"], 
-                "auto"
-            )
+            whisper_language = language_map.get(language.lower(), "en")
             
             # Use Whisper transcriber
             transcription = await whisper_transcriber.transcribe(
@@ -151,7 +142,7 @@ class TranscriptionService:
             logger.error(f"Whisper transcription failed: {e}")
             # Fallback to Wit.ai if Whisper fails
             logger.info("Falling back to Wit.ai transcription")
-            return await self._transcribe_with_wit(audio_path)
+            return await self._transcribe_with_wit(audio_path, language)
     
     async def _detect_language_with_whisper(self, audio_path: str) -> str:
         """Detect language using Whisper"""
