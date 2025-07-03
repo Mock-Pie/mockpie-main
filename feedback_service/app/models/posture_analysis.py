@@ -340,8 +340,12 @@ class PostureAnalyzer:
             right_wrist['y'] < right_shoulder['y']):
             bad_poses.append("Hands Above Shoulders")
         
-        # 4. Hands Behind Back (low visibility)
-        if not left_wrist_visible and not right_wrist_visible:
+        # 4. Hands Behind Back (low visibility) — only if hips are visible
+        left_hip_visible = left_hip['visibility'] > visibility_threshold
+        right_hip_visible = right_hip['visibility'] > visibility_threshold
+
+        if (not left_wrist_visible and not right_wrist_visible and
+            left_hip_visible and right_hip_visible):
             bad_poses.append("Hands Behind Back")
         
         # 5. Slouching Detection (shoulder position relative to hips)
