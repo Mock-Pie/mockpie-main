@@ -23,7 +23,6 @@ async def upload_video(
     language: Optional[str] = Form(None),
     topic: Optional[str] = Form(None),
     current_user: User = Depends(TokenHandler.get_current_user),
-    db: Session = Depends(get_db),
 ):
     return await UploadPresentation.upload_video(
         file=file,
@@ -31,7 +30,6 @@ async def upload_video(
         language=language,
         topic=topic,
         current_user=current_user,
-        db=db,
     )
         
 
