@@ -47,18 +47,10 @@ class LexicalRichnessAnalyzer:
             'arabic_chars': re.compile(r'[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]'),
         }
 
-    async def analyze(self, audio_path: str, language: str) -> Dict[str, Any]:
+    def analyze(self, audio_path: str, language: str, transcript: str = None) -> Dict[str, Any]:
         logger.info(f"Starting Lexical Richness Analysis for {audio_path}")
         try:
-            # Get transcript using centralized service
-            if language == 'arabic' and self.transcription_service_arabic:
-                transcript = await self.transcription_service_arabic.get_transcription(audio_path, language)
-            elif self.transcription_service_english:
-                transcript = await self.transcription_service_english.get_transcription(audio_path, language)
-            else:
-                transcript = None
-
-            if not transcript or transcript.strip() == "":
+            if not isinstance(transcript, str) or not transcript.strip():
                 return {
                     "error": "No transcript available for lexical analysis",
                     "richness_metrics": {},

@@ -40,23 +40,21 @@ class FillerWordDetector:
         self.min_pause_duration = 0.3  # seconds
         self.energy_threshold = 0.01
 
-    async def analyze(self, audio_path: str, language: str) -> Dict[str, Any]:
+    def analyze(self, audio_path: str, language: str, transcript_result: dict = None) -> Dict[str, Any]:
         """
         Analyze filler words and pauses in audio.
-
         Args:
             audio_path: Path to audio file
             language: Language of the audio ('english' or 'arabic')
-
+            transcript_result: dict with at least a 'text' key (and optionally 'word_timestamps')
         Returns:
             Dictionary containing filler word analysis results
         """
         logger.info(f"Starting Filler Detection Analysis for {audio_path} ({language})")
         try:
-            transcript_result = await self._transcribe_audio(audio_path, language)
-            if not transcript_result or "error" in transcript_result:
+            if not transcript_result or not isinstance(transcript_result, dict) or not transcript_result.get('text', '').strip():
                 return {
-                    "error": "Transcription failed",
+                    "error": "No transcript provided for filler detection",
                     "filler_analysis": {},
                     "pause_analysis": {},
                     "overall_score": 5.0
@@ -83,76 +81,6 @@ class FillerWordDetector:
                 "pause_analysis": {},
                 "overall_score": 5.0
             }
-
-    async def _transcribe_audio(self, audio_path: str, language: str) -> Dict[str, Any]:
-        """Transcribe audio using centralized service or Whisper fallback."""
-        try:
-            # Try centralized transcription service first
-            if language == 'arabic' and self.transcription_service_arabic:
-                try:
-                    transcription = await self.transcription_service_arabic.get_transcription(audio_path, language)
-                    if transcription:
-                        return {
-                            "text": transcription,
-                            "segments": [{"text": transcription, "start": 0, "end": 0}],
-                            "word_timestamps": []
-                        }
-                    else:
-                        logger.warning("Centralized Arabic transcription failed, falling back to Whisper")
-                except Exception as e:
-                    logger.warning(f"Centralized Arabic transcription error: {e}, falling back to Whisper")
-            elif language == 'english' and self.transcription_service_english:
-                try:
-                    transcription = await self.transcription_service_english.get_transcription(audio_path, language)
-                    if transcription:
-                        return {
-                            "text": transcription,
-                            "segments": [{"text": transcription, "start": 0, "end": 0}],
-                            "word_timestamps": []
-                        }
-                    else:
-                        logger.warning("Centralized English transcription failed, falling back to Whisper")
-                except Exception as e:
-                    logger.warning(f"Centralized English transcription error: {e}, falling back to Whisper")
-
-            # Fallback to Whisper
-            if self.model is None:
-                return self._fallback_transcription(audio_path)
-
-            # Set language for Whisper
-            whisper_lang = "ar" if language == "arabic" else "en"
-            result = self.model.transcribe(
-                audio_path,
-                language=whisper_lang,
-                word_timestamps=True,
-                no_speech_threshold=0.6,
-                logprob_threshold=-1.0,
-                compression_ratio_threshold=2.4
-            )
-            return {
-                "text": result.get("text", ""),
-                "segments": result.get("segments", []),
-                "word_timestamps": self._extract_word_timestamps(result)
-            }
-        except Exception as e:
-            logger.error(f"Error in transcription: {e}")
-            return {"error": str(e)}
-
-    def _extract_word_timestamps(self, whisper_result: Dict) -> List[Dict]:
-        """Extract word-level timestamps from Whisper result."""
-        word_timestamps = []
-        try:
-            for segment in whisper_result.get("segments", []):
-                for word_info in segment.get("words", []):
-                    word_timestamps.append({
-                        "word": word_info.get("word", "").strip(),
-                        "start": word_info.get("start", 0),
-                        "end": word_info.get("end", 0),
-                        "confidence": word_info.get("probability", 0)
-                    })
-        except Exception as e:
-            logger.error(f"Error extracting word timestamps: {e}")
-        return word_timestamps
 
     def _analyze_filler_words(self, transcript_result: Dict, language: str) -> Dict[str, Any]:
         """Analyze filler words in the transcript."""

@@ -21,21 +21,20 @@ class WPMCalculator:
             'audiobook': {'min': 150, 'max': 200, 'optimal': 175}
         }
 
-    async def analyze(self, audio_path: str, language: str, context: str = 'presentation') -> Dict[str, Any]:
+    def analyze(self, audio_path: str, language: str, context: str = 'presentation', transcript: str = None) -> Dict[str, Any]:
         logger.info(f"Starting WPM Calculator Analysis for {audio_path}")
         try:
             audio_data, sample_rate = librosa.load(audio_path, sr=16000)
             duration = len(audio_data) / sample_rate
 
-            transcription = await self._get_transcription(audio_path, language)
-            if not transcription:
-                return self._create_error_result("Failed to transcribe audio")
+            if not isinstance(transcript, str) or not transcript.strip():
+                return self._create_error_result("No transcript provided for WPM analysis")
 
-            word_count = self._count_words(transcription)
+            word_count = self._count_words(transcript)
             wpm = self._calculate_wpm(word_count, duration)
 
             speech_segments = self._detect_speech_segments(audio_data, sample_rate)
-            segment_analysis = self._analyze_segments(speech_segments, transcription)
+            segment_analysis = self._analyze_segments(speech_segments, transcript)
             pace_consistency = self._calculate_pace_consistency(segment_analysis)
             pause_analysis = self._analyze_pauses(speech_segments, duration)
             assessment = self._assess_wpm(wpm, context)
