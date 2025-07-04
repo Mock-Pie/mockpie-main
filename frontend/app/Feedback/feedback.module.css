@@ -305,6 +305,11 @@
         margin-top: 30px;
         padding: 20px;
     }
+
+    .video-transcription-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
 }
 
 @media (max-width: 576px) {
@@ -351,6 +356,11 @@
 
     .actionButton {
         padding: 12px 15px;
+    }
+
+    .detailedMetricsGrid {
+        gap: 1.25rem;
+        margin-bottom: 1.5rem;
     }
 }
 
@@ -419,10 +429,49 @@
     border-color: rgba(255, 214, 10, 0.3);
 }
 
+/* Enhanced Detailed Metrics Grid */
+.detailedMetricsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 2.5rem;
+    margin-bottom: 3rem;
+    padding: 0;
+}
+
+@media (max-width: 1400px) {
+    .detailedMetricsGrid {
+        grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+        gap: 2rem;
+    }
+}
+
+@media (max-width: 1200px) {
+    .detailedMetricsGrid {
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 2rem;
+    }
+}
+
+@media (max-width: 992px) {
+    .detailedMetricsGrid {
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2.5rem;
+    }
+}
+
 @media (max-width: 768px) {
-    .video-transcription-grid {
+    .detailedMetricsGrid {
         grid-template-columns: 1fr;
-        gap: 20px;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .detailedMetricsGrid {
+        gap: 1.25rem;
+        margin-bottom: 1.5rem;
     }
 }
 
