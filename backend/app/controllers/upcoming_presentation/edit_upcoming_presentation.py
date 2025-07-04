@@ -35,8 +35,9 @@ class EditUpcomingPresentation:
         """
         
         presentation = get_upcoming_presentation_by_id(
+            db=db,
             presentation_id=presentation_id,
-            db=db
+            current_user_id=current_user.id
         )
         
         if (not presentation) or (presentation.user_id != current_user.id):

@@ -78,7 +78,7 @@ const Dashboard = () => {
       setUpcomingLoading(true);
       
       // Initialize sample data if needed (only on first run)
-      await UpcomingPresentationService.initializeSampleData();
+      // await UpcomingPresentationService.initializeSampleData();
       
       // Fetch upcoming presentations from service
       const result = await UpcomingPresentationService.getUpcomingPresentations();

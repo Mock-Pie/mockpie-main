@@ -24,17 +24,18 @@ class DeleteUser:
         now = datetime.now()
         
         # First, mark all user's presentations as deleted
-        presentations = get_presentations_by_user_id(db, user_id)
+        presentations = get_presentations_by_user_id(user_id, db, 0, 9999)
         
         # Mark each presentation as deleted and also mark associated analyses
         for presentation in presentations:
             # Soft delete feedback associated with the presentation
             feedback = get_feedback_by_presentation_id(db, presentation.id)
-            feedback.deleted_at = now
+            if feedback:
+                feedback.deleted_at = now
             presentation.deleted_at = now
            
         # Soft delete all user's upcoming presentations
-        upcoming_presentations = get_upcoming_presentation_by_id(db, user_id)
+        upcoming_presentations = get_upcoming_presentations_by_user_id_ordered_asc(user_id, db)
         
         for upcoming_presentation in upcoming_presentations:
             upcoming_presentation.deleted_at = now

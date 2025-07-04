@@ -17,7 +17,7 @@ class ListUpcomingPresentations:
         Returns:
             UpcomingPresentationList: List of upcoming presentations
         """
-        upcoming_presentations = get_upcoming_presentations_by_user_id_ordered_asc(current_user, db)
+        upcoming_presentations = get_upcoming_presentations_by_user_id_ordered_asc(current_user.id, db)
         
         return UpcomingPresentationList(
             upcoming_presentations=[

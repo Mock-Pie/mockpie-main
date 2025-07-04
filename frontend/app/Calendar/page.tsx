@@ -147,7 +147,7 @@ const Calendar = () => {
     const fetchUpcomingPresentations = async (updateCalendar = false) => {
         try {
             // Initialize sample data if needed
-            await UpcomingPresentationService.initializeSampleData();
+            // await UpcomingPresentationService.initializeSampleData();
             
             // Fetch upcoming presentations from service
             const result = await UpcomingPresentationService.getUpcomingPresentations();

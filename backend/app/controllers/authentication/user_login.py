@@ -1,7 +1,7 @@
 from fastapi import HTTPException, status, Depends, Form
 from sqlalchemy.orm import Session
 from fastapi.security import OAuth2PasswordBearer
-from datetime import timedelta
+from datetime import timedelta, datetime, timezone
 import jwt
 
 from backend.database.database import get_db
@@ -41,6 +41,24 @@ class LoginUser:
         Raises:
             HTTPException: If login fails
         """        
+        # Check if there's a deleted user with this email first
+        deleted_user = get_deleted_user_by_email(db, email)
+        if deleted_user:
+            # Check if user was deleted within the last 30 days
+            deleted_at = deleted_user.deleted_at
+            if deleted_at.tzinfo is None:
+                deleted_at = deleted_at.replace(tzinfo=timezone.utc)
+            
+            thirty_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
+            
+            if deleted_at > thirty_days_ago:
+                # User was deleted less than 30 days ago
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="This account does not exist",
+                    headers={"WWW-Authenticate": "Bearer"},
+                )
+        
         # Find user by email
         user = get_user_by_email(db, email)
         

@@ -77,18 +77,20 @@ class RetrieveUser:
             user.email_verified_at = datetime.now()
             
             # Find and reactivate all presentations associated with the user
-            presentations = get_presentations_by_user_id(user, db, skip=0, limit=100)
+            presentations = get_presentations_by_user_id(user.id, db, skip=0, limit=9999)
             
-            for presentation in presentations:
-                # Reactivate the presentation
-                presentation.deleted_at = None
+            if presentations:
+                for presentation in presentations:
+                    # Reactivate the presentation
+                    presentation.deleted_at = None
             
             # Find and reactivate all upcoming presentations associated with the user
-            upcoming_presentations = get_upcoming_presentations_by_deleted_user_id(user.id, db, skip=0, limit=100)
+            upcoming_presentations = get_upcoming_presentations_by_deleted_user_id(user.id, db, skip=0, limit=1000)
             
-            for upcoming_presentation in upcoming_presentations:
-                # Reactivate the upcoming presentation
-                upcoming_presentation.deleted_at = None
+            if upcoming_presentations:
+                for upcoming_presentation in upcoming_presentations:
+                    # Reactivate the upcoming presentation
+                    upcoming_presentation.deleted_at = None
                     
             # Commit all changes
             db.commit()

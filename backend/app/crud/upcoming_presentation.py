@@ -9,7 +9,6 @@ from backend.app.crud.presentation import *
 def get_upcoming_presentations_by_deleted_user_id(user_id, db: Session, skip: int = 0, limit: int = 100):
     return db.query(UpcomingPresentation).filter(
         UpcomingPresentation.user_id == user_id,
-        UpcomingPresentation.deleted_at.is_(None)
     ).offset(skip).limit(limit).all()
     
     
@@ -34,11 +33,14 @@ def create_upcoming_presentation(
         topic=topic,
         presentation_date=presentation_date
     )
+
+    print("upcoming_presentation", upcoming_presentation)
     
     try:
         db.add(upcoming_presentation)
         db.commit()
         db.refresh(upcoming_presentation)
+        print('saved in db' )
         
     except Exception as e:
         db.rollback()
@@ -56,8 +58,9 @@ def delete_upcoming_presentation(
 ) -> UpcomingPresentation:
     
     try:
+        # Hard delete - permanently remove from database
+        db.delete(upcoming_presentation)
         db.commit()
-        db.refresh(upcoming_presentation)
         
     except Exception as e:
         db.rollback()
@@ -70,14 +73,18 @@ def delete_upcoming_presentation(
 
 
 def get_upcoming_presentations_by_user_id_ordered_asc(
-    current_user, 
+    current_user_id, 
     db: Session, 
 ) -> list[UpcomingPresentation]:
     
-    return db.query(UpcomingPresentation).filter(
-        UpcomingPresentation.user_id == current_user.id,
+    upcoming_presentation = db.query(UpcomingPresentation).filter(
+        UpcomingPresentation.user_id == current_user_id,
         UpcomingPresentation.deleted_at.is_(None)
     ).order_by(UpcomingPresentation.presentation_date.asc()).all()
+
+    print("upcoming_presentation", upcoming_presentation)
+
+    return upcoming_presentation
     
     
 def update_upcoming_presentation(

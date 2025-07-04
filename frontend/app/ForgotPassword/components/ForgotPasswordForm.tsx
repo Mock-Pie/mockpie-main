@@ -138,7 +138,7 @@ const ForgotPasswordForm = () => {
               Sending...
             </>
           ) : (
-            'Send Reset Link'
+            'Send Verification Code'
           )}
         </button>
       </form>

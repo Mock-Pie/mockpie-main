@@ -96,9 +96,24 @@ const LoginForm = () => {
                 console.log('Verification OTP sent successfully');
                 return true;
             } else {
-                const errorData = await response.json();
-                console.error('Failed to send verification OTP:', errorData);
-                return false;
+                let errorMessage = "Failed to send verification code. Please try again or contact support.";
+                try {
+                    const errorData = await response.json();
+                    if (typeof errorData.detail === 'string') {
+                        if (errorData.detail.toLowerCase().includes('not exist') || 
+                            errorData.detail.toLowerCase().includes('not found') ||
+                            errorData.detail.toLowerCase().includes('deleted')) {
+                            errorMessage = "Account not found or has been deleted. Please check your email or restore your account.";
+                        } else {
+                            errorMessage = errorData.detail;
+                        }
+                    }
+                    console.error('Failed to send verification OTP:', errorData);
+                } catch (parseError) {
+                    // If response is not JSON or empty, use default error message
+                    console.error('Failed to send verification OTP: (no JSON body or parsing failed)');
+                }
+                return { success: false, error: errorMessage };
             }
         } catch (error) {
             console.error('Error sending verification OTP:', error);
@@ -154,9 +169,12 @@ const LoginForm = () => {
                     // Send verification OTP
                     const otpSent = await sendVerificationOTP(formData.identifier.trim());
                     
-                    if (otpSent) {
+                    if (otpSent === true) {
                         // Redirect to OTP verification page
                         router.push(`/OTPVerifcation?email=${encodeURIComponent(formData.identifier.trim())}&from=login`);
+                    } else if (typeof otpSent === 'object' && otpSent.error) {
+                        // Display the specific error message from sendVerificationOTP
+                        setApiError(otpSent.error);
                     } else {
                         setApiError("Account not verified. Failed to send verification code. Please try again or contact support.");
                     }

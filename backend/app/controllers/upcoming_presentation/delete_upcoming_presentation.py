@@ -42,7 +42,5 @@ class DeleteUpcomingPresentation:
                     
         return {
             "message": "Upcoming presentation deleted successfully",
-            "presentation_id": upcoming_presentation.id,
-            "deleted_at": upcoming_presentation.deleted_at.isoformat()
         }
 

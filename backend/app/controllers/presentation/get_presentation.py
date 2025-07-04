@@ -10,7 +10,7 @@ from backend.app.static.lang.error_messages.exception_responses import ErrorMess
 
 class GetPresentation:
     @staticmethod
-    def get_video_details(
+    async def get_video_details(
         presentation_id: int,
         current_user: User = Depends(TokenHandler.get_current_user),
         db: Session = Depends(get_db)

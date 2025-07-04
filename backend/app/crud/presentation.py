@@ -118,8 +118,8 @@ def verify_file_content(file_path: Path) -> bool:
         return file_path.suffix.lower() in {'.mp4', '.avi', '.mkv', '.mov', '.wmv', '.flv', '.webm', '.m4v', '.3gp'}
 
 
-def get_presentations_by_user_id(current_user, db, skip, limit):
-    return db.query(Presentation).filter(Presentation.user_id == current_user.id).offset(skip).limit(limit).all()
+def get_presentations_by_user_id(current_user_id, db, skip, limit):
+    return db.query(Presentation).filter(Presentation.user_id == current_user_id).offset(skip).limit(limit).all()
 
 
 def get_presentation_by_id(db: Session, presentation_id: int, current_user) -> Optional[Presentation]:
@@ -180,6 +180,9 @@ def create_presentation(db, user_id,title,url,language,topic,is_public,uploaded_
 
 
 def delete_video_file(presentation: Presentation) -> None:
+    if (presentation.url is None):
+        return
+    
     if presentation.url.startswith("/uploads/videos/"):
         filename = presentation.url.replace("/uploads/videos/", "")
         file_path = UPLOAD_DIR / filename
@@ -199,7 +202,6 @@ def delete_presentation(
     try:
         db.delete(presentation)
         db.commit()
-        db.refresh(presentation)
     
     except Exception as e:
         db.rollback()

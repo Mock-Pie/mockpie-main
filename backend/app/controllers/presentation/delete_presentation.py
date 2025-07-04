@@ -48,5 +48,4 @@ class DeletePresentation:
         
         return {
             "message": "Video deleted successfully",
-            "presentation_id": presentation_id
         }

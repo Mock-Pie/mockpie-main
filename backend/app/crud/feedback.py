@@ -21,10 +21,7 @@ def delete_feedback_by_presentation_id(db: Session, presentation_id: int):
     feedback = db.query(Feedback).filter(Feedback.presentation_id == presentation_id).first()
     
     if not feedback:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=ErrorMessage.FEEDBACK_NOT_FOUND.value
-        )
+        return
     
     try: 
         db.delete(feedback)

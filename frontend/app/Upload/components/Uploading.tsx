@@ -1,84 +1,249 @@
 "use client";
-import React, { useState, useRef } from "react";
-import { useRouter } from "next/navigation";
-import { FiUploadCloud, FiFile, FiCheck, FiX, FiTarget } from "react-icons/fi";
+import React, { useState, useRef, useEffect } from "react";
+import { useRouter } from 'next/navigation';
+import { 
+    FiVideo, 
+    FiVideoOff, 
+    FiDownload, 
+    FiUploadCloud, 
+    FiPlay, 
+    FiCamera,
+    FiCheck,
+    FiX,
+    FiLoader,
+    FiClock,
+    FiEye,
+    FiFilm,
+    FiRadio,
+    FiTarget
+} from "react-icons/fi";
 import styles from "../page.module.css";
 import FocusModal from "../../components/shared/FocusModal";
 
-const Uploading = () => {
-    const [selectedFile, setSelectedFile] = useState<File | null>(null);
-    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-    const [fileName, setFileName] = useState<string | null>(null);
-    const [uploadStatus, setUploadStatus] = useState<string | null>(null);
+const Recording = () => {
+    const router = useRouter();
+    const [isRecording, setIsRecording] = useState(false);
+    const [videoURL, setVideoURL] = useState("");
+    const [recordingTime, setRecordingTime] = useState(0);
+    const [uploadStatus, setUploadStatus] = useState("");
     const [isUploading, setIsUploading] = useState(false);
-    const [videoTitle, setVideoTitle] = useState<string>("");
+    const [videoDuration, setVideoDuration] = useState(0);
+    const [showPreview, setShowPreview] = useState(true);
+    const [cameraReady, setCameraReady] = useState(false);
+    const [isClient, setIsClient] = useState(false);
+    const [videoFormat, setVideoFormat] = useState<{mimeType: string, extension: string}>({mimeType: 'video/mp4', extension: 'mp4'});
     const [presentationTopic, setPresentationTopic] = useState<string>("");
     const [selectedLanguage, setSelectedLanguage] = useState<string>("");
     const [selectedFocus, setSelectedFocus] = useState<string[]>([]);
     const [showFocusModal, setShowFocusModal] = useState(false);
-    const [isDragOver, setIsDragOver] = useState(false);
-    const fileInputRef = useRef<HTMLInputElement | null>(null);
-    const router = useRouter();
+    const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+    const videoStreamRef = useRef<MediaStream | null>(null);
+    const chunksRef = useRef<Blob[]>([]);
+    const videoPreviewRef = useRef<HTMLVideoElement | null>(null);
+    const recordedVideoRef = useRef<HTMLVideoElement | null>(null);
+    const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-    const formatFileSize = (bytes: number): string => {
-        if (bytes === 0) return '0 Bytes';
-        const k = 1024;
-        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-    };
+    // Ensure we're on the client side
+    useEffect(() => {
+        setIsClient(true);
+    }, []);
 
-    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
-        if (file) {
-            processFile(file);
-        }
-    };
+    useEffect(() => {
+        if (!isClient) return; // Don't run on server side
 
-    const processFile = (file: File) => {
-        // Revoke the previous preview URL to free up memory
-        if (previewUrl) {
-            URL.revokeObjectURL(previewUrl);
-        }
-        setSelectedFile(file);
-        setPreviewUrl(URL.createObjectURL(file));
-        setFileName(file.name);
-        setVideoTitle(file.name.split('.')[0]);
-        setUploadStatus(null);
-    };
+        const initializeCamera = async () => {
+            try {
+                // Detect best supported format
+                const format = detectVideoFormat();
+                setVideoFormat(format);
+                console.log(`Using video format: ${format.extension.toUpperCase()} (${format.mimeType})`);
 
-    const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
-        event.preventDefault();
-        setIsDragOver(false);
-        
-        const file = event.dataTransfer.files?.[0];
-        if (file && file.type.startsWith("video/")) {
-            processFile(file);
-            
-            // Programmatically set the file input's value
-            if (fileInputRef.current) {
-                const dataTransfer = new DataTransfer();
-                dataTransfer.items.add(file);
-                fileInputRef.current.files = dataTransfer.files;
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                videoStreamRef.current = stream;
+
+                // Wait a bit to ensure the video element is ready
+                await new Promise(resolve => setTimeout(resolve, 100));
+
+                if (videoPreviewRef.current) {
+                    videoPreviewRef.current.srcObject = stream;
+                    
+                    // Wait for the video to be ready before playing
+                    await new Promise((resolve, reject) => {
+                        if (videoPreviewRef.current) {
+                            videoPreviewRef.current.onloadedmetadata = () => {
+                                videoPreviewRef.current?.play().then(resolve).catch(reject);
+                            };
+                            videoPreviewRef.current.onerror = reject;
+                        }
+                    });
+                    
+                    setCameraReady(true);
+                }
+            } catch (error) {
+                console.error("Error accessing media devices:", error);
+                alert("Error accessing camera/microphone. Please check permissions and ensure camera is not being used by another application.");
+                setCameraReady(false);
             }
-        } else {
-            setUploadStatus("Please drop a valid video file.");
+        };
+
+        initializeCamera();
+
+        return () => {
+            if (videoStreamRef.current) {
+                videoStreamRef.current.getTracks().forEach((track) => track.stop());
+            }
+        };
+    }, [isClient]);
+
+    // Effect to handle preview switching
+    useEffect(() => {
+        if (showPreview && videoStreamRef.current && videoPreviewRef.current && cameraReady) {
+            videoPreviewRef.current.srcObject = videoStreamRef.current;
+            videoPreviewRef.current.play().catch(console.error);
+        }
+    }, [showPreview, cameraReady]);
+
+    // Cleanup effect to prevent memory leaks
+    useEffect(() => {
+        return () => {
+            // Clean up video URL when component unmounts
+            if (videoURL) {
+                URL.revokeObjectURL(videoURL);
+            }
+        };
+    }, [videoURL]);
+
+    const startRecording = async () => {
+        try {
+            // Reset video URL when starting a new recording
+            if (videoURL) {
+                URL.revokeObjectURL(videoURL);
+                setVideoURL("");
+                setVideoDuration(0);
+                setUploadStatus("");
+            }
+
+            // Ensure we have a camera stream
+            if (!videoStreamRef.current || !cameraReady) {
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: true, 
+                    audio: true
+                });
+                videoStreamRef.current = stream;
+                
+                if (videoPreviewRef.current) {
+                    videoPreviewRef.current.srcObject = stream;
+                    await videoPreviewRef.current.play();
+                    setCameraReady(true);
+                }
+            }
+
+            // Make sure the live preview is showing and playing
+            setShowPreview(true);
+            if (videoPreviewRef.current && videoStreamRef.current) {
+                videoPreviewRef.current.srcObject = videoStreamRef.current;
+                videoPreviewRef.current.play();
+            }
+
+            // Create MediaRecorder with the detected format
+            let mediaRecorder;
+            try {
+                mediaRecorder = new MediaRecorder(videoStreamRef.current, {
+                    mimeType: videoFormat.mimeType,
+                    videoBitsPerSecond: 2500000,
+                    audioBitsPerSecond: 128000
+                });
+            } catch (error) {
+                console.warn(`Failed to create MediaRecorder with ${videoFormat.mimeType}, trying fallback...`);
+                const fallbackMimeType = videoFormat.mimeType.split(';')[0];
+                try {
+                    mediaRecorder = new MediaRecorder(videoStreamRef.current, {
+                        mimeType: fallbackMimeType
+                    });
+                } catch (fallbackError) {
+                    mediaRecorder = new MediaRecorder(videoStreamRef.current);
+                }
+            }
+            
+            mediaRecorderRef.current = mediaRecorder;
+            chunksRef.current = [];
+
+            mediaRecorder.ondataavailable = (event) => {
+                if (event.data.size > 0) {
+                    chunksRef.current.push(event.data);
+                }
+            };
+
+            mediaRecorder.onstop = () => {
+                try {
+                    console.log("Recording stopped, creating video blob...");
+                    const blob = new Blob(chunksRef.current, { type: videoFormat.mimeType });
+                    const url = URL.createObjectURL(blob);
+                    console.log("Video URL created:", url);
+                    setVideoURL(url);
+                    setShowPreview(false);
+                    setVideoDuration(0);
+                    console.log("Video state updated successfully");
+                } catch (error) {
+                    console.error("Error in onstop handler:", error);
+                    setUploadStatus("Error processing recorded video. Please try again.");
+                }
+            };
+
+            mediaRecorder.start();
+            setIsRecording(true);
+            setRecordingTime(0);
+
+            timerRef.current = setInterval(() => {
+                setRecordingTime((prevTime) => prevTime + 1);
+            }, 1000);
+        } catch (error) {
+            console.error("Error starting recording:", error);
+            alert("Error accessing camera/microphone. Please check permissions.");
         }
     };
 
-    const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
-        event.preventDefault();
-        setIsDragOver(true);
+    const stopRecording = () => {
+        if (mediaRecorderRef.current) {
+            mediaRecorderRef.current.stop();
+        }
+        setIsRecording(false);
+
+        if (timerRef.current) {
+            clearInterval(timerRef.current);
+            timerRef.current = null;
+        }
     };
 
-    const handleDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
-        event.preventDefault();
-        setIsDragOver(false);
+    const recordNewVideo = () => {
+        setShowPreview(true);
+        setVideoURL("");
+        setVideoDuration(0);
+        setUploadStatus("");
+        setRecordingTime(0);
+        
+        if (videoStreamRef.current && videoPreviewRef.current) {
+            videoPreviewRef.current.srcObject = videoStreamRef.current;
+            videoPreviewRef.current.play().catch(console.error);
+        }
     };
 
-    const handleUpload = async () => {
-        if (!selectedFile) {
-            setUploadStatus("Please select a file first.");
+    const togglePreview = () => {
+        setShowPreview(!showPreview);
+    };
+
+    const downloadVideo = () => {
+        if (videoURL) {
+            const a = document.createElement("a");
+            a.href = videoURL;
+            a.download = `recording.${videoFormat.extension}`;
+            a.click();
+        }
+    };
+
+    const uploadVideo = async () => {
+        if (!videoURL) {
+            setUploadStatus("No video to upload. Please record a video first.");
             return;
         }
 
@@ -98,7 +263,6 @@ const Uploading = () => {
             return;
         }
 
-        // Check if user is authenticated
         const accessToken = localStorage.getItem("access_token");
         if (!accessToken) {
             setUploadStatus("Please log in to upload videos.");
@@ -106,265 +270,435 @@ const Uploading = () => {
             return;
         }
 
-        // Validate file size (100MB limit)
-        const maxSize = 100 * 1024 * 1024; // 100MB
-        if (selectedFile.size > maxSize) {
-            setUploadStatus("File size exceeds 100MB limit. Please choose a smaller file.");
-            return;
-        }
-
-        // Validate file type
-        const allowedTypes = [
-            'video/mp4', 'video/avi', 'video/mkv', 'video/mov', 'video/wmv', 
-            'video/flv', 'video/webm', 'video/m4v', 'video/3gp', 'video/quicktime'
-        ];
-        if (!allowedTypes.includes(selectedFile.type)) {
-            setUploadStatus("Unsupported file type. Please upload a valid video file.");
-            return;
-        }
-
-        const formData = new FormData();
-        formData.append("file", selectedFile);
-        if (videoTitle.trim()) {
-            formData.append("title", videoTitle.trim());
-        }
-        formData.append("topic", presentationTopic.trim());
-        formData.append("language", selectedLanguage);
-        formData.append("focus_areas", JSON.stringify(selectedFocus));
-        
         try {
             setIsUploading(true);
-            setUploadStatus("Uploading...");
-            const response = await fetch("http://localhost:8081/presentations/upload", {
-                method: "POST",
-                headers: {
-                    "Authorization": `Bearer ${accessToken}`,
-                },
-                body: formData,
+            setUploadStatus("Preparing upload...");
+
+            const response = await fetch(videoURL);
+            const blob = await response.blob();
+
+            const file = new File([blob], `recording.${videoFormat.extension}`, {
+                type: videoFormat.mimeType,
             });
-            if (response.ok) {
-                const data = await response.json();
-                // Save presentationId to localStorage before anything else
-                if (data && data.presentation_id) {
-                    localStorage.setItem("presentationId", data.presentation_id);
-                }
-                setUploadStatus("Upload successful! Generating feedback...");
-                // POST to feedback API
-                const feedbackForm = new FormData();
-                feedbackForm.append("file", selectedFile);
-                feedbackForm.append("services", selectedFocus.join(","));
-                feedbackForm.append("presentation_id", data.presentation_id);
-                feedbackForm.append("language", selectedLanguage);
-                const feedbackRes = await fetch("http://localhost:8081/feedback/custom-feedback", {
+
+            const formData = new FormData();
+            formData.append("file", file);
+            formData.append("title", `Recording ${new Date().toLocaleString()}`);
+            formData.append("topic", presentationTopic.trim());
+            formData.append("language", selectedLanguage);
+            formData.append("focus_areas", JSON.stringify(selectedFocus));
+            
+
+            try {
+                setIsUploading(true);
+                setUploadStatus("Uploading...");
+                const response = await fetch("http://localhost:8081/presentations/upload", {
                     method: "POST",
                     headers: {
                         "Authorization": `Bearer ${accessToken}`,
                     },
-                    body: feedbackForm,
+                    body: formData,
                 });
-                if (feedbackRes.ok) {
-                    const feedbackData = await feedbackRes.json();
-                    localStorage.setItem("feedbackData", JSON.stringify(feedbackData));
-                    console.log("Feedback data stored in localStorage:", feedbackData);
-                    router.push("/Feedback");
+                if (response.ok) {
+                    const data = await response.json();
+                    // Save presentationId to localStorage before anything else
+                    if (data && data.presentation_id) {
+                        localStorage.setItem("presentationId", data.presentation_id);
+                    }
+                    setUploadStatus("Upload successful! Generating feedback...");
+                    // POST to feedback API
+                    const feedbackForm = new FormData();
+                    feedbackForm.append("file", file);
+                    feedbackForm.append("services", selectedFocus.join(","));
+                    feedbackForm.append("presentation_id", data.presentation_id);
+                    feedbackForm.append("language", selectedLanguage);
+                    const feedbackRes = await fetch("http://localhost:8081/feedback/custom-feedback", {
+                        method: "POST",
+                        headers: {
+                            "Authorization": `Bearer ${accessToken}`,
+                        },
+                        body: feedbackForm,
+                    });
+                    if (feedbackRes.ok) {
+                        const feedbackData = await feedbackRes.json();
+                        localStorage.setItem("feedbackData", JSON.stringify(feedbackData));
+                        console.log("Feedback data stored in localStorage:", feedbackData);
+                        router.push("/Feedback");
+                    } else {
+                        setUploadStatus("Failed to generate feedback. Please try again later.");
+                    }
                 } else {
-                    setUploadStatus("Failed to generate feedback. Please try again later.");
+                    const errorData = await response.json();
+                    
+                    if (response.status === 401) {
+                        localStorage.removeItem("access_token");
+                        setUploadStatus("Session expired. Please log in again.");
+                        setTimeout(() => router.push("/Login"), 2000);
+                    } else if (response.status === 413) {
+                        setUploadStatus("File too large. Maximum size is 100MB.");
+                    } else if (response.status === 415) {
+                        setUploadStatus("Unsupported file type.");
+                    } else {
+                        setUploadStatus(`Upload failed: ${errorData.detail || "Unknown error"}`);
+                    }
                 }
-            } else {
-                const errorData = await response.json();
-                
-                if (response.status === 401) {
-                    localStorage.removeItem("access_token");
-                    setUploadStatus("Session expired. Please log in again.");
-                    setTimeout(() => router.push("/Login"), 2000);
-                } else if (response.status === 413) {
-                    setUploadStatus("File too large. Maximum size is 100MB.");
-                } else if (response.status === 415) {
-                    setUploadStatus("Unsupported file type.");
-                } else {
-                    setUploadStatus(`Upload failed: ${errorData.detail || "Unknown error"}`);
-                }
+            } catch (error) {
+                console.error("Error uploading file:", error);
+                setUploadStatus("Network error. Please check your connection and try again.");
+            } finally {
+                setIsUploading(false);
             }
         } catch (error) {
-            console.error("Error uploading file:", error);
-            setUploadStatus("Network error. Please check your connection and try again.");
-        } finally {
-            setIsUploading(false);
+            console.error("Error in uploadVideo:", error);
+            setUploadStatus("An unexpected error occurred during upload.");
+        }
+    };
+    
+
+
+    const formatTime = (time: number) => {
+        const minutes = Math.floor(time / 60);
+        const seconds = time % 60;
+        return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+    };
+
+    const formatDuration = (duration: number) => {
+        // Handle invalid duration values
+        if (!duration || !isFinite(duration) || isNaN(duration) || duration <= 0) {
+            return "0:00";
+        }
+        const minutes = Math.floor(duration / 60);
+        const seconds = Math.floor(duration % 60);
+        return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+    };
+
+    const handleVideoLoadedMetadata = () => {
+        if (recordedVideoRef.current) {
+            const duration = recordedVideoRef.current.duration;
+            // Only set duration if it's a valid, finite number
+            if (duration && isFinite(duration) && !isNaN(duration) && duration > 0) {
+                setVideoDuration(duration);
+            } else {
+                setVideoDuration(0);
+            }
         }
     };
 
-    const getStatusClass = () => {
+    const detectVideoFormat = () => {
+        const formats = [
+            { mimeType: 'video/mp4;codecs=h264', extension: 'mp4' },
+            { mimeType: 'video/mp4', extension: 'mp4' },
+            { mimeType: 'video/webm;codecs=vp9', extension: 'webm' },
+            { mimeType: 'video/webm;codecs=vp8', extension: 'webm' },
+            { mimeType: 'video/webm', extension: 'webm' },
+        ];
+
+        for (const format of formats) {
+            if (MediaRecorder.isTypeSupported(format.mimeType)) {
+                return format;
+            }
+        }
+
+        return { mimeType: 'video/mp4', extension: 'mp4' };
+    };
+
+    const getUploadStatusClass = () => {
         if (!uploadStatus) return "";
-        if (uploadStatus.includes("successful")) return styles.StatusSuccess;
-        if (uploadStatus.includes("failed") || uploadStatus.includes("error") || uploadStatus.includes("expired")) return styles.StatusError;
-        if (uploadStatus.includes("Uploading")) return styles.StatusUploading;
-        return styles.StatusError;
+        if (uploadStatus.includes("successful")) return styles.uploadSuccess;
+        if (uploadStatus.includes("failed") || uploadStatus.includes("error") || uploadStatus.includes("expired")) return styles.uploadError;
+        if (uploadStatus.includes("Uploading") || uploadStatus.includes("Preparing")) return styles.uploadUploading;
+        return styles.uploadError;
+    };
+
+    const getStatusIcon = () => {
+        if (!uploadStatus) return null;
+        if (uploadStatus.includes("successful")) return <FiCheck />;
+        if (uploadStatus.includes("failed") || uploadStatus.includes("error") || uploadStatus.includes("expired")) return <FiX />;
+        if (uploadStatus.includes("Uploading") || uploadStatus.includes("Preparing")) return <div className={styles.loadingSpinner}></div>;
+        return <FiX />;
     };
 
     return (
-        <div className={styles.UploadContainer}>
-            <div
-                className={`${styles.PreviewSquare} ${isDragOver ? styles.dragOver : ''}`}
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-                onClick={() => fileInputRef.current?.click()}
-            >
-                {previewUrl ? (
-                    <video
-                        key={previewUrl}
-                        controls
-                        className={styles.VideoPreview}
-                    >
-                        <source src={previewUrl} type="video/mp4" />
-                        Your browser does not support the video tag.
-                    </video>
-                ) : (
-                    <div className={styles.DropZone}>
-                        <FiUploadCloud className={styles.UploadIcon} />
-                        <div className={styles.DropZoneText}>
-                            {isDragOver ? "Drop your video here" : "Upload Video"}
-                        </div>
-                        <div className={styles.DropZoneSubtext}>
-                            Drag and drop your video file here, or click to browse
-                        </div>
-                        <div className={styles.DropZoneSubtext}>
-                            Supports: MP4, AVI, MKV, MOV, WMV (Max: 100MB)
-                        </div>
-                    </div>
-                )}
-            </div>
-            
-            {/* File Information */}
-            {selectedFile && (
-                <div className={styles.FileInfo}>
-                    <div className={styles.TitleInputGroup}>
-                        <label className={styles.TitleLabel}>
-                            Video Title
-                        </label>
-                        <input
-                            type="text"
-                            value={videoTitle}
-                            onChange={(e) => setVideoTitle(e.target.value)}
-                            placeholder="Enter a title for your video"
-                            className={styles.TitleInput}
-                        />
-                    </div>
-                    <div className={styles.FileDetails}>
-                        <div className={styles.FileName}>
-                            <FiFile style={{ marginRight: '8px', verticalAlign: 'middle' }} />
-                            {fileName}
-                        </div>
-                        <div className={styles.FileSize}>
-                            {formatFileSize(selectedFile.size)}
-                        </div>
-                    </div>
-                </div>
-            )}
+        <div className={styles.container} onSubmit={(e) => e.preventDefault()}>
+            <div className={styles.studioContainer}>
+                <div className={styles.mainContent}>
+                    {/* Video Preview Section */}
+                    <div className={`${styles.preview} ${isRecording ? styles.recording : ''}`}>
+                    <div className={styles.videoWrapper}>
+                        {/* Live Camera Preview */}
+                        {showPreview && isClient && (
+                            <>
+                                <video
+                                    ref={videoPreviewRef}
+                                    className={`${styles.videoPreview} ${cameraReady ? styles.visible : styles.hidden}`}
+                                    muted
+                                    playsInline
+                                />
+                                {!cameraReady && (
+                                    <div className={styles.cameraPlaceholder}>
+                                        <FiCamera className={styles.cameraIcon} />
+                                        <div className={styles.cameraText}>Setting up camera...</div>
+                                        <div className={styles.cameraSubtext}>Please allow camera and microphone access</div>
+                                        <button 
+                                            onClick={() => {
+                                                const initializeCamera = async () => {
+                                                    try {
+                                                        const format = detectVideoFormat();
+                                                        setVideoFormat(format);
+                                                        
+                                                        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                                                        videoStreamRef.current = stream;
 
-            <div className={styles.ButtonGroup}>
-                <label htmlFor="fileInput" className={styles.ChooseFileButton}>
-                    {selectedFile ? "Change File" : "Choose File"}
-                </label>
-                <input
-                    id="fileInput"
-                    type="file"
-                    accept="video/*"
-                    onChange={handleFileChange}
-                    className={styles.FileInput}
-                    ref={fileInputRef}
-                />
-                <button 
-                    onClick={handleUpload} 
-                    className={styles.UploadButton}
-                    disabled={isUploading || !selectedFile || !presentationTopic.trim() || !selectedLanguage || selectedFocus.length === 0}
-                >
-                    {isUploading ? (
-                        <>
-                            <div className={styles.LoadingSpinner}></div>
-                            Uploading...
-                        </>
-                    ) : (
-                        <>
-                            <FiUploadCloud style={{ marginRight: '8px' }} />
-                            Upload Video
-                        </>
-                    )}
-                </button>
-            </div>
+                                                        // Wait a bit to ensure the video element is ready
+                                                        await new Promise(resolve => setTimeout(resolve, 100));
 
-            {/* Presentation Details Form */}
-            <div className={styles.PresentationDetailsForm}>
-                                    <div className={styles.FormGroup}>
-                        <label className={styles.FormLabel}>
-                            Presentation Topic *
-                        </label>
-                        <input
-                            type="text"
-                            value={presentationTopic}
-                            onChange={(e) => setPresentationTopic(e.target.value)}
-                            placeholder="for content relevance analysis"
-                            className={styles.FormInput}
-                            maxLength={255}
-                        />
-                        <div className={styles.CharacterCount}>
-                            {presentationTopic.length}/255 characters
-                        </div>
-                    </div>
-                <div className={styles.FormGroup}>
-                    <label className={styles.FormLabel}>
-                        Language *
-                    </label>
-                    <select
-                        value={selectedLanguage}
-                        onChange={(e) => setSelectedLanguage(e.target.value)}
-                        className={styles.FormSelect}
-                    >
-                        <option value="">Select Language</option>
-                        <option value="english">English</option>
-                        <option value="arabic">Arabic</option>
-                    </select>
-                </div>
-                
-                <div className={styles.FormGroup}>
-                    <label className={styles.FormLabel}>
-                        Focus Areas *
-                    </label>
-                    <button
-                        type="button"
-                        onClick={() => setShowFocusModal(true)}
-                        className={styles.FocusButton}
-                    >
-                        <FiTarget style={{ marginRight: '8px' }} />
-                        {selectedFocus.length > 0 
-                            ? `${selectedFocus.length} focus area${selectedFocus.length > 1 ? 's' : ''} selected`
-                            : "Choose a focus"
-                        }
-                    </button>
-                    {selectedFocus.length > 0 && (
-                        <div className={styles.SelectedFocusPreview}>
-                            {selectedFocus.slice(0, 2).map((focus, index) => (
-                                <span key={focus} className={styles.FocusTag}>
-                                    {focus.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                                </span>
-                            ))}
-                            {selectedFocus.length > 2 && (
-                                <span className={styles.FocusMore}>
-                                    +{selectedFocus.length - 2} more
-                                </span>
+                                                        if (videoPreviewRef.current) {
+                                                            videoPreviewRef.current.srcObject = stream;
+                                                            
+                                                            // Wait for the video to be ready before playing
+                                                            await new Promise((resolve, reject) => {
+                                                                if (videoPreviewRef.current) {
+                                                                    videoPreviewRef.current.onloadedmetadata = () => {
+                                                                        videoPreviewRef.current?.play().then(resolve).catch(reject);
+                                                                    };
+                                                                    videoPreviewRef.current.onerror = reject;
+                                                                }
+                                                            });
+                                                        }
+                                                        setCameraReady(true);
+                                                    } catch (error) {
+                                                        console.error("Error accessing media devices:", error);
+                                                        alert("Error accessing camera/microphone. Please check permissions and ensure camera is not being used by another application.");
+                                                        setCameraReady(false);
+                                                    }
+                                                };
+                                                initializeCamera();
+                                            }}
+                                            style={{
+                                                marginTop: "16px",
+                                                padding: "8px 16px",
+                                                backgroundColor: "var(--naples-yellow)",
+                                                color: "var(--white)",
+                                                border: "none",
+                                                borderRadius: "8px",
+                                                cursor: "pointer",
+                                                fontSize: "14px",
+                                                fontWeight: "500"
+                                            }}
+                                        >
+                                            Retry Camera Setup
+                                        </button>
+                                    </div>
+                                )}
+                            </>
+                        )}
+
+                        {/* Show loading state on server side */}
+                        {showPreview && !isClient && (
+                            <div className={styles.cameraPlaceholder}>
+                                <FiCamera className={styles.cameraIcon} />
+                                <div className={styles.cameraText}>Loading...</div>
+                                <div className={styles.cameraSubtext}>Please wait while the camera initializes</div>
+                            </div>
+                        )}
+
+                        {/* Recorded Video Playback */}
+                        {!showPreview && videoURL && (
+                            <video
+                                ref={recordedVideoRef}
+                                src={videoURL}
+                                className={styles.recordedVideo}
+                                controls
+                                onLoadedMetadata={handleVideoLoadedMetadata}
+                            />
+                        )}
+
+                        {/* Recording Timer */}
+                        {isRecording && (
+                            <div className={styles.timer}>
+                                <div className={styles.recordingIndicator}></div>
+                                <FiClock />
+                                REC {formatTime(recordingTime)}
+                            </div>
+                        )}
+
+                        {/* Status Badge */}
+                        <div className={`${styles.statusBadge} ${showPreview ? styles.live : styles.recorded}`}>
+                            {showPreview ? (
+                                <>
+                                    <FiRadio />
+                                    LIVE
+                                </>
+                            ) : (
+                                <>
+                                    <FiFilm />
+                                    RECORDED
+                                </>
                             )}
                         </div>
+                    </div>
+                </div>
+                </div>
+
+                {/* Control Panel */}
+                <div className={styles.controlPanel}>
+                    {/* Presentation Details Form */}
+                    <div className={styles.presentationForm}>
+                        <div className={styles.formRow}>
+                            <div className={styles.formGroup}>
+                                <label className={styles.formLabel}>
+                                    Presentation Topic *
+                                </label>
+                                <input
+                                    type="text"
+                                    value={presentationTopic}
+                                    onChange={(e) => setPresentationTopic(e.target.value)}
+                                    placeholder="for content relevance analysis"
+                                    className={styles.formInput}
+                                    maxLength={255}
+                                />
+                                <div className={styles.characterCount}>
+                                    {presentationTopic.length}/255 characters
+                                </div>
+                            </div>
+                            <div className={styles.formGroup}>
+                                <label className={styles.formLabel}>
+                                    Language *
+                                </label>
+                                <select
+                                    value={selectedLanguage}
+                                    onChange={(e) => setSelectedLanguage(e.target.value)}
+                                    className={styles.formSelect}
+                                >
+                                    <option value="">Select Language</option>
+                                    <option value="english">English</option>
+                                    <option value="arabic">Arabic</option>
+                                </select>
+                            </div>
+                            <div className={styles.formGroup}>
+                                <label className={styles.formLabel}>
+                                    Focus Areas *
+                                </label>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowFocusModal(true)}
+                                    className={styles.focusButton}
+                                >
+                                    <FiTarget style={{ marginRight: '8px' }} />
+                                    {selectedFocus.length > 0 
+                                        ? `${selectedFocus.length} focus area${selectedFocus.length > 1 ? 's' : ''} selected`
+                                        : "Choose a focus"
+                                    }
+                                </button>
+                                {selectedFocus.length > 0 && (
+                                    <div className={styles.selectedFocusPreview}>
+                                        {selectedFocus.slice(0, 2).map((focus, index) => (
+                                            <span key={focus} className={styles.focusTag}>
+                                                {focus.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                                            </span>
+                                        ))}
+                                        {selectedFocus.length > 2 && (
+                                            <span className={styles.focusMore}>
+                                                +{selectedFocus.length - 2} more
+                                            </span>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                    {/* Preview Toggle Section */}
+                    {videoURL && (
+                        <div className={styles.toggleSection}>
+                            <div className={styles.toggleButtons}>
+                                <button
+                                    className={`${styles.toggleButton} ${showPreview ? styles.active : ''}`}
+                                    onClick={() => setShowPreview(true)}
+                                >
+                                    <FiEye />
+                                    Live Preview
+                                </button>
+                                <button
+                                    className={`${styles.toggleButton} ${!showPreview ? styles.active : ''}`}
+                                    onClick={() => setShowPreview(false)}
+                                >
+                                    <FiPlay />
+                                    Recorded Video
+                                </button>
+                            </div>
+                        </div>
                     )}
+
+                    {/* Upload Status */}
+                    {uploadStatus && (
+                        <div className={`${styles.UploadStatus} ${getUploadStatusClass()}`}>
+                            {uploadStatus.includes("successful") && <FiCheck style={{ marginRight: '8px' }} />}
+                            {(uploadStatus.includes("failed") || uploadStatus.includes("error") || uploadStatus.includes("expired")) && <FiX style={{ marginRight: '8px' }} />}
+                            {uploadStatus}
+                        </div>
+                    )}
+
+                    {/* Action Buttons */}
+                    <div className={styles.footer}>
+                        {!isRecording && !videoURL && (
+                            <button
+                                onClick={startRecording}
+                                className={`${styles.actionButton} ${styles.recordButton}`}
+                                disabled={!cameraReady}
+                            >
+                                <FiVideo />
+                                Start Recording
+                            </button>
+                        )}
+
+                        {isRecording && (
+                            <button
+                                onClick={stopRecording}
+                                className={`${styles.actionButton} ${styles.stopButton} ${styles.recording}`}
+                            >
+                                <FiVideoOff />
+                                Stop Recording
+                            </button>
+                        )}
+
+                        {videoURL && !isRecording && (
+                            <>
+                                <button
+                                    onClick={recordNewVideo}
+                                    className={`${styles.actionButton} ${styles.newRecordingButton}`}
+                                >
+                                    <FiVideo />
+                                    New Recording
+                                </button>
+                                <button
+                                    onClick={downloadVideo}
+                                    className={`${styles.actionButton} ${styles.downloadButton}`}
+                                >
+                                    <FiDownload />
+                                    Download
+                                </button>
+                                <button
+                                    onClick={uploadVideo}
+                                    disabled={isUploading || !presentationTopic.trim() || !selectedLanguage || selectedFocus.length === 0}
+                                    className={`${styles.actionButton} ${styles.uploadButton}`}
+                                >
+                                    {isUploading ? (
+                                        <>
+                                            <div className={styles.loadingSpinner}></div>
+                                            Uploading...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <FiUploadCloud />
+                                            Upload Video
+                                        </>
+                                    )}
+                                </button>
+                            </>
+                        )}
+                    </div>
                 </div>
             </div>
-
-            {uploadStatus && (
-                <div className={`${styles.UploadStatus} ${getStatusClass()}`}>
-                    {uploadStatus.includes("successful") && <FiCheck style={{ marginRight: '8px' }} />}
-                    {(uploadStatus.includes("failed") || uploadStatus.includes("error")) && <FiX style={{ marginRight: '8px' }} />}
-                    {uploadStatus}
-                </div>
-            )}
 
             <FocusModal
                 isOpen={showFocusModal}
@@ -376,4 +710,4 @@ const Uploading = () => {
     );
 };
 
-export default Uploading;
+export default Recording;
