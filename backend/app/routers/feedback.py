@@ -9,7 +9,7 @@ from backend.app.crud.feedback import create_feedback, get_feedback_by_presentat
 
 router = APIRouter(prefix="/feedback", tags=["Feedback Service"])
 
-FEEDBACK_SERVICE_URL = "http://presentation-analyzer:8082/api"
+FEEDBACK_SERVICE_URL = "http://142.93.205.233:8082/api"
 
 async def proxy_to_feedback_service(endpoint: str, file: UploadFile, extra_form: Optional[dict] = None):
     url = f"{FEEDBACK_SERVICE_URL}/{endpoint}"
@@ -120,48 +120,25 @@ async def custom_feedback(
     language: str = Form('english'),
     db: Session = Depends(get_db)
 ):
-    # Save file to shared volume first
-    from pathlib import Path
-    import shutil
-    
-    # Create uploads directory if it doesn't exist
-    upload_dir = Path("/app/backend/uploads/videos")
-    upload_dir.mkdir(parents=True, exist_ok=True)
-    
-    # Generate unique filename
-    import uuid
-    from datetime import datetime
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    unique_id = str(uuid.uuid4())[:8]
-    file_extension = Path(file.filename).suffix
-    unique_filename = f"{timestamp}_{unique_id}{file_extension}"
-    
-    # Save file to shared volume
-    file_path = upload_dir / unique_filename
-    with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
-    
-    # Verify file was saved successfully
-    if not file_path.exists():
-        raise HTTPException(status_code=500, detail="Failed to save file to shared volume")
-    
-    # Convert to path that feedback service can access
-    feedback_service_path = f"/app/uploads/videos/{unique_filename}"
-    
-    print(f"Backend: Saved file to {file_path}")
-    print(f"Backend: Sending path {feedback_service_path} to feedback service")
-    
-    # Call feedback service with file path
+    # Call feedback service with file content (for remote deployed service)
     url = f"{FEEDBACK_SERVICE_URL}/custom-feedback"
     try:
-        async with httpx.AsyncClient(timeout=1000) as client:  # Increased timeout to 10 minutes for large files
+        async with httpx.AsyncClient(timeout=1000) as client:  # Increased timeout to 15 minutes for large files
+            # Read file content
+            file_content = await file.read()
+            
             form_data = {
                 "services": services, 
                 "presentation_id": str(presentation_id), 
-                "language": language,
-                "file_path": feedback_service_path
+                "language": language
             }
-            resp = await client.post(url, data=form_data)
+            
+            # Send file content to remote service
+            files = {"file": (file.filename, file_content, file.content_type)}
+            
+            print(f"Backend: Sending file {file.filename} ({len(file_content)} bytes) to deployed feedback service")
+            
+            resp = await client.post(url, files=files, data=form_data)
             
             # Check if response is successful
             if resp.status_code != 200:
@@ -182,20 +159,8 @@ async def custom_feedback(
             create_feedback(db, presentation_id, feedback_data)
             return JSONResponse(status_code=resp.status_code, content=feedback_data)
     except httpx.TimeoutException:
-        # Clean up file if feedback service times out
-        try:
-            if file_path.exists():
-                os.remove(file_path)
-        except:
-            pass
         raise HTTPException(status_code=408, detail="Feedback service request timed out. Please try again with a shorter video.")
     except Exception as e:
-        # Clean up file if feedback service fails
-        try:
-            if file_path.exists():
-                os.remove(file_path)
-        except:
-            pass
         raise HTTPException(status_code=500, detail=f"Failed to contact feedback service: {str(e)}")
 
 
