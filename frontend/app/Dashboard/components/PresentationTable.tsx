@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from '../page.module.css';
+import PresentationService, { Presentation } from '../../services/presentationService';
 
 interface PresentationData {
   id: string | number;
@@ -22,60 +23,109 @@ interface PresentationTableProps {
 }
 
 const PresentationTable: React.FC<PresentationTableProps> = ({ 
-  submittedTrials, 
-  upcomingPresentations, 
+  // submittedTrials, 
+  // upcomingPresentations, 
   loading = false,
   onRefresh 
 }) => {
   const router = useRouter();
+
+  // State for recent presentations
+  const [recentPresentations, setRecentPresentations] = useState<Presentation[]>([]);
+  const [loadingState, setLoadingState] = useState<boolean>(true);
+
+  useEffect(() => {
+    const fetchRecent = async () => {
+      setLoadingState(true);
+      const response = await PresentationService.getUserPresentations();
+      if (response.success && response.data) {
+        const presentationsData = (response.data as any).videos || [];
+        // Filter to only submitted presentations (uploaded_at <= now)
+        const now = new Date();
+        const submitted = presentationsData.filter((p: any) => new Date(p.uploaded_at) <= now);
+        // Sort by uploaded_at descending (most recent first)
+        const sorted = submitted.sort((a: any, b: any) => new Date(b.uploaded_at).getTime() - new Date(a.uploaded_at).getTime());
+        // Take the 4 most recent
+        const top4 = sorted.slice(0, 4);
+        // Fetch feedback for each
+        const withScores = await Promise.all(
+          top4.map(async (presentation: Presentation) => {
+            try {
+              const feedbackResponse = await fetch(`http://localhost:8081/feedback/presentation/${presentation.id}/feedback`, {
+                headers: {
+                  'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+                  'Content-Type': 'application/json',
+                },
+              });
+              if (feedbackResponse.ok) {
+                const feedbackData = await feedbackResponse.json();
+                const enhanced = feedbackData.enhanced_feedback || {};
+                const overallScore = enhanced.overall_score || feedbackData.overall_score || feedbackData.score || null;
+                return { ...presentation, overall_score: overallScore };
+              } else {
+                return { ...presentation, overall_score: undefined };
+              }
+            } catch {
+              return { ...presentation, overall_score: undefined };
+            }
+          })
+        );
+        setRecentPresentations(withScores);
+      } else {
+        setRecentPresentations([]);
+      }
+      setLoadingState(false);
+    };
+    fetchRecent();
+  }, []);
 
   // Combine and transform data
   const combineData = (): PresentationData[] => {
     const combined: PresentationData[] = [];
 
     // Add submitted trials (completed presentations)
-    submittedTrials.forEach((trial, index) => {
-      combined.push({
-        id: trial.id || `trial_${index}`,
-        title: trial.title,
-        company: trial.title || `Presentation ${trial.id || index + 1}`,
-        date: new Date(trial.uploaded_at).toLocaleDateString('en-GB'),
-        status: 'presented',
-        type: 'submitted'
-      });
-    });
+    // submittedTrials.forEach((trial, index) => {
+    //   combined.push({
+    //     id: trial.id || `trial_${index}`,
+    //     title: trial.title,
+    //     company: trial.title || `Presentation ${trial.id || index + 1}`,
+    //     date: new Date(trial.uploaded_at).toLocaleDateString('en-GB'),
+    //     status: 'presented',
+    //     type: 'submitted'
+    //   });
+    // });
 
     // Add upcoming presentations
-    upcomingPresentations.forEach((presentation, index) => {
-      combined.push({
-        id: presentation.id || `upcoming_${index}`,
-        topic: presentation.topic,
-        company: presentation.topic || `Upcoming ${index + 1}`,
-        date: new Date(presentation.date).toLocaleDateString('en-GB'),
-        status: 'upcoming',
-        type: 'upcoming',
-        time: presentation.time
-      });
-    });
+    // upcomingPresentations.forEach((presentation, index) => {
+    //   combined.push({
+    //     id: presentation.id || `upcoming_${index}`,
+    //     topic: presentation.topic,
+    //     company: presentation.topic || `Upcoming ${index + 1}`,
+    //     date: new Date(presentation.date).toLocaleDateString('en-GB'),
+    //     status: 'upcoming',
+    //     type: 'upcoming',
+    //     time: presentation.time
+    //   });
+    // });
 
     // Sort by date (newest first for submitted, upcoming first for future)
-    return combined.sort((a, b) => {
-      if (a.type === 'upcoming' && b.type === 'submitted') return -1;
-      if (a.type === 'submitted' && b.type === 'upcoming') return 1;
-      
-      const dateA = new Date(a.date.split('/').reverse().join('-'));
-      const dateB = new Date(b.date.split('/').reverse().join('-'));
-      
-      if (a.type === 'upcoming') {
-        return dateA.getTime() - dateB.getTime(); // Upcoming: earliest first
-      } else {
-        return dateB.getTime() - dateA.getTime(); // Submitted: newest first
-      }
-    });
+    // return combined.sort((a, b) => {
+    //   if (a.type === 'upcoming' && b.type === 'submitted') return -1;
+    //   if (a.type === 'submitted' && b.type === 'upcoming') return 1;
+    //   
+    //   const dateA = new Date(a.date.split('/').reverse().join('-'));
+    //   const dateB = new Date(b.date.split('/').reverse().join('-'));
+    //   
+    //   if (a.type === 'upcoming') {
+    //     return dateA.getTime() - dateB.getTime(); // Upcoming: earliest first
+    //   } else {
+    //     return dateB.getTime() - dateA.getTime(); // Submitted: newest first
+    //   }
+    // });
   };
 
-  const combinedData = combineData();
-  const activeCount = upcomingPresentations.length;
+  // Only show the 4 most recent presentations
+  const displayedData = recentPresentations;
 
   const getCompanyInitial = (company: string): string => {
     return company.charAt(0).toUpperCase();
@@ -125,6 +175,14 @@ const PresentationTable: React.FC<PresentationTableProps> = ({
     console.log('Filter clicked');
   };
 
+  // Add delete handler
+  const handleDelete = async (presentationId: number) => {
+    if (!window.confirm('Are you sure you want to delete this presentation?')) return;
+    await PresentationService.deletePresentation(presentationId);
+    // Refresh the list after deletion
+    setRecentPresentations(prev => prev.filter(p => p.id !== presentationId));
+  };
+
   if (loading) {
     return (
       <div className={styles.tableSection}>
@@ -159,16 +217,6 @@ const PresentationTable: React.FC<PresentationTableProps> = ({
       <div className={styles.tableHeader}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <h3 className={styles.sectionTitle}>📋 Recent Presentations</h3>
-          <span style={{ 
-            background: 'rgba(255, 214, 10, 0.2)', 
-            color: 'var(--naples-yellow)', 
-            padding: '4px 12px', 
-            borderRadius: '12px', 
-            fontSize: '12px', 
-            fontWeight: '600' 
-          }}>
-            {activeCount} Active
-          </span>
         </div>
         <div style={{ display: 'flex', gap: '12px' }}>
           <button className={styles.filterButton} onClick={handleFilter}>
@@ -186,7 +234,7 @@ const PresentationTable: React.FC<PresentationTableProps> = ({
         </div>
       </div>
       
-      {combinedData.length === 0 ? (
+      {displayedData.length === 0 ? (
         <div style={{ 
           padding: '40px', 
           textAlign: 'center', 
@@ -248,7 +296,7 @@ const PresentationTable: React.FC<PresentationTableProps> = ({
             </tr>
           </thead>
           <tbody>
-            {combinedData.slice(0, 4).map((item, index) => (
+            {displayedData.map((item, index) => (
               <tr key={item.id} className={styles.tableRow}>
                 <td className={styles.tableCell}>
                   <span style={{ fontFamily: 'monospace', fontWeight: '600' }}>
@@ -256,69 +304,51 @@ const PresentationTable: React.FC<PresentationTableProps> = ({
                   </span>
                 </td>
                 <td className={styles.tableCell}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <div style={{ 
-                      width: '32px', 
-                      height: '32px', 
-                      borderRadius: '8px', 
-                      background: getCompanyColor(index), 
-                      display: 'flex', 
-                      alignItems: 'center', 
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div style={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: '8px',
+                      background: getCompanyColor(index),
+                      display: 'flex',
+                      alignItems: 'center',
                       justifyContent: 'center',
-                      fontSize: '14px',
-                      fontWeight: 'bold',
-                      color: 'white'
+                      fontWeight: 700,
+                      fontSize: 18,
+                      color: '#fff',
                     }}>
-                      {getCompanyInitial(item.company || '')}
+                      {getCompanyInitial(item.title || 'P')}
                     </div>
-                    <span style={{ fontWeight: '600' }}>
-                      {item.company}
+                    <div>
+                      <div style={{ fontWeight: 600, color: 'var(--white)' }}>
+                        {item.title || 'Untitled'}
+                      </div>
                       {item.time && (
-                        <span style={{ 
-                          fontSize: '12px', 
-                          color: 'var(--light-grey)', 
-                          marginLeft: '8px' 
-                        }}>
-                          {item.time}
-                        </span>
+                        <span style={{ fontSize: 12, color: 'var(--light-grey)' }}>{item.time}</span>
                       )}
-                    </span>
+                    </div>
                   </div>
                 </td>
-                <td className={styles.tableCell}>{item.date}</td>
+                <td className={styles.tableCell}>{item.uploaded_at ? new Date(item.uploaded_at).toLocaleDateString('en-GB') : ''}</td>
                 <td className={styles.tableCell}>
-                  {getStatusBadge(item.status)}
+                  <span className={styles.statusPresented}>Submitted</span>
                 </td>
                 <td className={styles.tableCell}>
                   <div style={{ display: 'flex', gap: '8px' }}>
-                    <button 
-                      onClick={() => handleView(item)}
-                      style={{ 
-                        background: 'rgba(0, 255, 204, 0.2)', 
-                        border: '1px solid rgba(0, 255, 204, 0.3)', 
-                        color: 'var(--aqua)', 
-                        padding: '4px 8px', 
-                        borderRadius: '6px', 
-                        fontSize: '12px',
-                        cursor: 'pointer'
-                      }}
+                    <button
+                      className={styles.deleteButton}
+                      style={{ background: '#ff4d4f', color: '#fff', border: 'none', borderRadius: 6, padding: '6px 14px', marginRight: 8, cursor: 'pointer', fontWeight: 600 }}
+                      onClick={() => handleDelete(Number(item.id))}
                     >
-                      👁️ View
+                      Delete
                     </button>
-                                         <button 
-                       onClick={() => handleAction(item)}
-                       style={{ 
-                         background: 'rgba(76, 175, 80, 0.2)', 
-                         border: '1px solid rgba(76, 175, 80, 0.3)', 
-                         color: '#4CAF50', 
-                         padding: '4px 8px', 
-                         borderRadius: '6px', 
-                         fontSize: '12px',
-                         cursor: 'pointer'
-                       }}
-                     >
-                       📊 Report
-                     </button>
+                    <button
+                      className={styles.feedbackButton}
+                      style={{ background: '#1e90ff', color: '#fff', border: 'none', borderRadius: 6, padding: '6px 14px', cursor: 'pointer', fontWeight: 600 }}
+                      onClick={() => router.push(`/Feedback?presentationId=${item.id}`)}
+                    >
+                      Feedback
+                    </button>
                   </div>
                 </td>
               </tr>
@@ -327,28 +357,7 @@ const PresentationTable: React.FC<PresentationTableProps> = ({
         </table>
       )}
       
-             {combinedData.length > 4 && (
-        <div style={{ 
-          textAlign: 'center', 
-          padding: '16px',
-          borderTop: '1px solid rgba(255, 255, 255, 0.1)'
-        }}>
-          <button 
-            onClick={() => router.push('/SubmittedTrials')}
-            style={{
-              background: 'none',
-              border: '1px solid rgba(255, 214, 10, 0.3)',
-              color: 'var(--naples-yellow)',
-              padding: '8px 16px',
-              borderRadius: '8px',
-              fontSize: '14px',
-              cursor: 'pointer'
-            }}
-          >
-            View All Presentations ({combinedData.length})
-          </button>
-        </div>
-      )}
+             {/* No combinedData for submitted only */}
     </div>
   );
 };
