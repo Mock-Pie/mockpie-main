@@ -226,3 +226,18 @@ def get_file_info(presentation: Presentation) -> dict:
             file_info = {"file_exists": False}
             
     return file_info
+
+
+def update_presentation_url(db: Session, presentation: Presentation, new_url: str) -> Presentation:
+    """Update the URL of a presentation"""
+    try:
+        presentation.url = new_url
+        db.commit()
+        db.refresh(presentation)
+        return presentation
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error updating presentation URL: {str(e)}"
+        )

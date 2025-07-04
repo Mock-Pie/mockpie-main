@@ -6,6 +6,11 @@ import os
 from sqlalchemy.orm import Session
 from backend.database.database import get_db
 from backend.app.crud.feedback import create_feedback, get_feedback_by_presentation_id
+from backend.app.crud.presentation import get_presentation_by_id, update_presentation_url
+from pathlib import Path
+import shutil
+import uuid
+from datetime import datetime
 
 router = APIRouter(prefix="/feedback", tags=["Feedback Service"])
 
@@ -118,21 +123,37 @@ async def custom_feedback(
     services: str = Form(...),
     presentation_id: int = Form(...),
     language: str = Form('english'),
-    topic: str = Form(""),
     db: Session = Depends(get_db)
 ):
+    # Save file locally for video preview
+    upload_dir = Path("/app/backend/uploads/videos")
+    upload_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Generate unique filename
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    unique_id = str(uuid.uuid4())[:8]
+    file_extension = Path(file.filename).suffix
+    unique_filename = f"{timestamp}_{unique_id}{file_extension}"
+    
+    # Save file locally for video preview
+    local_file_path = upload_dir / unique_filename
+    with open(local_file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+    
+    print(f"Backend: Saved file locally to {local_file_path} for video preview")
+    
     # Call feedback service with file content (for remote deployed service)
     url = f"{FEEDBACK_SERVICE_URL}/custom-feedback"
     try:
         async with httpx.AsyncClient(timeout=1000) as client:  # Increased timeout to 15 minutes for large files
-            # Read file content
+            # Read file content again for AI service
+            file.file.seek(0)  # Reset file pointer
             file_content = await file.read()
             
             form_data = {
                 "services": services, 
                 "presentation_id": str(presentation_id), 
-                "language": language,
-                "topic": topic
+                "language": language
             }
             
             # Send file content to remote service
@@ -157,6 +178,14 @@ async def custom_feedback(
             # Add used_criteria
             used_criteria = [s.strip() for s in services.split(",") if s.strip()]
             feedback_data["used_criteria"] = used_criteria
+            
+            # Update presentation URL to point to the locally saved file
+            file_url = f"/uploads/videos/{unique_filename}"
+            presentation = get_presentation_by_id(db, presentation_id, None)  # No user check needed here
+            if presentation:
+                update_presentation_url(db, presentation, file_url)
+                print(f"Backend: Updated presentation {presentation_id} URL to {file_url}")
+            
             # Store feedback in DB
             create_feedback(db, presentation_id, feedback_data)
             return JSONResponse(status_code=resp.status_code, content=feedback_data)

@@ -175,8 +175,20 @@ async def api_enhanced_overall_feedback(file: UploadFile = File(...), language: 
         file_path = await analyzers["file_processor"].save_uploaded_file(file)
         audio_path, video_path, has_video = await analyzers["file_processor"].extract_components(file_path)
         logger.info("Pre-transcribing audio for all models...")
+        logger.info(f"Audio path: {audio_path}, Video path: {video_path}, Has video: {has_video}")
+        
         transcription = await analyzers["transcription_service"].get_transcription(audio_path, language)
+        logger.info(f"Transcription result type: {type(transcription)}, length: {len(transcription) if transcription else 0}")
+        logger.info(f"Transcription preview: {transcription[:100] if transcription else 'None'}")
+        
+        # Ensure transcription is never None
+        if transcription is None:
+            logger.warning("Transcription returned None, using empty string as fallback")
+            transcription = ""
+        
         transcript_result = {"text": transcription} if transcription else {"text": ""}
+        logger.info(f"Final transcription length: {len(transcription)}, transcript_result: {transcript_result}")
+        
         results = {}
         analysis_tasks = [
             ("speech_emotion", analyzers["speech_emotion"].analyze(audio_path)),
@@ -457,8 +469,7 @@ async def api_custom_feedback(
     file: UploadFile = File(None),
     file_path: str = Form(None),
     services: str = Form(...),
-    language: str = Form(...),
-    topic: str = Form("")
+    language: str = Form(...)
 ):
     """
     Customizable feedback endpoint: upload a video/audio and specify which services to run.
@@ -488,8 +499,20 @@ async def api_custom_feedback(
             return JSONResponse(content={"error": "Either file or file_path must be provided"}, status_code=400)
         
         audio_path, video_path, has_video = await analyzers["file_processor"].extract_components(input_file_path)
+        logger.info(f"Audio path: {audio_path}, Video path: {video_path}, Has video: {has_video}")
+        
         transcription = await analyzers["transcription_service"].get_transcription(audio_path, language)
+        logger.info(f"Transcription result type: {type(transcription)}, length: {len(transcription) if transcription else 0}")
+        logger.info(f"Transcription preview: {transcription[:100] if transcription else 'None'}")
+        
+        # Ensure transcription is never None
+        if transcription is None:
+            logger.warning("Transcription returned None, using empty string as fallback")
+            transcription = ""
+        
         transcript_result = {"text": transcription} if transcription else {"text": ""}
+        logger.info(f"Final transcription length: {len(transcription)}, transcript_result: {transcript_result}")
+        
         requested_services = [s.strip() for s in services.split(",") if s.strip()]
         results = {}
         service_map = {
@@ -500,7 +523,7 @@ async def api_custom_feedback(
             "stutter_detection": ("stutter_detection", "audio", "analyze", {}),
             "lexical_richness": ("lexical_richness", "audio", "analyze", {"language": language, "transcript": transcription}),
             "wpm_analysis": ("wpm_calculator", "audio", "analyze", {"language": language, "context": "presentation", "transcript": transcription}),
-            "keyword_relevance": ("keyword_relevance", "audio", "analyze", {"language": language, "transcript": transcription, "target_keywords": topic}),
+            "keyword_relevance": ("keyword_relevance", "audio", "analyze", {"language": language, "transcript": transcription}),
             "facial_emotion": ("facial_emotion", "video", "analyze", {}),
             "eye_contact": ("eye_contact", "video", "analyze_eye_contact", {}),
             "hand_gesture": ("hand_gesture", "video", "analyze", {}),
