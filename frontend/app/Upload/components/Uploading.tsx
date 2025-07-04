@@ -131,7 +131,7 @@ const Uploading = () => {
         formData.append("topic", presentationTopic.trim());
         formData.append("language", selectedLanguage);
         formData.append("focus_areas", JSON.stringify(selectedFocus));
-
+        
         try {
             setIsUploading(true);
             setUploadStatus("Uploading...");
@@ -154,9 +154,7 @@ const Uploading = () => {
                 feedbackForm.append("file", selectedFile);
                 feedbackForm.append("services", selectedFocus.join(","));
                 feedbackForm.append("presentation_id", data.presentation_id);
-                console.log(data.presentation_id);
-                console.log(JSON.stringify(selectedFocus));
-                console.log(selectedFile);
+                feedbackForm.append("language", selectedLanguage);
                 const feedbackRes = await fetch("http://localhost:8081/feedback/custom-feedback", {
                     method: "POST",
                     headers: {

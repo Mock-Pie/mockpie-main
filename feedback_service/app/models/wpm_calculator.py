@@ -164,6 +164,75 @@ class WPMCalculator:
             logger.error(f"Error in async WPM analysis: {str(e)}")
             return self._create_error_result(f"Analysis failed: {str(e)}")
     
+    async def analyze_with_transcription(self, audio_path: str, transcription: str, context: str = 'presentation') -> Dict:
+        """
+        Analyze WPM using pre-transcribed text.
+        
+        Args:
+            audio_path: Path to audio file (for duration and segment analysis)
+            transcription: Pre-transcribed text
+            context: Speaking context ('presentation', 'conversation', 'audiobook')
+            
+        Returns:
+            Dictionary with WPM analysis results
+        """
+        print(f"⏱️ DEBUG: Starting WPM Calculator Analysis with pre-transcription for {audio_path}")
+        
+        try:
+            # Load audio file for duration and segment analysis
+            audio_data, sample_rate = librosa.load(audio_path, sr=16000)
+            duration = len(audio_data) / sample_rate
+            
+            # Use provided transcription
+            if not transcription:
+                return self._create_error_result("No transcription provided")
+            
+            # Calculate basic metrics
+            word_count = self._count_words(transcription)
+            wpm = self._calculate_wpm(word_count, duration)
+            
+            # Analyze speech segments and pauses
+            speech_segments = self._detect_speech_segments(audio_data, sample_rate)
+            segment_analysis = self._analyze_segments(speech_segments, transcription)
+            
+            # Calculate advanced metrics
+            pace_consistency = self._calculate_pace_consistency(segment_analysis)
+            pause_analysis = self._analyze_pauses(speech_segments, duration)
+            
+            # Generate assessment and recommendations
+            assessment = self._assess_wpm(wpm, context)
+            recommendations = self._generate_recommendations(wpm, pace_consistency, pause_analysis, context)
+            
+            # Calculate overall score (0-10) based on WPM assessment and consistency
+            overall_score = self._calculate_overall_score(wpm, pace_consistency, assessment, context)
+            
+            return {
+                'overall_wpm': round(wpm, 1),
+                'word_count': word_count,
+                'duration_minutes': round(duration / 60, 2),
+                'context': context,
+                'assessment': assessment,
+                'overall_score': float(overall_score),
+                'pace_consistency': {
+                    'score': round(pace_consistency, 2),
+                    'status': self._get_consistency_status(pace_consistency)
+                },
+                'segment_analysis': {
+                    'segments': len(speech_segments),
+                    'avg_segment_wpm': round(np.mean([seg['wpm'] for seg in segment_analysis]), 1),
+                    'wpm_variance': round(np.var([seg['wpm'] for seg in segment_analysis]), 1)
+                },
+                'pause_analysis': pause_analysis,
+                'detailed_segments': segment_analysis[:10],  # First 10 segments for detail
+                'recommendations': recommendations,
+                'success': True,
+                'transcription_method': 'pre_provided'
+            }
+            
+        except Exception as e:
+            logger.error(f"Error in WPM analysis with pre-transcription: {str(e)}")
+            return self._create_error_result(f"Analysis failed: {str(e)}")
+    
     def _get_transcription(self, audio_path: str, language: str = 'english') -> Optional[str]:
         """Get transcription using centralized transcription service"""
         try:

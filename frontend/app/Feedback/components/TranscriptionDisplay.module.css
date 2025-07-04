@@ -1,0 +1,206 @@
+.transcriptionContainer {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 30px;
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.transcriptionContainer:hover {
+    border-color: rgba(255, 214, 10, 0.3);
+    transform: translateY(-2px);
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.titleSection {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.titleIcon {
+    color: var(--naples-yellow);
+    font-size: 1.5rem;
+}
+
+.title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--white);
+    margin: 0;
+}
+
+.copyButton {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--white);
+    padding: 10px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+}
+
+.copyButton:hover {
+    background: rgba(255, 214, 10, 0.1);
+    border-color: var(--naples-yellow);
+    color: var(--naples-yellow);
+    transform: scale(1.05);
+}
+
+.content {
+    margin-bottom: 20px;
+}
+
+.transcriptionText {
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 10px;
+}
+
+.transcriptionText::-webkit-scrollbar {
+    width: 6px;
+}
+
+.transcriptionText::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+}
+
+.transcriptionText::-webkit-scrollbar-thumb {
+    background: var(--naples-yellow);
+    border-radius: 3px;
+}
+
+.transcriptionText::-webkit-scrollbar-thumb:hover {
+    background: var(--dark-yellow);
+}
+
+.paragraph {
+    color: var(--light-grey);
+    font-size: 1rem;
+    line-height: 1.6;
+    margin: 0 0 15px 0;
+    text-align: justify;
+}
+
+.paragraph:last-child {
+    margin-bottom: 0;
+}
+
+.noTranscription {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--light-grey);
+    font-style: italic;
+}
+
+.noTranscription p {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.stats {
+    display: flex;
+    gap: 20px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stat {
+    color: var(--naples-yellow);
+    font-size: 0.9rem;
+    font-weight: 500;
+    background: rgba(255, 214, 10, 0.1);
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 214, 10, 0.2);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .transcriptionContainer {
+        padding: 20px;
+        height: auto;
+    }
+    
+    .title {
+        font-size: 1.1rem;
+    }
+    
+    .titleIcon {
+        font-size: 1.3rem;
+    }
+    
+    .copyButton {
+        padding: 8px;
+        font-size: 1rem;
+    }
+    
+    .transcriptionText {
+        max-height: 300px;
+    }
+    
+    .paragraph {
+        font-size: 0.95rem;
+        margin-bottom: 12px;
+    }
+    
+    .stats {
+        gap: 15px;
+    }
+    
+    .stat {
+        font-size: 0.8rem;
+        padding: 6px 10px;
+    }
+}
+
+@media (max-width: 576px) {
+    .transcriptionContainer {
+        padding: 15px;
+    }
+    
+    .header {
+        flex-direction: column;
+        gap: 15px;
+        align-items: flex-start;
+    }
+    
+    .title {
+        font-size: 1rem;
+    }
+    
+    .copyButton {
+        align-self: flex-end;
+    }
+    
+    .transcriptionText {
+        max-height: 250px;
+    }
+    
+    .paragraph {
+        font-size: 0.9rem;
+        margin-bottom: 10px;
+    }
+    
+    .stats {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .stat {
+        text-align: center;
+    }
+} 

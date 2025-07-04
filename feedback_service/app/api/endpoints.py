@@ -176,7 +176,7 @@ async def api_enhanced_overall_feedback(file: UploadFile = File(...), language: 
         
         # Pre-transcribe audio once for all models
         logger.info("Pre-transcribing audio for all models...")
-        transcription = await analyzers["transcription_service"].get_transcription(audio_path)
+        transcription = await analyzers["transcription_service"].get_transcription(audio_path, language)
         if transcription:
             logger.info(f"Transcription successful: {len(transcription)} characters")
         else:
@@ -226,6 +226,7 @@ async def api_enhanced_overall_feedback(file: UploadFile = File(...), language: 
         results["transcription_info"] = {
             "transcription_length": len(transcription) if transcription else 0,
             "transcription_preview": transcription[:200] + "..." if transcription and len(transcription) > 200 else transcription,
+            "transcription_full": transcription,  # Include the full transcription
             "transcription_success": transcription is not None
         }
         
@@ -301,6 +302,7 @@ async def api_overall_feedback(file: UploadFile = File(...), language: str = For
         results["transcription_info"] = {
             "transcription_length": len(transcription) if transcription else 0,
             "transcription_preview": transcription[:200] + "..." if transcription and len(transcription) > 200 else transcription,
+            "transcription_full": transcription,  # Include the full transcription
             "transcription_success": transcription is not None
         }
         
@@ -319,7 +321,7 @@ async def api_audio_only_feedback(file: UploadFile = File(...), language: str = 
         
         # Pre-transcribe audio once for all models
         logger.info("Pre-transcribing audio for all models...")
-        transcription = await analyzers["transcription_service"].get_transcription(audio_path)
+        transcription = await analyzers["transcription_service"].get_transcription(audio_path, language)
         if transcription:
             logger.info(f"Transcription successful: {len(transcription)} characters")
         else:
@@ -366,6 +368,7 @@ async def api_audio_only_feedback(file: UploadFile = File(...), language: str = 
         results["transcription_info"] = {
             "transcription_length": len(transcription) if transcription else 0,
             "transcription_preview": transcription[:200] + "..." if transcription and len(transcription) > 200 else transcription,
+            "transcription_full": transcription,  # Include the full transcription
             "transcription_success": transcription is not None
         }
         
@@ -518,19 +521,29 @@ async def api_custom_feedback(
         file_path = await analyzers["file_processor"].save_uploaded_file(file)
         audio_path, video_path, has_video = await analyzers["file_processor"].extract_components(file_path)
 
+        # Pre-transcribe audio once for all models
+        transcription = None
+        if audio_path:
+            logger.info("Pre-transcribing audio for all models...")
+            transcription = await analyzers["transcription_service"].get_transcription(audio_path, language)
+            if transcription:
+                logger.info(f"Transcription successful: {len(transcription)} characters")
+            else:
+                logger.warning("Transcription failed, models will use fallback methods")
+
         # Parse requested services
         requested_services = [s.strip() for s in services.split(",") if s.strip()]
         results = {}
         print(f"Language: {language}")
         # Map of service key to (analyzer key, input type, method, extra kwargs)
         service_map = {
-            "speech_emotion": ("speech_emotion", "audio", "analyze", {"language": language}),
-            "pitch_analysis": ("pitch_analysis", "audio", "analyze", {"language": language}),
-            "volume_consistency": ("volume_consistency", "audio", "analyze", {"language": language}),
+            "speech_emotion": ("speech_emotion", "audio", "analyze", {}),
+            "pitch_analysis": ("pitch_analysis", "audio", "analyze", {}),
+            "volume_consistency": ("volume_consistency", "audio", "analyze", {}),
             "filler_detection": ("filler_detection", "audio", "analyze", {"language": language}),
-            "stutter_detection": ("stutter_detection", "audio", "analyze", {"language": language}),
+            "stutter_detection": ("stutter_detection", "audio", "analyze", {}),
             "lexical_richness": ("lexical_richness", "audio", "analyze", {"language": language}),
-            "wpm_analysis": ("wpm_calculator", "audio", "analyze_async", {"context": "presentation", "language": language}),
+            "wpm_analysis": ("wpm_calculator", "audio", "analyze_with_transcription", {"transcription": transcription, "context": "presentation"}),
             "keyword_relevance": ("keyword_relevance", "audio", "analyze", {"language": language}),
             "facial_emotion": ("facial_emotion", "video", "analyze", {}),
             "eye_contact": ("eye_contact", "video", "analyze_eye_contact", {}),
@@ -581,6 +594,14 @@ async def api_custom_feedback(
         except Exception as e:
             logger.error(f"Enhanced feedback generation error: {e}")
             results["enhanced_feedback"] = {"error": str(e)}
+
+        # Add transcription info to results
+        results["transcription_info"] = {
+            "transcription_length": len(transcription) if transcription else 0,
+            "transcription_preview": transcription[:200] + "..." if transcription and len(transcription) > 200 else transcription,
+            "transcription_full": transcription,  # Include the full transcription
+            "transcription_success": transcription is not None
+        }
 
         return JSONResponse(content=results, status_code=200)
     except Exception as e:
