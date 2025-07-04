@@ -12,7 +12,7 @@ from backend.app.models.presentation.presentation import Presentation
 from backend.app.crud.presentation import *
 
 # Configuration
-UPLOAD_DIR = Path("uploads/videos")
+UPLOAD_DIR = Path("/app/backend/uploads/videos")  # Absolute path for Docker volume mount
 MAX_FILE_SIZE = 100 * 1024 * 1024  # 100MB
 ALLOWED_VIDEO_TYPES = {
     "video/mp4", "video/avi", "video/mkv", "video/mov", "video/wmv", 

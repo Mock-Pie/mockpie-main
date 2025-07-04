@@ -23,6 +23,7 @@ services:
       - AI_SERVICE_URL=http://presentation-analyzer:8000
     volumes:
       - ./:/app  # Mount entire project so backend module is available
+      - shared_uploads:/app/backend/uploads  # Shared uploads volume
     restart: unless-stopped
     
   frontend:
@@ -63,6 +64,7 @@ services:
     volumes:
       - ./feedback_service/app:/app/app
       - ./feedback_service/main.py:/app/main.py
+      - shared_uploads:/app/uploads  # Shared uploads volume
     environment:
       - PYTHONPATH=/app
       - LOG_LEVEL=INFO
@@ -99,3 +101,4 @@ volumes:
   # postgres_data_dev:
   redis_data_dev:
   frontend_node_modules_dev:
+  shared_uploads:  # Shared volume for uploads

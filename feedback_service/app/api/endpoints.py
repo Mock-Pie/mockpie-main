@@ -4,6 +4,7 @@ import time
 import asyncio
 from typing import Dict, Any
 import logging
+import os
 
 # These will be injected from main.py
 analyzers = None
@@ -453,7 +454,8 @@ async def get_api_endpoints():
 
 @router.post("/api/custom-feedback")
 async def api_custom_feedback(
-    file: UploadFile = File(...),
+    file: UploadFile = File(None),
+    file_path: str = Form(None),
     services: str = Form(...),
     language: str = Form(...)
 ):
@@ -461,14 +463,28 @@ async def api_custom_feedback(
     Customizable feedback endpoint: upload a video/audio and specify which services to run.
     'services' should be a comma-separated list of service keys, e.g.:
     'speech_emotion,pitch_analysis,facial_emotion,eye_contact,hand_gesture,posture_analysis,volume_consistency,filler_detection,stutter_detection,lexical_richness,wpm_analysis,keyword_relevance'
+    
+    Can accept either file upload or file_path for better performance with large files.
     """
     try:
         if analyzers is None:
             logger.error("Analyzers not initialized. Make sure analyzers are injected from main.py.")
             return JSONResponse(content={"error": "Analyzers not initialized."}, status_code=500)
-        logger.info(f"Custom feedback API called for file: {file.filename} with services: {services}")
-        file_path = await analyzers["file_processor"].save_uploaded_file(file)
-        audio_path, video_path, has_video = await analyzers["file_processor"].extract_components(file_path)
+        
+        # Handle file input - either uploaded file or file path
+        if file_path:
+            logger.info(f"Custom feedback API called for file path: {file_path} with services: {services}")
+            # Validate file path exists
+            if not os.path.exists(file_path):
+                return JSONResponse(content={"error": f"File not found: {file_path}"}, status_code=404)
+            input_file_path = file_path
+        elif file:
+            logger.info(f"Custom feedback API called for uploaded file: {file.filename} with services: {services}")
+            input_file_path = await analyzers["file_processor"].save_uploaded_file(file)
+        else:
+            return JSONResponse(content={"error": "Either file or file_path must be provided"}, status_code=400)
+        
+        audio_path, video_path, has_video = await analyzers["file_processor"].extract_components(input_file_path)
         transcription = await analyzers["transcription_service"].get_transcription(audio_path, language)
         transcript_result = {"text": transcription} if transcription else {"text": ""}
         requested_services = [s.strip() for s in services.split(",") if s.strip()]

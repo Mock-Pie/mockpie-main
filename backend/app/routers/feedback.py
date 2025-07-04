@@ -24,6 +24,19 @@ async def proxy_to_feedback_service(endpoint: str, file: UploadFile, extra_form:
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to contact feedback service: {str(e)}")
 
+async def proxy_to_feedback_service_with_path(endpoint: str, file_path: str, extra_form: Optional[dict] = None):
+    """Proxy to feedback service using file path instead of file content"""
+    url = f"{FEEDBACK_SERVICE_URL}/{endpoint}"
+    try:
+        async with httpx.AsyncClient(timeout=300) as client:  # Increased timeout for large files
+            form_data = {"file_path": file_path}
+            if extra_form:
+                form_data.update(extra_form)
+            resp = await client.post(url, data=form_data)
+            return JSONResponse(status_code=resp.status_code, content=resp.json())
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to contact feedback service: {str(e)}")
+
 @router.post("/speech-emotion")
 async def speech_emotion(file: UploadFile = File(...)):
     return await proxy_to_feedback_service("speech-emotion", file)
@@ -107,13 +120,41 @@ async def custom_feedback(
     language: str = Form('english'),
     db: Session = Depends(get_db)
 ):
-    # Call feedback service
+    # Save file to shared volume first
+    from pathlib import Path
+    import shutil
+    
+    # Create uploads directory if it doesn't exist
+    upload_dir = Path("/app/backend/uploads/videos")
+    upload_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Generate unique filename
+    import uuid
+    from datetime import datetime
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    unique_id = str(uuid.uuid4())[:8]
+    file_extension = Path(file.filename).suffix
+    unique_filename = f"{timestamp}_{unique_id}{file_extension}"
+    
+    # Save file to shared volume
+    file_path = upload_dir / unique_filename
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+    
+    # Convert to path that feedback service can access
+    feedback_service_path = f"/app/uploads/videos/{unique_filename}"
+    
+    # Call feedback service with file path
     url = f"{FEEDBACK_SERVICE_URL}/custom-feedback"
     try:
-        async with httpx.AsyncClient(timeout=120) as client:
-            form_data = {"services": services, "presentation_id": str(presentation_id), "language": language}
-            files = {"file": (file.filename, await file.read(), file.content_type)}
-            resp = await client.post(url, files=files, data=form_data)
+        async with httpx.AsyncClient(timeout=300) as client:  # Increased timeout for large files
+            form_data = {
+                "services": services, 
+                "presentation_id": str(presentation_id), 
+                "language": language,
+                "file_path": feedback_service_path
+            }
+            resp = await client.post(url, data=form_data)
             feedback_data = resp.json()
             # Add used_criteria
             used_criteria = [s.strip() for s in services.split(",") if s.strip()]
@@ -122,6 +163,12 @@ async def custom_feedback(
             create_feedback(db, presentation_id, feedback_data)
             return JSONResponse(status_code=resp.status_code, content=feedback_data)
     except Exception as e:
+        # Clean up file if feedback service fails
+        try:
+            if file_path.exists():
+                os.remove(file_path)
+        except:
+            pass
         raise HTTPException(status_code=500, detail=f"Failed to contact feedback service: {str(e)}")
 
 
