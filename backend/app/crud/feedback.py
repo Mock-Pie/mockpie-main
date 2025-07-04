@@ -19,7 +19,7 @@ def get_feedback_by_presentation_id(db: Session, presentation_id: int) -> Feedba
 
 def delete_feedback_by_presentation_id(db: Session, presentation_id: int):
     feedback = db.query(Feedback).filter(Feedback.presentation_id == presentation_id).first()
-    
+    print("delete_feedback_by_presentation_id", feedback)
     if not feedback:
         return
     
