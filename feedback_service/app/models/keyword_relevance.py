@@ -54,8 +54,7 @@ class KeywordRelevanceAnalyzer:
             'كان', 'كانت', 'يكون', 'تكون', 'أنا', 'أنت', 'هو', 'هي', 'نحن', 'أنتم',
             'هم', 'هن', 'و', 'أو', 'لكن', 'إذا', 'إن', 'أن', 'ما', 'ماذا', 'كيف',
             'ماشي', 'تمام',
-            'آآ','أين', 'متى', 'لماذا', 'ال', 'لا', 'نعم', 'أيضا', 'فقط', 'حيث', 'عندما',
-            "يعني", "اه", "ام", "مم", "طب", "بص", "شوف", "فا", "تمام", "حلو", "مش", "كده", "ايوه", "لا", "اوه"
+            'آآ','أين', 'متى', 'لماذا', 'ال', 'لا', 'نعم', 'أيضا', 'فقط', 'حيث', 'عندما'
         }
 
     def analyze(self, audio_path: str, language: str, target_keywords: str = "") -> Dict[str, Any]:
@@ -257,4 +256,90 @@ class KeywordRelevanceAnalyzer:
             logger.error(f"Error analyzing target keywords: {e}")
             return {"target_coverage": 0.0, "matching_keywords": []}
 
-    def
+    def _calculate_keyword_diversity(self, keywords: Dict) -> Dict[str, Any]:
+        try:
+            combined_keywords = keywords.get("combined", [])
+            if not combined_keywords:
+                return {"diversity_score": 0.0, "keyword_distribution": "none"}
+            scores = [kw["score"] for kw in combined_keywords]
+            if len(scores) < 2:
+                return {"diversity_score": 0.0, "keyword_distribution": "insufficient"}
+            score_variance = np.var(scores)
+            score_range = max(scores) - min(scores)
+            diversity_score = min(1.0, score_variance * 10)
+            keyword_lengths = [len(kw["keyword"].split()) for kw in combined_keywords]
+            avg_keyword_length = np.mean(keyword_lengths)
+            if diversity_score > 0.5:
+                distribution = "highly_diverse"
+            elif diversity_score > 0.25:
+                distribution = "moderately_diverse"
+            elif diversity_score > 0.1:
+                distribution = "somewhat_diverse"
+            else:
+                distribution = "low_diversity"
+            return {
+                "diversity_score": float(diversity_score),
+                "keyword_distribution": distribution,
+                "score_variance": float(score_variance),
+                "score_range": float(score_range),
+                "average_keyword_length": float(avg_keyword_length),
+                "total_unique_keywords": len(combined_keywords)
+            }
+        except Exception as e:
+            logger.error(f"Error calculating keyword diversity: {e}")
+            return {"diversity_score": 0.0, "keyword_distribution": "unknown"}
+
+    def _generate_relevance_assessment(self, coherence: Dict, target_analysis: Dict, diversity: Dict, language: str) -> Dict[str, Any]:
+        try:
+            coherence_score = coherence.get("coherence_score", 0)
+            target_relevance = target_analysis.get("relevance_score", 0) / 100 if target_analysis else 0.5
+            diversity_score = diversity.get("diversity_score", 0)
+            if target_analysis:
+                overall_score = (coherence_score * 3 + target_relevance * 5 + diversity_score * 2)
+            else:
+                overall_score = (coherence_score * 6 + diversity_score * 4)
+            overall_score = min(10, overall_score)
+            if overall_score >= 6:
+                assessment_level = "excellent"
+            elif overall_score >= 4:
+                assessment_level = "good"
+            elif overall_score >= 2:
+                assessment_level = "fair"
+            else:
+                assessment_level = "needs_improvement"
+            topic_focus = coherence.get("topic_focus", "unknown")
+            return {
+                "overall_relevance_score": float(overall_score),
+                "assessment_level": assessment_level,
+                "topic_focus_quality": topic_focus,
+                "content_alignment": target_analysis.get("alignment", "not_specified") if target_analysis else "no_target",
+                "keyword_quality": "high" if diversity_score > 0.4 else "medium" if diversity_score > 0.2 else "low"
+            }
+        except Exception as e:
+            logger.error(f"Error generating relevance assessment: {e}")
+            return {"overall_relevance_score": 5.0, "assessment_level": "unknown"}
+
+    def _generate_recommendations(self, coherence: Dict, target_analysis: Dict, assessment: Dict, language: str) -> List[str]:
+        recommendations = []
+        try:
+            coherence_score = coherence.get("coherence_score", 0)
+            assessment_level = assessment.get("assessment_level", "unknown")
+            if coherence_score < 0.3:
+                recommendations.append("Improve topic focus - stay on subject and avoid tangents")
+                recommendations.append("Use more consistent terminology throughout your presentation")
+            if target_analysis:
+                relevance_score = target_analysis.get("relevance_score", 0)
+                if relevance_score < 40:
+                    recommendations.append("Better address the specified topic keywords")
+                    recommendations.append("Include more relevant terminology for your subject area")
+            topic_focus = coherence.get("topic_focus", "unknown")
+            if topic_focus in ["unfocused", "somewhat_focused"]:
+                recommendations.append("Strengthen your central theme and key message")
+            if assessment_level in ["fair", "needs_improvement"]:
+                recommendations.append("Use more specific and technical vocabulary related to your topic")
+            if not recommendations:
+                recommendations.append("Excellent keyword relevance! Your content is well-focused and on-topic")
+            return recommendations
+        except Exception as e:
+            logger.error(f"Error generating recommendations: {e}")
+            return ["Unable to generate keyword relevance recommendations"]
