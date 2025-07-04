@@ -6,10 +6,18 @@ from backend.app.static.lang.error_messages.exception_responses import ErrorMess
 # Create feedback record
 def create_feedback(db: Session, presentation_id: int, data: dict) -> Feedback:
     feedback = Feedback(presentation_id=presentation_id, data=data)
-    db.add(feedback)
-    db.commit()
-    db.refresh(feedback)
-    return feedback
+    
+    try:
+        db.add(feedback)
+        db.commit()
+        db.refresh(feedback)
+    
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error creating feedback: {str(e)}"
+        )
 
 
 # Get feedback by presentation_id
@@ -21,10 +29,7 @@ def delete_feedback_by_presentation_id(db: Session, presentation_id: int):
     feedback = db.query(Feedback).filter(Feedback.presentation_id == presentation_id).first()
     
     if not feedback:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=ErrorMessage.FEEDBACK_NOT_FOUND.value
-        )
+        pass
     
     try: 
         db.delete(feedback)

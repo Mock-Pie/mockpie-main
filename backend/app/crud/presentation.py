@@ -208,7 +208,6 @@ def delete_presentation(
             detail=f"Error deleting presentation: {str(e)}"
         )
     
-    return presentation
 
 
 def get_file_info(presentation: Presentation) -> dict:

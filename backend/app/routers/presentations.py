@@ -68,7 +68,6 @@ async def delete_video(
     db: Session = Depends(get_db)
 ):
     return await DeletePresentation.delete_video(
-        upload_dir=UPLOAD_DIR,
         presentation_id=presentation_id,
         current_user=current_user,
         db=db
