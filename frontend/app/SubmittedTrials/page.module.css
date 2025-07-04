@@ -446,6 +446,27 @@
     padding: 1rem 1.5rem;
 }
 
+.feedbackButton {
+    background-color: var(--naples-yellow);
+    color: var(--chinese-black);
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    font-size: 0.875rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.feedbackButton:hover {
+    background: var(--dark-yellow);
+    transform: translateY(-1px);
+}
+
 .feedbackContent {
     max-width: 20rem;
 }
