@@ -197,40 +197,9 @@ class UpcomingPresentationService {
       const nextQuarter = new Date(today);
       nextQuarter.setMonth(today.getMonth() + 3);
 
-      const samplePresentations: UpcomingPresentationRequest[] = [
-        {
-          topic: 'Monthly Team Review',
-          date: tomorrow.toISOString().split('T')[0],
-          time: '10:00',
-          description: 'Monthly team performance review and planning session',
-          language: 'english'
-        },
-        {
-          topic: 'Client Project Demo',
-          date: nextWeek.toISOString().split('T')[0],
-          time: '15:30',
-          description: 'Demonstrating new features to client stakeholders',
-          language: 'arabic'
-        },
-        {
-          topic: 'Quarterly Business Review',
-          date: nextMonth.toISOString().split('T')[0],
-          time: '14:00',
-          description: 'Quarterly financial and business performance review',
-          language: 'english'
-        },
-        {
-          topic: 'Product Launch Presentation',
-          date: nextQuarter.toISOString().split('T')[0],
-          time: '11:30',
-          description: 'Launch presentation for new product features',
-          language: 'english'
-        }
-      ];
+    
 
-      for (const presentation of samplePresentations) {
-        await this.addUpcomingPresentation(presentation);
-      }
+     
     } catch (error) {
       console.error('Error initializing sample data:', error);
     }
