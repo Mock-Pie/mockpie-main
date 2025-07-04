@@ -3,8 +3,8 @@ from fastapi import HTTPException, Depends, Form, status
 from sqlalchemy.orm import Session
 
 from backend.app.crud.user import verify_otp
-from backend.app.static.lang.error_messages.exception_responses import ErrorMessage
 from backend.database.database import get_db
+from backend.app.static.lang.error_messages.exception_responses import ErrorMessage
 
 
 class VerifyOTP(BaseModel):
@@ -18,7 +18,7 @@ class VerifyOTP(BaseModel):
         if not user:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Invalid or expired OTP"
+                detail=ErrorMessage.INVALID_OTP.value
             )
         
         return {

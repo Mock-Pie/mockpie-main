@@ -1,10 +1,11 @@
-from fastapi import HTTPException, Depends, Form, status, Body
+from fastapi import HTTPException, Depends, status
 from sqlalchemy.orm import Session
 
 from backend.database.database import get_db
-from backend.app.models.presentation.presentation import Presentation
 from backend.app.utils.token_handler import TokenHandler
 from backend.app.models.user.user import User
+from backend.app.crud.presentation import *
+from backend.app.static.lang.error_messages.exception_responses import ErrorMessage
 
 
 class ToggleVisibility:
@@ -17,21 +18,20 @@ class ToggleVisibility:
         current_user: User = Depends(TokenHandler.get_current_user),
         db: Session = Depends(get_db)):
     
-        presentation = db.query(Presentation).filter(
-        Presentation.id == presentation_id,
-        Presentation.user_id == current_user.id
-    ).first()
+        presentation = get_presentation_by_id(
+            db=db,
+            presentation_id=presentation_id,
+            current_user=current_user
+        )
     
         if not presentation:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Presentation not found"
+                detail=ErrorMessage.PRESENTATION_NOT_FOUND.value
             )
         
         # Toggle the is_public field
-        presentation.is_public = not presentation.is_public
-        db.commit()
-        db.refresh(presentation)
+        toggle_presentation_visibility(db=db, presentation=presentation)
         
         return {
             "message": f"Presentation visibility updated successfully",

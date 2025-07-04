@@ -13,9 +13,18 @@ class ErrorMessage(str, Enum):
     INSUFFICIENT_PERMISSIONS = "Insufficient permissions to perform this action"
     TOKEN_EXPIRED = "Token has expired"
     INVALID_REFRESH_TOKEN = "Invalid refresh token"
+    INVALID_OTP = "Invalid OTP provided"
+    EXPIRED_OTP = "OTP has expired. Please request a new one."
+    FAILED_TO_CREATE_RESET_PASSWORD_OTP = "Failed to create password reset otp"
+    FAILED_TO_SEND_RESET_PASSWORD_EMAIL = "Failed to send password reset email"
+    RESET_PASSWORD_SESSIION_EXPIRED='Session expired. Please request a new password reset or re-verify your email.'
+    FAILED_TO_RESET_PASSWORD = "Failed to reset password"
+    EMAIL_ALREADY_VERIFIED = "Email is already verified"
+    FAILED_TO_CREATE_VERIFICATION_OTP = "Failed to create verification OTP"
+    FAILED_TO_SEND_VERIFICATION_EMAIL = "Failed to send verification email"
     
     # User related errors
-    USER_NOT_FOUND = "User not found"
+    USER_NOT_FOUND = "User not found or deleted"
     USER_ALREADY_EXISTS = "User with this email already exists"
     USERNAME_TAKEN = "Username already taken"
     EMAIL_TAKEN = "Email address already registered"
@@ -27,6 +36,11 @@ class ErrorMessage(str, Enum):
     DELETED_USER_EXISTS_WITH_THIS_EMAIL = "A deleted user exists with this email address. Please wait 30 days before registering with this email again."
     DELETED_USER_EXISTS_WITH_THIS_USERNAME = "A deleted user exists with this username. Please wait 30 days before using this username again."
     DELETED_USER_EXISTS_WITH_THIS_PHONE = "A deleted user exists with this phone number. Please wait 30 days before registering with this phone number again."
+    RETRIVAL_FAILED = "Error reactivating user and associated data"
+    NO_DELETED_USER_FOUND = "No deleted user found with this email address"
+    RESTORE_ACCOUNT_DENIED = "Cannot restore accounts deleted more than 30 days ago"
+    FAILED_TO_CREATE_RESTORATION_OTP = 'Failed to create restoration OTP'
+    FAILED_TO_SEND_RESTORATION_OTP_EMAIL = 'Failed to send restoration OTP email'
     
     # Presentation related errors
     PRESENTATION_NOT_FOUND = "Presentation not found"
@@ -34,6 +48,11 @@ class ErrorMessage(str, Enum):
     UPLOAD_FAILED = "Failed to upload presentation"
     INVALID_FILE_FORMAT = "Invalid file format. Please upload a supported video format"
     FILE_TOO_LARGE = "File size exceeds maximum allowed limit"
+    TOPIC_EMPTY = "Topic cannot be empty"
+    VIDEO_NOT_FOUND = "Video file not found"
+    
+    # Upcoming presentation related errors
+    UPCOMING_PRESENTATION_NOT_FOUND = "Upcoming presentation not found or already deleted"
     
     # Analysis related errors
     ANALYSIS_NOT_FOUND = "Analysis not found"
@@ -81,3 +100,10 @@ class ErrorMessage(str, Enum):
     
     # Redis errors
     REDIS_CONNECTION_ERROR = "Failed to connect to Redis"
+    
+    # Upcoming presentation errors
+    INVALID_UPCOMING_PRESENTATION_DATE = "Upcoming presentation date must be in the future"
+    
+    # Format errors
+    INVALID_DATE_FORMAT = "Invalid date format. Use ISO format: YYYY-MM-DDTHH:MM:SS"
+    

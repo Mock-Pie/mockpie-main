@@ -8,6 +8,7 @@ from backend.app.crud.user import get_user_by_email, set_otp_and_otp_expiry_time
 from backend.app.static.lang.error_messages.exception_responses import ErrorMessage
 from backend.app.utils.otp_handler import OTPHandler
 
+
 class SendVerificationOTP:
     @staticmethod
     async def send_verification_otp(
@@ -29,7 +30,7 @@ class SendVerificationOTP:
         if user.email_verified_at:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Email is already verified"
+                detail=ErrorMessage.EMAIL_ALREADY_VERIFIED.value
             )
 
         # Create a unique OTP
@@ -40,7 +41,7 @@ class SendVerificationOTP:
         if not set_otp_and_otp_expiry_time(db, user, otp, expiry):
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Failed to create verification OTP"
+                detail=ErrorMessage.FAILED_TO_CREATE_VERIFICATION_OTP.value
             )
 
         # Send the verification email
@@ -54,5 +55,5 @@ class SendVerificationOTP:
             db.commit()
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Failed to send verification email"
+                detail= ErrorMessage.FAILED_TO_SEND_VERIFICATION_EMAIL.value
             ) 

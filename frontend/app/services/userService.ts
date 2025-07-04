@@ -46,7 +46,7 @@ class UserService {
 
   static async getCurrentUser(): Promise<UserApiResponse> {
     try {
-      const response = await fetch(`${this.BASE_URL}/auth/me`, {
+      const response = await fetch(`${this.BASE_URL}/users/profile`, {
         method: 'GET',
         headers: this.getAuthHeaders(),
       });
@@ -87,7 +87,7 @@ class UserService {
     try {
       console.log('UserService.updateUser called with:', userData);
       
-      const response = await fetch(`${this.BASE_URL}/auth/me`, {
+      const response = await fetch(`${this.BASE_URL}/users/edit`, {
         method: 'PUT',
         headers: this.getAuthHeaders(),
         body: JSON.stringify(userData),

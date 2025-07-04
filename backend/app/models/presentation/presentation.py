@@ -19,9 +19,5 @@ class Presentation(Base):
     # Establish the relationship with the User model
     user = relationship("User", back_populates="presentations")
     
-    # Analysis relationships
-    voice_analysis = relationship("VoiceAnalysis", back_populates="presentation", uselist=False)
-    body_analysis = relationship("BodyAnalysis", back_populates="presentation", uselist=False)
-    
     # Feedback relationship
     feedback = relationship("Feedback", back_populates="presentation", uselist=False)

@@ -1,19 +1,15 @@
-from fastapi import APIRouter, HTTPException, Depends, Form, status
+from fastapi import HTTPException, Depends, Form, status
 from sqlalchemy.orm import Session
-from uuid import uuid4
 from datetime import datetime, timedelta
 from typing import Dict, Any
 
 from backend.database.database import get_db
-from backend.app.models.user.user import User
 from backend.app.services.authentication.email_service import *
 from backend.app.crud.user import *
 from backend.app.static.lang.error_messages.exception_responses import *
-from backend.app.crud.user import *
 
 
 class ResetPassword:
-
     @staticmethod
     async def reset_password(
         email: str = Form(...),
@@ -56,7 +52,7 @@ class ResetPassword:
             if datetime.now() > verification_expiry:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Session expired. Please request a new password reset or re-verify your email."
+                    detail=ErrorMessage.RESET_PASSWORD_SESSIION_EXPIRED.value
                 )
 
         # Add debug before password update
@@ -67,7 +63,7 @@ class ResetPassword:
         if not result:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Failed to reset password"
+                detail=ErrorMessage.FAILED_TO_RESET_PASSWORD.value
             )
 
         return {"message": "Password has been successfully reset"}
