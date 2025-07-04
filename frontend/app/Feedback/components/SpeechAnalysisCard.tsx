@@ -6,6 +6,7 @@ import styles from './AnalysisCard.module.css';
 interface SpeechMetric {
   value: number | string;
   score: number;
+  normalized_score: number;
   insight: string;
   recommendation?: string;
 }
@@ -113,7 +114,7 @@ const SpeechAnalysisCard: React.FC<SpeechAnalysisProps> = ({
           icon={getMetricIcon('emotion')}
           title="Speech Emotion"
           value={speechEmotion.value}
-          score={speechEmotion.score}
+          score={speechEmotion.normalized_score}
           insight={speechEmotion.insight}
           recommendation={speechEmotion.recommendation}
         />
@@ -122,7 +123,7 @@ const SpeechAnalysisCard: React.FC<SpeechAnalysisProps> = ({
           icon={getMetricIcon('rate')}
           title="Speaking Rate"
           value={speakingRate.value}
-          score={speakingRate.score}
+          score={speakingRate.normalized_score}
           insight={speakingRate.insight}
           recommendation={speakingRate.recommendation}
         />
@@ -131,7 +132,7 @@ const SpeechAnalysisCard: React.FC<SpeechAnalysisProps> = ({
           icon={getMetricIcon('pitch')}
           title="Pitch Variation"
           value={pitchAnalysis.value}
-          score={pitchAnalysis.score}
+          score={pitchAnalysis.normalized_score}
           insight={pitchAnalysis.insight}
           recommendation={pitchAnalysis.recommendation}
         />
@@ -140,7 +141,7 @@ const SpeechAnalysisCard: React.FC<SpeechAnalysisProps> = ({
           icon={getMetricIcon('filler')}
           title="Filler Words"
           value={fillerWords.value}
-          score={fillerWords.score}
+          score={fillerWords.normalized_score}
           insight={fillerWords.insight}
           recommendation={fillerWords.recommendation}
         />
@@ -149,7 +150,7 @@ const SpeechAnalysisCard: React.FC<SpeechAnalysisProps> = ({
           icon={getMetricIcon('stutter')}
           title="Speech Fluency"
           value={stutterDetection.value}
-          score={stutterDetection.score}
+          score={stutterDetection.normalized_score}
           insight={stutterDetection.insight}
           recommendation={stutterDetection.recommendation}
         />

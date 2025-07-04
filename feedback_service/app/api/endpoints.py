@@ -457,7 +457,8 @@ async def api_custom_feedback(
     file: UploadFile = File(None),
     file_path: str = Form(None),
     services: str = Form(...),
-    language: str = Form(...)
+    language: str = Form(...),
+    topic: str = Form("")
 ):
     """
     Customizable feedback endpoint: upload a video/audio and specify which services to run.
@@ -499,7 +500,7 @@ async def api_custom_feedback(
             "stutter_detection": ("stutter_detection", "audio", "analyze", {}),
             "lexical_richness": ("lexical_richness", "audio", "analyze", {"language": language, "transcript": transcription}),
             "wpm_analysis": ("wpm_calculator", "audio", "analyze", {"language": language, "context": "presentation", "transcript": transcription}),
-            "keyword_relevance": ("keyword_relevance", "audio", "analyze", {"language": language, "transcript": transcription}),
+            "keyword_relevance": ("keyword_relevance", "audio", "analyze", {"language": language, "transcript": transcription, "target_keywords": topic}),
             "facial_emotion": ("facial_emotion", "video", "analyze", {}),
             "eye_contact": ("eye_contact", "video", "analyze_eye_contact", {}),
             "hand_gesture": ("hand_gesture", "video", "analyze", {}),

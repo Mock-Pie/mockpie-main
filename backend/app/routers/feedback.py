@@ -118,6 +118,7 @@ async def custom_feedback(
     services: str = Form(...),
     presentation_id: int = Form(...),
     language: str = Form('english'),
+    topic: str = Form(""),
     db: Session = Depends(get_db)
 ):
     # Call feedback service with file content (for remote deployed service)
@@ -130,7 +131,8 @@ async def custom_feedback(
             form_data = {
                 "services": services, 
                 "presentation_id": str(presentation_id), 
-                "language": language
+                "language": language,
+                "topic": topic
             }
             
             # Send file content to remote service

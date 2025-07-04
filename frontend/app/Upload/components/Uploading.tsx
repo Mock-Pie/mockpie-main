@@ -155,6 +155,7 @@ const Uploading = () => {
                 feedbackForm.append("services", selectedFocus.join(","));
                 feedbackForm.append("presentation_id", data.presentation_id);
                 feedbackForm.append("language", selectedLanguage);
+                feedbackForm.append("topic", presentationTopic.trim());
                 const feedbackRes = await fetch("http://localhost:8081/feedback/custom-feedback", {
                     method: "POST",
                     headers: {

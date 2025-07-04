@@ -6,6 +6,7 @@ import styles from './AnalysisCard.module.css';
 interface VisualMetric {
   value: number | string;
   score: number;
+  normalized_score: number;
   insight: string;
   recommendation?: string;
 }
@@ -110,7 +111,7 @@ const VisualAnalysisCard: React.FC<VisualAnalysisProps> = ({
           icon={getMetricIcon('emotion')}
           title="Facial Expression"
           value={facialEmotion.value}
-          score={facialEmotion.score}
+          score={facialEmotion.normalized_score}
           insight={facialEmotion.insight}
           recommendation={facialEmotion.recommendation}
         />
@@ -119,7 +120,7 @@ const VisualAnalysisCard: React.FC<VisualAnalysisProps> = ({
           icon={getMetricIcon('eye')}
           title="Eye Contact"
           value={eyeContact.value}
-          score={eyeContact.score}
+          score={eyeContact.normalized_score}
           insight={eyeContact.insight}
           recommendation={eyeContact.recommendation}
         />
@@ -128,7 +129,7 @@ const VisualAnalysisCard: React.FC<VisualAnalysisProps> = ({
           icon={getMetricIcon('gesture')}
           title="Hand Gestures"
           value={handGestures.value}
-          score={handGestures.score}
+          score={handGestures.normalized_score}
           insight={handGestures.insight}
           recommendation={handGestures.recommendation}
         />
@@ -137,7 +138,7 @@ const VisualAnalysisCard: React.FC<VisualAnalysisProps> = ({
           icon={getMetricIcon('posture')}
           title="Posture"
           value={postureAnalysis.value}
-          score={postureAnalysis.score}
+          score={postureAnalysis.normalized_score}
           insight={postureAnalysis.insight}
           recommendation={postureAnalysis.recommendation}
         />

@@ -6,6 +6,7 @@ import styles from './AnalysisCard.module.css';
 interface ContentMetric {
   value: number | string;
   score: number;
+  normalized_score: number;
   insight: string;
   recommendation?: string;
 }
@@ -104,7 +105,7 @@ const ContentAnalysisCard: React.FC<ContentAnalysisProps> = ({
           icon={getMetricIcon('lexical')}
           title="Lexical Richness"
           value={lexicalRichness.value}
-          score={lexicalRichness.score}
+          score={lexicalRichness.normalized_score}
           insight={lexicalRichness.insight}
           recommendation={lexicalRichness.recommendation}
         />
@@ -113,7 +114,7 @@ const ContentAnalysisCard: React.FC<ContentAnalysisProps> = ({
           icon={getMetricIcon('keyword')}
           title="Topic Relevance"
           value={keywordRelevance.value}
-          score={keywordRelevance.score}
+          score={keywordRelevance.normalized_score}
           insight={keywordRelevance.insight}
           recommendation={keywordRelevance.recommendation}
         />
