@@ -1,18 +1,19 @@
+'use client';
+
 import React from "react";
 import styles from "./page.module.css";
 import Header from "./components/Header";
-import SideBar from "../UploadRecordVideos/components/SideBar";
 import ProfileForm from "./components/ProfileForm";
+import ProtectedRoute from "../components/auth/ProtectedRoute";
 
 const ProfileInfo = () => {
     return (
-        <div className={styles.container}>
-            <SideBar />  
-            <div className={styles.mainContent}>
+        <ProtectedRoute>
+            <div className={styles.container}>
                 <Header />
                 <ProfileForm />
             </div>
-        </div>
+        </ProtectedRoute>
     );
 };
 

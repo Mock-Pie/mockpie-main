@@ -14,9 +14,12 @@ import PresentationTable from "./components/PresentationTable";
 import UserService, { User } from "../services/userService";
 import PresentationService from "../services/presentationService";
 import UpcomingPresentationService, { UpcomingPresentation } from "../services/upcomingPresentationService";
+import ProtectedRoute from "../components/auth/ProtectedRoute";
+import { useAuth } from "../components/auth/AuthProvider";
 
 const Dashboard = () => {
   const router = useRouter();
+  const { user: authUser, logout } = useAuth();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [submittedTrialsCount, setSubmittedTrialsCount] = useState<number>(0);
@@ -45,7 +48,7 @@ const Dashboard = () => {
       } else {
         console.error('Failed to fetch user data:', result.error);
         if (result.error?.includes('Authentication expired')) {
-          router.push('/Login');
+          logout();
         }
       }
     } catch (err) {
@@ -106,7 +109,7 @@ const Dashboard = () => {
       } else {
         console.error('Failed to fetch presentations data:', result.error);
         if (result.error?.includes('Authentication expired')) {
-          router.push('/Login');
+          logout();
         }
       }
     } catch (err) {
@@ -137,7 +140,7 @@ const Dashboard = () => {
       } else {
         console.error('Failed to fetch upcoming presentations:', result.error);
         if (result.error?.includes('Authentication expired')) {
-          router.push('/Login');
+          logout();
         }
       }
     } catch (err) {
@@ -300,4 +303,12 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+const DashboardPage = () => {
+  return (
+    <ProtectedRoute>
+      <Dashboard />
+    </ProtectedRoute>
+  );
+};
+
+export default DashboardPage;

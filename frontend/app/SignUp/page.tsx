@@ -1,13 +1,15 @@
-import React from 'react';
-import styles from "../Login/page.module.css";
+'use client';
+
+import React from "react";
 import SignUpForm from "./components/SignUpForm";
+import PublicRoute from "../components/auth/PublicRoute";
 
 const SignUpPage = () => {
     return (
-        <div className={styles.container}>
+        <PublicRoute>
             <SignUpForm />
-        </div>
+        </PublicRoute>
     );
-}
+};
 
 export default SignUpPage;
