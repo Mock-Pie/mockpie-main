@@ -2,14 +2,18 @@
 import React, { useEffect, useState } from "react";
 import SideBar from "../UploadRecordVideos/components/SideBar";
 import styles from "../UploadRecordVideos/page.module.css";
+import feedbackStyles from "./feedback.module.css";
 import LoadingFeedback from "./components/LoadingFeedback";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import Header from "../Upload/components/Header";
+import Header from "./components/Header";
 import AnalysisOverview from "./components/AnalysisOverview";
 import SpeechAnalysisCard from "./components/SpeechAnalysisCard";
 import VisualAnalysisCard from "./components/VisualAnalysisCard";
 import ContentAnalysisCard from "./components/ContentAnalysisCard";
 import InsightsPanel from "./components/InsightsPanel";
+import VideoPlayer from "./components/VideoPlayer";
+import TranscriptionDisplay from "./components/TranscriptionDisplay";
+import { FiPlay, FiFileText, FiCopy, FiCheck } from "react-icons/fi";
 
 // Define the type for the feedback data
 interface FeedbackData {
@@ -30,6 +34,18 @@ interface FeedbackData {
     [key: string]: any; // Allow arbitrary keys for dynamic feedback fields
 }
 
+// Define the type for presentation data
+interface PresentationData {
+    id: number;
+    title: string;
+    url: string;
+    uploaded_at: string;
+    file_info?: {
+        file_size?: number;
+        file_exists?: boolean;
+    };
+}
+
 // Add this at the top of the file for TypeScript
 declare global {
     interface Window {
@@ -47,35 +63,68 @@ const Feedback = () => {
         presentationId = localStorage.getItem("presentationId");
     }
     const [feedback, setFeedback] = useState<FeedbackData | null>(null);
+    const [presentation, setPresentation] = useState<PresentationData | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [copied, setCopied] = useState(false);
 
     useEffect(() => {
-        if (typeof window !== "undefined") {
-            const stored = localStorage.getItem("feedbackData");
-            if (stored) {
-                setFeedback(JSON.parse(stored));
+        const fetchData = async () => {
+            if (typeof window !== "undefined") {
+                const stored = localStorage.getItem("feedbackData");
+                if (stored) {
+                    setFeedback(JSON.parse(stored));
+                    localStorage.removeItem("feedbackData");
+                }
+            }
+            
+            // If not in localStorage, fetch from backend
+            if (!presentationId) {
+                setError("No presentation ID provided.");
                 setLoading(false);
-                localStorage.removeItem("feedbackData");
                 return;
             }
-        }
-        // If not in localStorage, fetch from backend
-        if (!presentationId) {
-            setError("No presentation ID provided.");
-            setLoading(false);
-            return;
-        }
-        fetch(`http://localhost:8081/feedback/presentation/${presentationId}/feedback`)
-            .then(res => res.ok ? res.json() : Promise.reject("Failed to fetch feedback"))
-            .then(data => {
-                setFeedback(data);
+
+            try {
+                // Fetch presentation details
+                const accessToken = localStorage.getItem("access_token");
+                if (!accessToken) {
+                    setError("Please log in to view feedback.");
+                    setLoading(false);
+                    return;
+                }
+
+                const presentationResponse = await fetch(`http://localhost:8081/presentations/${presentationId}`, {
+                    headers: {
+                        "Authorization": `Bearer ${accessToken}`,
+                    },
+                });
+
+                if (presentationResponse.ok) {
+                    const presentationData = await presentationResponse.json();
+                    setPresentation(presentationData);
+                } else {
+                    console.error("Failed to fetch presentation details");
+                }
+
+                // Fetch feedback data
+                const feedbackResponse = await fetch(`http://localhost:8081/feedback/presentation/${presentationId}/feedback`);
+                if (feedbackResponse.ok) {
+                    const feedbackData = await feedbackResponse.json();
+                    console.log('Feedback data received:', feedbackData);
+                    console.log('Transcription info:', feedbackData.transcription_info);
+                    setFeedback(feedbackData);
+                } else {
+                    setError("Failed to fetch feedback data");
+                }
+            } catch (err) {
+                setError(typeof err === "string" ? err : "Error loading data");
+            } finally {
                 setLoading(false);
-            })
-            .catch(err => {
-                setError(typeof err === "string" ? err : "Error loading feedback");
-                setLoading(false);
-            });
+            }
+        };
+
+        fetchData();
     }, [pathname, presentationId]);
 
     if (loading) return <LoadingFeedback />;
@@ -198,9 +247,94 @@ const Feedback = () => {
     return (
         <div className={styles.container}>
             <SideBar />
-            {/* <Header /> */}
-            <div style={{ maxWidth: 900, margin: '0 auto' }}>
+            <div className={feedbackStyles.mainContent}>
+                <Header />
+                {/* Video and Transcription Row */}
+                <div style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', 
+                    gap: '30px', 
+                    marginBottom: '30px',
+                    alignItems: 'start'
+                }} className={feedbackStyles['video-transcription-grid']}>
+                    {/* Video Player - Left Side */}
+                    <div className={feedbackStyles.videoFrame}>
+                        <div className={feedbackStyles.frameHeader}>
+                            <FiPlay className={feedbackStyles.frameIcon} />
+                            <h3 className={feedbackStyles.frameTitle}>Video Preview</h3>
+                        </div>
+                        {presentation && presentation.file_info?.file_exists && (
+                            <VideoPlayer 
+                                videoUrl={`http://localhost:8081${presentation.url}`}
+                                title={presentation.title}
+                            />
+                        )}
+                    </div>
+                    
+                    {/* Transcription Display - Right Side */}
+                    <div className={feedbackStyles.transcriptionFrame}>
+                        <div className={feedbackStyles.frameHeader}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
+                                <FiFileText className={feedbackStyles.frameIcon} />
+                                <h3 className={feedbackStyles.frameTitle}>Video Transcription</h3>
+                            </div>
+                            <button 
+                                onClick={async () => {
+                                    const transcription = feedback?.transcription_info?.transcription_full || feedback?.transcription_info?.transcription_preview || "";
+                                    try {
+                                        await navigator.clipboard.writeText(transcription);
+                                        setCopied(true);
+                                        setTimeout(() => setCopied(false), 2000);
+                                    } catch (err) {
+                                        console.error('Failed to copy text: ', err);
+                                    }
+                                }}
+                                className={feedbackStyles.copyButton}
+                                title="Copy transcription"
+                            >
+                                {copied ? (
+                                    <>
+                                        <FiCheck />
+                                        <span>Copied!</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <FiCopy />
+                                        <span>Copy</span>
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                        {/* Always show transcription if available, regardless of success status */}
+                        {feedback && feedback.transcription_info && (feedback.transcription_info.transcription_full || feedback.transcription_info.transcription_preview) && (
+                            <TranscriptionDisplay 
+                                transcription={feedback.transcription_info.transcription_full || feedback.transcription_info.transcription_preview || ""}
+                                title=""
+                            />
+                        )}
+                        {/* Debug: Show transcription info if available but no content */}
+                        {feedback && feedback.transcription_info && !feedback.transcription_info.transcription_full && !feedback.transcription_info.transcription_preview && (
+                            <div style={{ 
+                                background: 'rgba(255, 0, 0, 0.1)', 
+                                padding: '20px', 
+                                borderRadius: '10px',
+                                border: '1px solid rgba(255, 0, 0, 0.3)',
+                                color: 'white'
+                            }}>
+                                <h3>Transcription Debug Info</h3>
+                                <p>Success: {feedback.transcription_info.transcription_success ? 'Yes' : 'No'}</p>
+                                <p>Length: {feedback.transcription_info.transcription_length || 'N/A'}</p>
+                                <p>Has Full: {feedback.transcription_info.transcription_full ? 'Yes' : 'No'}</p>
+                                <p>Has Preview: {feedback.transcription_info.transcription_preview ? 'Yes' : 'No'}</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+                
+                {/* Analysis Overview - Below Both */}
                 <AnalysisOverview {...overviewProps} />
+                
+                {/* Other Analysis Cards */}
                 <SpeechAnalysisCard {...speechAnalysisProps} />
                 <VisualAnalysisCard {...visualAnalysisProps} />
                 <ContentAnalysisCard {...contentAnalysisProps} />

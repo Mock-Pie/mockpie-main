@@ -35,11 +35,47 @@ const SubmittedTrials = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteType, setDeleteType] = useState<'single' | 'bulk'>('single');
   const [itemToDelete, setItemToDelete] = useState<number | null>(null);
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const presentationsPerPage = 5;
 
   // Fetch presentations on component mount
   useEffect(() => {
     fetchPresentations();
   }, []);
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, dateFilter]);
+
+  // Calculate pagination
+  const indexOfLastPresentation = currentPage * presentationsPerPage;
+  const indexOfFirstPresentation = indexOfLastPresentation - presentationsPerPage;
+  const currentPresentations = filteredPresentations.slice(indexOfFirstPresentation, indexOfLastPresentation);
+  const totalPages = Math.ceil(filteredPresentations.length / presentationsPerPage);
+
+  // Pagination handlers
+  const goToPage = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+  };
+
+  const goToNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const goToPreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleViewFeedback = (presentationId: number) => {
+    router.push(`/Feedback?presentationId=${presentationId}`);
+  };
 
   const fetchPresentations = async () => {
     try {
@@ -436,12 +472,12 @@ const SubmittedTrials = () => {
                         type="checkbox"
                         onChange={(e) => {
                           if (e.target.checked) {
-                            setSelectedPresentations(filteredPresentations.map(p => p.id));
+                            setSelectedPresentations(currentPresentations.map(p => p.id));
                           } else {
                             setSelectedPresentations([]);
                           }
                         }}
-                        checked={selectedPresentations.length === filteredPresentations.length && filteredPresentations.length > 0}
+                        checked={selectedPresentations.length === currentPresentations.length && currentPresentations.length > 0}
                         className={styles.checkbox}
                       />
                     </th>
@@ -449,11 +485,12 @@ const SubmittedTrials = () => {
                     <th className={styles.tableHeaderCell}>Date</th>
                     <th className={styles.tableHeaderCell}>Size</th>
                     <th className={styles.tableHeaderCell}>Overall Score</th>
+                    <th className={styles.tableHeaderCell}>Feedback</th>
                     <th className={styles.tableHeaderCell}>Actions</th>
                   </tr>
                 </thead>
                 <tbody className={styles.tableBody}>
-                  {filteredPresentations.map((presentation) => (
+                  {currentPresentations.map((presentation) => (
                     <tr key={presentation.id} className={styles.tableRow}>
                       <td className={styles.checkboxCell}>
                         <input
@@ -498,6 +535,16 @@ const SubmittedTrials = () => {
                         ) : (
                           <span className={styles.noScore}>No score yet</span>
                         )}
+                      </td>
+                      <td className={styles.feedbackCell}>
+                        <button 
+                          className={styles.feedbackButton}
+                          onClick={() => handleViewFeedback(presentation.id)}
+                          title="View detailed feedback"
+                        >
+                          <IoEyeOutline size={16} />
+                          See Feedback
+                        </button>
                       </td>
                       <td className={styles.actionsCell}>
                         <div className={styles.actionButtons}>
@@ -548,12 +595,26 @@ const SubmittedTrials = () => {
           {/* Footer */}
           <div className={styles.tableFooter}>
             <p className={styles.footerText}>
-              Showing {filteredPresentations.length} of {presentations.length} presentations
+              Showing {indexOfFirstPresentation + 1}-{Math.min(indexOfLastPresentation, filteredPresentations.length)} of {filteredPresentations.length} presentations
             </p>
             <div className={styles.pagination}>
-              <button className={styles.paginationButton}>Previous</button>
-              <span className={styles.paginationCurrent}>1</span>
-              <button className={styles.paginationButton}>Next</button>
+              <button 
+                className={styles.paginationButton} 
+                onClick={goToPreviousPage}
+                disabled={currentPage === 1}
+              >
+                Previous
+              </button>
+              <span className={styles.paginationCurrent}>
+                Page {currentPage} of {totalPages}
+              </span>
+              <button 
+                className={styles.paginationButton} 
+                onClick={goToNextPage}
+                disabled={currentPage === totalPages}
+              >
+                Next
+              </button>
             </div>
           </div>
         </div>

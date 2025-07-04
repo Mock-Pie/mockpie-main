@@ -16,8 +16,9 @@ class LexicalRichnessAnalyzer:
     Supports both English and Arabic
     """
     
-    def __init__(self, transcription_service=None):
-        self.transcription_service = transcription_service
+    def __init__(self, transcription_service_english=None, transcription_service_arabic=None):
+        self.transcription_service_english = transcription_service_english
+        self.transcription_service_arabic = transcription_service_arabic
         
         # Download required NLTK data
         try:
@@ -62,7 +63,7 @@ class LexicalRichnessAnalyzer:
             'arabic_words': re.compile(r'[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]+')
         }
     
-    async def analyze(self, audio_path: str) -> Dict[str, Any]:
+    async def analyze(self, audio_path: str, language) -> Dict[str, Any]:
         """
         Analyze lexical richness from transcript
         Now uses centralized transcription service
@@ -71,7 +72,12 @@ class LexicalRichnessAnalyzer:
         
         try:
             # Get transcript using centralized service
-            transcript = await self._get_transcript(audio_path)
+            if language == 'arabic' and self.transcription_service_arabic:
+                transcript = await self.transcription_service_arabic.get_transcription(audio_path)
+            elif self.transcription_service_english:
+                transcript = await self.transcription_service_english.get_transcription(audio_path)
+            else:
+                transcript = None
             
             if not transcript or transcript.strip() == "":
                 return {

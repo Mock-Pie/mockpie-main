@@ -2,6 +2,20 @@
 
 A comprehensive FastAPI-based application that analyzes presentations using multiple open-source AI models. This system provides detailed feedback on speech emotion, pitch analysis, facial expressions, eye contact, hand gestures, filler word detection, lexical richness, keyword relevance, volume consistency, speaking pace (WPM), and generates composite engagement/confidence scores.
 
+## Recent Updates
+
+### WPM Analysis Fix
+- Fixed WPM analysis to use pre-transcribed audio instead of attempting its own transcription
+- Added `analyze_with_transcription` method to WPMCalculator for better integration
+- Resolves "Failed to transcribe audio" errors in WPM analysis
+- Improves reliability and performance of WPM calculations
+
+### Full Transcription Support
+- The `/api/custom-feedback` endpoint now includes full transcription in the response
+- Transcription is performed once and shared across all audio-based analyzers
+- Full transcription text is available in `transcription_info.transcription_full`
+- This improves efficiency and ensures consistency across all analysis components
+
 ## Features
 
 ### 🎯 Core Analysis Features

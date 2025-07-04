@@ -311,10 +311,8 @@ const Recording = () => {
                 const videoBlob = new Blob(chunksRef.current, { type: videoFormat.mimeType });
                 feedbackForm.append("file", videoBlob, "recorded_video.mp4");
                 feedbackForm.append("services", JSON.stringify(selectedFocus));
-                const presentationId = localStorage.getItem("presentationId");
-                if (presentationId) {
-                    feedbackForm.append("presentation_id", presentationId);
-                }
+                feedbackForm.append("presentation_id", data.presentation_id);
+                feedbackForm.append("language", selectedLanguage);
                 const feedbackRes = await fetch("http://localhost:8081/feedback/custom-feedback", {
                     method: "POST",
                     headers: {
