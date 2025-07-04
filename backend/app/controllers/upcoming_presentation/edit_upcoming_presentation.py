@@ -37,8 +37,10 @@ class EditUpcomingPresentation:
         presentation = get_upcoming_presentation_by_id(
             db=db,
             presentation_id=presentation_id,
-            current_user_id=current_user.id
+            user_id=current_user.id
         )
+
+        print("presentation", presentation)
         
         if (not presentation) or (presentation.user_id != current_user.id):
             raise HTTPException(
@@ -72,7 +74,7 @@ class EditUpcomingPresentation:
         # Update the upcoming presentation
         updated_presentation = update_upcoming_presentation(
             db=db,
-            presentation=presentation
+            upcoming_presentation=presentation
         )
 
         return updated_presentation

@@ -147,35 +147,65 @@ class UpcomingPresentationService {
     }
   }
 
-  // Update upcoming presentation
-  static async updateUpcomingPresentation(id: string, updates: Partial<UpcomingPresentationRequest>): Promise<UpcomingPresentationResponse> {
+  /**
+   * Update an existing upcoming presentation by ID using the backend API.
+   * Uses POST /upcoming-presentations/{presentation_id}/edit endpoint.
+   * Only 'topic' and 'presentation_date' (ISO format) are sent, as required by the backend.
+   * @param id - The ID of the upcoming presentation to update
+   * @param request - { topic: string, date: string (YYYY-MM-DD), time: string (HH:MM) }
+   */
+  static async updateUpcomingPresentation(id: string, request: { topic: string; date: string; time: string }): Promise<UpcomingPresentationResponse> {
     try {
-      const existing = await this.getUpcomingPresentations();
-      if (!existing.success) {
-        return existing;
+      // Combine date and time into ISO format (YYYY-MM-DDTHH:MM:SS)
+      const presentationDate = `${request.date}T${request.time || '00:00'}:00`;
+      const token = localStorage.getItem('access_token');
+      if (!token) {
+        throw new Error('No authentication token found');
       }
+      const headers: Record<string, string> = {
+        'Authorization': `Bearer ${token}`
+        // Do NOT set 'Content-Type' here
+      };
+      const formData = new URLSearchParams();
+      formData.append('topic', request.topic);
+      formData.append('presentation_date', presentationDate);
 
-      const presentations = (existing.data as UpcomingPresentation[]) || [];
-      const index = presentations.findIndex(p => p.id === id);
-      
-      if (index === -1) {
+      const response = await fetch(`${this.BASE_URL}/upcoming-presentations/${id}/edit`, {
+        method: 'POST',
+        headers,
+        body: formData,
+      });
+
+      if (response.status === 401) {
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
         return {
           success: false,
-          error: 'Presentation not found'
+          error: 'Authentication expired. Please log in again.'
         };
       }
 
-      presentations[index] = {
-        ...presentations[index],
-        ...updates,
-        updatedAt: new Date().toISOString()
-      };
+      if (response.status === 404) {
+        return {
+          success: false,
+          error: 'Upcoming presentation not found or access denied.'
+        };
+      }
 
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(presentations));
+      if (!response.ok) {
+        const errorText = await response.text();
+        return {
+          success: false,
+          error: `Failed to update upcoming presentation: ${errorText}`
+        };
+      }
 
+      const data = await response.json();
+      console.log('Update response:', data); // Debug log
+      
       return {
         success: true,
-        data: presentations[index]
+        data: data as any
       };
     } catch (error) {
       console.error('Error updating upcoming presentation:', error);

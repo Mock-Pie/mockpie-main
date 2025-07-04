@@ -8,6 +8,7 @@ from backend.app.models.user.user import User
 from backend.app.models.upcoming_presentation.upcoming_presentation import UpcomingPresentation
 from backend.app.utils.token_handler import TokenHandler
 from backend.app.controllers.upcoming_presentation.create_upcoming_presentation import CreateUpcomingPresentation
+from backend.app.controllers.upcoming_presentation.edit_upcoming_presentation import EditUpcomingPresentation
 from backend.app.controllers.upcoming_presentation.list_upcoming_presentations import ListUpcomingPresentations
 from backend.app.controllers.upcoming_presentation.delete_upcoming_presentation import DeleteUpcomingPresentation
 from backend.app.schemas.upcoming_presentation.upcoming_presentation_schema import (
@@ -122,7 +123,7 @@ async def edit_upcoming_presentation(
     Raises:
         HTTPException: If update fails or access denied
     """
-    return await CreateUpcomingPresentation.edit_upcoming_presentation(
+    return await EditUpcomingPresentation.edit_upcoming_presentation(
         presentation_id=presentation_id,
         topic=topic,
         presentation_date=presentation_date,
