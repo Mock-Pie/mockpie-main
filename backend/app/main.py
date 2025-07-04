@@ -43,12 +43,19 @@ app.include_router(upcoming_presentations.router)
 app.include_router(feedback.router)
 
 # Mount static files for uploaded videos
-uploads_dir = "uploads"  # Relative to the app working directory
+uploads_dir = "/app/backend/uploads"  # Absolute path in Docker container
 if os.path.exists(uploads_dir):
     app.mount("/uploads", StaticFiles(directory=uploads_dir), name="uploads")
-    logger.info(f"Mounted uploads directory: {os.path.abspath(uploads_dir)}")
+    logger.info(f"Mounted uploads directory: {uploads_dir}")
 else:
-    logger.warning(f"Uploads directory not found: {os.path.abspath(uploads_dir)}")
+    logger.warning(f"Uploads directory not found: {uploads_dir}")
+    # Try to create the directory
+    try:
+        os.makedirs(uploads_dir, exist_ok=True)
+        app.mount("/uploads", StaticFiles(directory=uploads_dir), name="uploads")
+        logger.info(f"Created and mounted uploads directory: {uploads_dir}")
+    except Exception as e:
+        logger.error(f"Failed to create uploads directory: {e}")
 
 # Global exception handler
 @app.exception_handler(Exception)
