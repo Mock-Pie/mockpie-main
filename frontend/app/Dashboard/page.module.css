@@ -1140,3 +1140,37 @@
   margin-right: 8px;
   display: inline-block;
 }
+
+.mockPieTitle {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--naples-yellow);
+  letter-spacing: 0.04em;
+  font-family: inherit;
+  background: linear-gradient(90deg, var(--naples-yellow) 0%, #fffbe6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+  text-shadow: 0 2px 8px rgba(255, 214, 10, 0.15);
+  padding: 4px 24px 4px 0;
+  border-radius: 8px;
+  display: inline-block;
+}
+
+.mockPieBranding {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.mockPieSubtitle {
+  font-size: 1rem;
+  font-style: italic;
+  color: var(--naples-yellow);
+  font-weight: 500;
+  margin-left: 2px;
+  letter-spacing: 0.01em;
+  opacity: 0.85;
+}

@@ -287,68 +287,74 @@ const Recording = () => {
             formData.append("topic", presentationTopic.trim());
             formData.append("language", selectedLanguage);
             formData.append("focus_areas", JSON.stringify(selectedFocus));
+            
 
-            setUploadStatus("Uploading video...");
-
-            const uploadResponse = await fetch("http://localhost:8081/presentations/upload", {
-                method: "POST",
-                headers: {
-                    "Authorization": `Bearer ${accessToken}`,
-                },
-                body: formData,
-            });
-
-            if (uploadResponse.ok) {
-                const data = await uploadResponse.json();
-                // Save presentationId to localStorage before anything else
-                if (data && data.id) {
-                    localStorage.setItem("presentationId", data.id.toString());
-                }
-                setUploadStatus("Upload successful! Generating feedback...");
-                // POST to feedback API
-                const feedbackForm = new FormData();
-                // Assume the recorded video is available as a Blob in chunksRef.current
-                const videoBlob = new Blob(chunksRef.current, { type: videoFormat.mimeType });
-                feedbackForm.append("file", videoBlob, "recorded_video.mp4");
-                feedbackForm.append("services", JSON.stringify(selectedFocus));
-                feedbackForm.append("presentation_id", data.presentation_id);
-                feedbackForm.append("language", selectedLanguage);
-                const feedbackRes = await fetch("http://localhost:8081/feedback/custom-feedback", {
+            try {
+                setIsUploading(true);
+                setUploadStatus("Uploading...");
+                const response = await fetch("http://localhost:8081/presentations/upload", {
                     method: "POST",
                     headers: {
                         "Authorization": `Bearer ${accessToken}`,
                     },
-                    body: feedbackForm,
+                    body: formData,
                 });
-                if (feedbackRes.ok) {
-                    const feedbackData = await feedbackRes.json();
-                    localStorage.setItem("feedbackData", JSON.stringify(feedbackData));
-                    router.push("/Feedback");
+                if (response.ok) {
+                    const data = await response.json();
+                    // Save presentationId to localStorage before anything else
+                    if (data && data.presentation_id) {
+                        localStorage.setItem("presentationId", data.presentation_id);
+                    }
+                    setUploadStatus("Upload successful! Generating feedback...");
+                    // POST to feedback API
+                    const feedbackForm = new FormData();
+                    feedbackForm.append("file", file);
+                    feedbackForm.append("services", selectedFocus.join(","));
+                    feedbackForm.append("presentation_id", data.presentation_id);
+                    feedbackForm.append("language", selectedLanguage);
+                    const feedbackRes = await fetch("http://localhost:8081/feedback/custom-feedback", {
+                        method: "POST",
+                        headers: {
+                            "Authorization": `Bearer ${accessToken}`,
+                        },
+                        body: feedbackForm,
+                    });
+                    if (feedbackRes.ok) {
+                        const feedbackData = await feedbackRes.json();
+                        localStorage.setItem("feedbackData", JSON.stringify(feedbackData));
+                        console.log("Feedback data stored in localStorage:", feedbackData);
+                        router.push("/Feedback");
+                    } else {
+                        setUploadStatus("Failed to generate feedback. Please try again later.");
+                    }
                 } else {
-                    setUploadStatus("Failed to generate feedback. Please try again later.");
+                    const errorData = await response.json();
+                    
+                    if (response.status === 401) {
+                        localStorage.removeItem("access_token");
+                        setUploadStatus("Session expired. Please log in again.");
+                        setTimeout(() => router.push("/Login"), 2000);
+                    } else if (response.status === 413) {
+                        setUploadStatus("File too large. Maximum size is 100MB.");
+                    } else if (response.status === 415) {
+                        setUploadStatus("Unsupported file type.");
+                    } else {
+                        setUploadStatus(`Upload failed: ${errorData.detail || "Unknown error"}`);
+                    }
                 }
-            } else {
-                const errorData = await uploadResponse.json();
-                
-                if (uploadResponse.status === 401) {
-                    localStorage.removeItem("access_token");
-                    setUploadStatus("Session expired. Please log in again.");
-                    setTimeout(() => router.push("/Login"), 2000);
-                } else if (uploadResponse.status === 413) {
-                    setUploadStatus("File too large. Maximum size is 100MB.");
-                } else if (uploadResponse.status === 415) {
-                    setUploadStatus("Unsupported file type.");
-                } else {
-                    setUploadStatus(`Upload failed: ${errorData.detail || "Unknown error"}`);
-                }
+            } catch (error) {
+                console.error("Error uploading file:", error);
+                setUploadStatus("Network error. Please check your connection and try again.");
+            } finally {
+                setIsUploading(false);
             }
         } catch (error) {
-            console.error("Error uploading video:", error);
-            setUploadStatus("Network error. Please check your connection and try again.");
-        } finally {
-            setIsUploading(false);
+            console.error("Error in uploadVideo:", error);
+            setUploadStatus("An unexpected error occurred during upload.");
         }
     };
+    
+
 
     const formatTime = (time: number) => {
         const minutes = Math.floor(time / 60);
