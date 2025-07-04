@@ -159,14 +159,14 @@ const LoginForm = () => {
                 const errorData = await response.json();
                 console.log("Login error response:", errorData);
                 
-                // Check if user is not verified (status code 403 or specific error message)
-                if (response.status === 403 || 
-                    (errorData.detail && typeof errorData.detail === 'string' && 
-                     (errorData.detail.toLowerCase().includes('not verified') || 
-                      errorData.detail.toLowerCase().includes('email not verified') ||
-                      errorData.detail.toLowerCase().includes('account not verified')))) {
-                    
-                    // Send verification OTP
+                // Check if user is specifically not verified (email verification required)
+                const isEmailNotVerified = errorData.detail && typeof errorData.detail === 'string' && 
+                    (errorData.detail.toLowerCase().includes('email not verified') ||
+                     errorData.detail.toLowerCase().includes('account not verified') ||
+                     errorData.detail.toLowerCase().includes('not verified'));
+                
+                if (isEmailNotVerified) {
+                    // Send verification OTP only for email verification issues
                     const otpSent = await sendVerificationOTP(formData.identifier.trim());
                     
                     if (otpSent === true) {
