@@ -141,13 +141,20 @@ async def custom_feedback(
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
     
+    # Verify file was saved successfully
+    if not file_path.exists():
+        raise HTTPException(status_code=500, detail="Failed to save file to shared volume")
+    
     # Convert to path that feedback service can access
     feedback_service_path = f"/app/uploads/videos/{unique_filename}"
+    
+    print(f"Backend: Saved file to {file_path}")
+    print(f"Backend: Sending path {feedback_service_path} to feedback service")
     
     # Call feedback service with file path
     url = f"{FEEDBACK_SERVICE_URL}/custom-feedback"
     try:
-        async with httpx.AsyncClient(timeout=300) as client:  # Increased timeout for large files
+        async with httpx.AsyncClient(timeout=1000) as client:  # Increased timeout to 10 minutes for large files
             form_data = {
                 "services": services, 
                 "presentation_id": str(presentation_id), 
@@ -155,6 +162,18 @@ async def custom_feedback(
                 "file_path": feedback_service_path
             }
             resp = await client.post(url, data=form_data)
+            
+            # Check if response is successful
+            if resp.status_code != 200:
+                error_detail = f"Feedback service returned status {resp.status_code}"
+                try:
+                    error_data = resp.json()
+                    if "error" in error_data:
+                        error_detail = error_data["error"]
+                except:
+                    pass
+                raise HTTPException(status_code=resp.status_code, detail=error_detail)
+            
             feedback_data = resp.json()
             # Add used_criteria
             used_criteria = [s.strip() for s in services.split(",") if s.strip()]
@@ -162,6 +181,14 @@ async def custom_feedback(
             # Store feedback in DB
             create_feedback(db, presentation_id, feedback_data)
             return JSONResponse(status_code=resp.status_code, content=feedback_data)
+    except httpx.TimeoutException:
+        # Clean up file if feedback service times out
+        try:
+            if file_path.exists():
+                os.remove(file_path)
+        except:
+            pass
+        raise HTTPException(status_code=408, detail="Feedback service request timed out. Please try again with a shorter video.")
     except Exception as e:
         # Clean up file if feedback service fails
         try:

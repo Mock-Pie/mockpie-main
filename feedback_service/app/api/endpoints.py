@@ -476,7 +476,9 @@ async def api_custom_feedback(
             logger.info(f"Custom feedback API called for file path: {file_path} with services: {services}")
             # Validate file path exists
             if not os.path.exists(file_path):
+                logger.error(f"File not found at path: {file_path}")
                 return JSONResponse(content={"error": f"File not found: {file_path}"}, status_code=404)
+            logger.info(f"File found at path: {file_path}, size: {os.path.getsize(file_path)} bytes")
             input_file_path = file_path
         elif file:
             logger.info(f"Custom feedback API called for uploaded file: {file.filename} with services: {services}")
