@@ -153,7 +153,7 @@ class KeywordRelevanceAnalyzer:
         try:
             if self.transcription_service:
                 # Use centralized transcription service
-                transcription = await self.transcription_service.get_transcription(audio_path, self.language)
+                transcription = await self.transcription_service.get_transcription(audio_path)
                 if transcription and isinstance(transcription, str):
                     logger.info(f"Transcription successful: {transcription[:100]}...")
                     return transcription

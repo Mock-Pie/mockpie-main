@@ -100,7 +100,7 @@ class FillerWordDetector:
             # Try centralized transcription service first
             if language == 'arabic' and self.transcription_service_arabic:
                 try:
-                    transcription = await self.transcription_service_arabic.get_transcription(audio_path, language)
+                    transcription = await self.transcription_service_arabic.get_transcription(audio_path)
                     
                     if transcription:
                         return {
@@ -115,7 +115,7 @@ class FillerWordDetector:
             
             elif self.transcription_service_english:
                 try:
-                    transcription = await self.transcription_service_english.get_transcription(audio_path, language)
+                    transcription = await self.transcription_service_english.get_transcription(audio_path)
                     
                     if transcription:
                         return {

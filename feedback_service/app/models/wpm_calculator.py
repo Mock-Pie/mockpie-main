@@ -237,9 +237,9 @@ class WPMCalculator:
         """Get transcription using centralized transcription service"""
         try:
             if language == 'arabic' and self.transcription_service_arabic:
-                transcription = self.transcription_service_arabic.get_transcription(audio_path, language)
+                transcription = self.transcription_service_arabic.get_transcription(audio_path)
             elif self.transcription_service_english:
-                transcription = self.transcription_service_english.get_transcription(audio_path, language)
+                transcription = self.transcription_service_english.get_transcription(audio_path)
             else:
                 transcription = None
             return transcription
@@ -252,9 +252,9 @@ class WPMCalculator:
         """Async version of transcription for use in async contexts"""
         try:
             if language == 'arabic' and self.transcription_service_arabic:
-                transcription = await self.transcription_service_arabic.get_transcription(audio_path, language)
+                transcription = await self.transcription_service_arabic.get_transcription(audio_path)
             elif self.transcription_service_english:
-                transcription = await self.transcription_service_english.get_transcription(audio_path, language)
+                transcription = await self.transcription_service_english.get_transcription(audio_path)
             else:
                 transcription = None
             return transcription

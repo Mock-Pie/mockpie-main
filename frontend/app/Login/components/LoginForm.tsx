@@ -8,13 +8,10 @@ import { FaExclamationCircle, FaExclamationTriangle, FaCheckCircle } from "react
 import { signIn } from "next-auth/react";
 import styles from "../page.module.css";
 import Image from "next/image";
-import { useAuth } from "../../components/auth/AuthProvider";
-import { ROUTES } from "../../constants";
 
 const LoginForm = () => {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const { login } = useAuth();
     const [formData, setFormData] = useState({
         identifier: "",
         password: "",
@@ -148,13 +145,16 @@ const LoginForm = () => {
             if (response.ok) {
                 const responseData = await response.json();
                 
-                // Use the auth context to handle login
-                if (responseData.access_token && responseData.user) {
-                    login(responseData.access_token, responseData.user);
-                    // The AuthProvider will handle the redirect to dashboard
-                } else {
-                    setApiError("Invalid response from server. Please try again.");
+                // Store tokens securely
+                if (responseData.access_token) {
+                    localStorage.setItem("access_token", responseData.access_token);
                 }
+                if (responseData.refresh_token) {
+                    localStorage.setItem("refresh_token", responseData.refresh_token);
+                }
+                
+                // Redirect to dashboard
+                router.push("/Dashboard");
             } else {
                 const errorData = await response.json();
                 console.log("Login error response:", errorData);

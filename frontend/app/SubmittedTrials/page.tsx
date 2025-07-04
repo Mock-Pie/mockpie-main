@@ -20,10 +20,6 @@ import styles1 from "../UploadRecordVideos/page.module.css";
 import uploadStyles from "../UploadRecordVideos/uploadrecord.module.css";
 import SideBar from "../UploadRecordVideos/components/SideBar";
 import PresentationService, { Presentation } from '../services/presentationService';
-import ProtectedRoute from "../components/auth/ProtectedRoute";
-import HeaderActions from "./components/HeaderActions";
-import TrialsTable from "./components/TrialsTable";
-import FilterModal from "./components/FilterModal";
 
 const SubmittedTrials = () => {
   const router = useRouter();
@@ -43,14 +39,6 @@ const SubmittedTrials = () => {
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const presentationsPerPage = 5;
-
-  // Filter state
-  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
-  const [filters, setFilters] = useState({
-    dateRange: { start: null, end: null },
-    scoreRange: { min: 0, max: 10 },
-    searchTerm: "",
-  });
 
   // Fetch presentations on component mount
   useEffect(() => {
@@ -372,7 +360,25 @@ const SubmittedTrials = () => {
     return feedbacks[index];
   };
 
-  const SubmittedTrialsContent = () => (
+  if (loading) {
+    return (
+      <div className={styles1.container}>
+        <SideBar />
+        <div className={uploadStyles.mainContent}>
+          <div className={`${uploadStyles.header} ${styles.customHeader}`}>
+            <h1 className={uploadStyles.title}>Submitted Trials</h1>
+            <p className={uploadStyles.subtitle}>Loading your presentations...</p>
+          </div>
+          <div className={styles.loadingState}>
+            <div className={styles.loadingSpinner}></div>
+            <p>Loading presentations...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
     <div className={styles1.container}>
       <SideBar />
       <div className={uploadStyles.mainContent}>
@@ -647,12 +653,6 @@ const SubmittedTrials = () => {
         )}
       </div>
     </div>
-  );
-
-  return (
-    <ProtectedRoute>
-      <SubmittedTrialsContent />
-    </ProtectedRoute>
   );
 };
 

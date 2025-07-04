@@ -250,7 +250,7 @@ async def api_overall_feedback(file: UploadFile = File(...), language: str = For
         
         # Pre-transcribe audio once for all models
         logger.info("Pre-transcribing audio for all models...")
-        transcription = await analyzers["transcription_service"].get_transcription(audio_path, language)
+        transcription = await analyzers["transcription_service"].get_transcription(audio_path)
         if transcription:
             logger.info(f"Transcription successful: {len(transcription)} characters")
         else:
