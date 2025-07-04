@@ -141,7 +141,7 @@ const ChangePasswordForm = () => {
               Loading...
             </>
           ) : (
-            'Send Reset Code'
+            'Send Verification Code'
           )}
         </button>
 
