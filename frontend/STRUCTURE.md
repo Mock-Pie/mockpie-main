@@ -1,6 +1,6 @@
 # Frontend Code Structure
 
-This document outlines the clean and organized structure of the MockPie frontend application.
+This document outlines the clean and organized structure of the PresentAI frontend application.
 
 ## Directory Structure
 

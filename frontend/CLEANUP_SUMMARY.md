@@ -1,7 +1,7 @@
 # Frontend Code Structure Cleanup Summary
 
 ## Overview
-This document summarizes the comprehensive cleanup and restructuring of the MockPie frontend codebase to improve maintainability, reusability, and developer experience.
+This document summarizes the comprehensive cleanup and restructuring of the PresentAI frontend codebase to improve maintainability, reusability, and developer experience.
 
 ## Issues Identified and Resolved
 

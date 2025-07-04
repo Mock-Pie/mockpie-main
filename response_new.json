@@ -1,0 +1,2238 @@
+{
+  "\"speech_emotion": {
+    "error": "Unknown service: \"speech_emotion"
+  },
+  "wpm_analysis": {
+    "overall_wpm": 162.5,
+    "word_count": 82,
+    "duration_minutes": 0.5,
+    "context": "presentation",
+    "assessment": {
+      "status": "too_fast",
+      "message": "Speaking pace is too fast for presentation",
+      "optimal_range": "120-160 WPM",
+      "optimal_target": "140 WPM"
+    },
+    "overall_score": 2.024411266633797,
+    "pace_consistency": {
+      "score": 0.4,
+      "status": "fair"
+    },
+    "segment_analysis": {
+      "segments": 49,
+      "avg_segment_wpm": 373.8,
+      "wpm_variance": 49497.6
+    },
+    "pause_analysis": {
+      "total_pause_time": 6.4,
+      "pause_percentage": 21.1,
+      "average_pause_duration": 0.3,
+      "pause_count": 21
+    },
+    "detailed_segments": [
+      {
+        "segment_id": 1,
+        "start_time": 2.21,
+        "end_time": 3.39,
+        "duration": 1.18,
+        "estimated_words": 1.7,
+        "wpm": 85.1
+      },
+      {
+        "segment_id": 2,
+        "start_time": 3.4,
+        "end_time": 3.62,
+        "duration": 0.22,
+        "estimated_words": 1.7,
+        "wpm": 456.4
+      },
+      {
+        "segment_id": 3,
+        "start_time": 3.71,
+        "end_time": 3.97,
+        "duration": 0.26,
+        "estimated_words": 1.7,
+        "wpm": 386.2
+      },
+      {
+        "segment_id": 4,
+        "start_time": 4.02,
+        "end_time": 4.61,
+        "duration": 0.59,
+        "estimated_words": 1.7,
+        "wpm": 170.2
+      },
+      {
+        "segment_id": 5,
+        "start_time": 4.8,
+        "end_time": 5.21,
+        "duration": 0.41,
+        "estimated_words": 1.7,
+        "wpm": 244.9
+      },
+      {
+        "segment_id": 6,
+        "start_time": 5.29,
+        "end_time": 5.5,
+        "duration": 0.21,
+        "estimated_words": 1.7,
+        "wpm": 478.1
+      },
+      {
+        "segment_id": 7,
+        "start_time": 5.58,
+        "end_time": 5.85,
+        "duration": 0.27,
+        "estimated_words": 1.7,
+        "wpm": 371.9
+      },
+      {
+        "segment_id": 8,
+        "start_time": 5.91,
+        "end_time": 6.03,
+        "duration": 0.12,
+        "estimated_words": 1.7,
+        "wpm": 836.7
+      },
+      {
+        "segment_id": 9,
+        "start_time": 6.1,
+        "end_time": 7.73,
+        "duration": 1.63,
+        "estimated_words": 1.7,
+        "wpm": 61.6
+      },
+      {
+        "segment_id": 10,
+        "start_time": 7.98,
+        "end_time": 8.39,
+        "duration": 0.41,
+        "estimated_words": 1.7,
+        "wpm": 244.9
+      }
+    ],
+    "recommendations": [
+      "Slow down your speaking pace. Target 140 WPM for better comprehension.",
+      "Focus on clear articulation and allow listeners time to process information.",
+      "Work on maintaining consistent speaking pace throughout your presentation.",
+      "Practice with a metronome or pacing exercises to develop rhythm.",
+      "Use longer strategic pauses to give audience time to process important information.",
+      "For presentations, slightly slower pace helps audience retention.",
+      "Use pauses after key points to let information sink in."
+    ],
+    "success": true,
+    "transcription_method": "pre_provided"
+  },
+  "pitch_analysis": {
+    "pitch_statistics": {
+      "mean_pitch": 119.0820967189251,
+      "median_pitch": 112.21985796485906,
+      "std_pitch": 35.282850643409844,
+      "min_pitch": 75.29244318001734,
+      "max_pitch": 478.5698910403223,
+      "pitch_range": 403.27744786030496,
+      "voiced_frames_percentage": 51.554232804232804
+    },
+    "intonation_patterns": {
+      "overall_slope": -0.0037874882251094457,
+      "contour_type": "flat",
+      "pitch_movements": {
+        "rises": 339,
+        "falls": 340,
+        "total_movements": 679
+      },
+      "stress_pattern": {
+        "stress_points": 25,
+        "average_stress_height": 205.45697363274496,
+        "stress_frequency": 1.603592046183451
+      },
+      "intonation_variability": 7.28875234039964
+    },
+    "variation_metrics": {
+      "coefficient_of_variation": 29.6290136095685,
+      "semitone_range": 32.01783184780395,
+      "pitch_dynamism": 4.846378040914926
+    },
+    "speaking_style": {
+      "speaking_style": "highly_dynamic",
+      "engagement_score": 10,
+      "monotone_risk": false,
+      "expressiveness_level": "high"
+    },
+    "overall_score": 10,
+    "recommendations": [
+      "Work on maintaining consistent voicing throughout speech"
+    ]
+  },
+  "filler_detection": {
+    "transcript": " In this class, you learn about the state of the art and also practice implementing machine learning algorithms yourself. You learn about the most important machine learning algorithms, some of which are exactly what's being used in large AI or large tech companies today, and you get a sense of what is the state of the art in AI. Beyond learning the algorithms though, in this class, you also learn all the important practical tips and tricks for making them possible.",
+    "filler_analysis": {
+      "filler_counts": {},
+      "filler_positions": [],
+      "total_fillers": 0,
+      "total_words": 82,
+      "filler_rate_percentage": 0,
+      "most_common_filler": null
+    },
+    "pause_analysis": {
+      "pauses": [
+        {
+          "start_time": 0,
+          "end_time": 2.224943310657596,
+          "duration": 2.224943310657596
+        },
+        {
+          "start_time": 8.430839002267573,
+          "end_time": 9.27891156462585,
+          "duration": 0.8480725623582774
+        },
+        {
+          "start_time": 17.480272108843536,
+          "end_time": 17.969160997732427,
+          "duration": 0.4888888888888907
+        },
+        {
+          "start_time": 21.24172335600907,
+          "end_time": 22.399092970521544,
+          "duration": 1.1573696145124721
+        },
+        {
+          "start_time": 28.964172335600907,
+          "end_time": 29.323356009070295,
+          "duration": 0.3591836734693885
+        }
+      ],
+      "total_pauses": 5,
+      "total_pause_time": 5.078458049886625,
+      "pause_percentage": 16.77608022795575,
+      "average_pause_duration": 1.015691609977325,
+      "max_pause_duration": 2.224943310657596,
+      "pause_frequency": 9.910142052860085
+    },
+    "disfluency_metrics": {
+      "fluency_score": 8,
+      "fluency_level": "excellent",
+      "overall_disfluency_rate": 8.388040113977874,
+      "speech_rhythm": "smooth"
+    },
+    "overall_score": 8,
+    "recommendations": [
+      "Work on reducing excessive pauses - practice smooth transitions"
+    ]
+  },
+  "stutter_detection": {
+    "stutter_detected": true,
+    "stutter_probability": 0.2695130668580532,
+    "confidence": 0.2695130668580532,
+    "fluency_score": 7.304869331419468,
+    "overall_score": 7.304869331419468,
+    "analysis_method": "huggingface_pipeline",
+    "total_segments": 7,
+    "stutter_segments_count": 2,
+    "stutter_frequency_per_minute": 3.9640510123814656,
+    "stutter_percentage": 28.57142857142857,
+    "stutter_timeline": [
+      {
+        "start_time": 0,
+        "end_time": 5,
+        "duration": 5,
+        "stutter_probability": 0.8703991174697876,
+        "confidence": 0.8703991174697876,
+        "segment_id": 1
+      },
+      {
+        "start_time": 30,
+        "end_time": 30.2720625,
+        "duration": 0.27206250000000054,
+        "stutter_probability": 0.7397980690002441,
+        "confidence": 0.7397980690002441,
+        "segment_id": 7
+      }
+    ],
+    "all_segments": [
+      {
+        "stutter_detected": true,
+        "stutter_probability": 0.8703991174697876,
+        "confidence": 0.8703991174697876,
+        "model_output": [
+          {
+            "score": 0.8703991174697876,
+            "label": "repetition"
+          },
+          {
+            "score": 0.12272906303405762,
+            "label": "nonstutter"
+          },
+          {
+            "score": 0.004349101800471544,
+            "label": "blocks"
+          },
+          {
+            "score": 0.002522728405892849,
+            "label": "prolongation"
+          }
+        ],
+        "analysis_method": "huggingface_pipeline",
+        "segment_id": 1,
+        "start_time": 0,
+        "end_time": 5,
+        "duration": 5
+      },
+      {
+        "stutter_detected": false,
+        "stutter_probability": 0.0018374890787526965,
+        "confidence": 0.0018374890787526965,
+        "model_output": [
+          {
+            "score": 0.9961699843406677,
+            "label": "nonstutter"
+          },
+          {
+            "score": 0.0018374890787526965,
+            "label": "repetition"
+          },
+          {
+            "score": 0.00099758745636791,
+            "label": "blocks"
+          },
+          {
+            "score": 0.0009949456434696913,
+            "label": "prolongation"
+          }
+        ],
+        "analysis_method": "huggingface_pipeline",
+        "segment_id": 2,
+        "start_time": 5,
+        "end_time": 10,
+        "duration": 5
+      },
+      {
+        "stutter_detected": false,
+        "stutter_probability": 0.001343284035101533,
+        "confidence": 0.001343284035101533,
+        "model_output": [
+          {
+            "score": 0.9965571165084839,
+            "label": "nonstutter"
+          },
+          {
+            "score": 0.001343284035101533,
+            "label": "repetition"
+          },
+          {
+            "score": 0.0010654851794242859,
+            "label": "prolongation"
+          },
+          {
+            "score": 0.0010341998422518373,
+            "label": "blocks"
+          }
+        ],
+        "analysis_method": "huggingface_pipeline",
+        "segment_id": 3,
+        "start_time": 10,
+        "end_time": 15,
+        "duration": 5
+      },
+      {
+        "stutter_detected": false,
+        "stutter_probability": 0.006077148951590061,
+        "confidence": 0.006077148951590061,
+        "model_output": [
+          {
+            "score": 0.9920933842658997,
+            "label": "nonstutter"
+          },
+          {
+            "score": 0.006077148951590061,
+            "label": "repetition"
+          },
+          {
+            "score": 0.0010741222649812698,
+            "label": "prolongation"
+          },
+          {
+            "score": 0.0007554104668088257,
+            "label": "blocks"
+          }
+        ],
+        "analysis_method": "huggingface_pipeline",
+        "segment_id": 4,
+        "start_time": 15,
+        "end_time": 20,
+        "duration": 5
+      },
+      {
+        "stutter_detected": false,
+        "stutter_probability": 0.26531848311424255,
+        "confidence": 0.26531848311424255,
+        "model_output": [
+          {
+            "score": 0.7275928854942322,
+            "label": "nonstutter"
+          },
+          {
+            "score": 0.26531848311424255,
+            "label": "repetition"
+          },
+          {
+            "score": 0.004055511672049761,
+            "label": "blocks"
+          },
+          {
+            "score": 0.0030331129673868418,
+            "label": "prolongation"
+          }
+        ],
+        "analysis_method": "huggingface_pipeline",
+        "segment_id": 5,
+        "start_time": 20,
+        "end_time": 25,
+        "duration": 5
+      },
+      {
+        "stutter_detected": false,
+        "stutter_probability": 0.0018178763566538692,
+        "confidence": 0.0018178763566538692,
+        "model_output": [
+          {
+            "score": 0.9961450099945068,
+            "label": "nonstutter"
+          },
+          {
+            "score": 0.0018178763566538692,
+            "label": "repetition"
+          },
+          {
+            "score": 0.0010463664075359702,
+            "label": "prolongation"
+          },
+          {
+            "score": 0.0009907502681016922,
+            "label": "blocks"
+          }
+        ],
+        "analysis_method": "huggingface_pipeline",
+        "segment_id": 6,
+        "start_time": 25,
+        "end_time": 30,
+        "duration": 5
+      },
+      {
+        "stutter_detected": true,
+        "stutter_probability": 0.7397980690002441,
+        "confidence": 0.7397980690002441,
+        "model_output": [
+          {
+            "score": 0.7397980690002441,
+            "label": "repetition"
+          },
+          {
+            "score": 0.24125570058822632,
+            "label": "blocks"
+          },
+          {
+            "score": 0.015644917264580727,
+            "label": "nonstutter"
+          },
+          {
+            "score": 0.0033013038337230682,
+            "label": "prolongation"
+          }
+        ],
+        "analysis_method": "huggingface_pipeline",
+        "segment_id": 7,
+        "start_time": 30,
+        "end_time": 30.2720625,
+        "duration": 0.27206250000000054
+      }
+    ],
+    "assessment": "Good speech fluency with occasional stuttering",
+    "recommendations": [
+      "Continue practicing clear articulation and pacing",
+      "Consider recording presentations to identify improvement areas",
+      "Practice speaking in front of a mirror to build confidence",
+      "Focus on the 2 segments where stuttering was detected"
+    ],
+    "segment_duration": 5,
+    "total_audio_duration": 30.2720625
+  },
+  "facial_emotion": {
+    "face_detection_rate": 0.6774193548387096,
+    "total_analyzed_frames": 21,
+    "emotion_statistics": {
+      "emotion_averages": {
+        "angry": 0,
+        "disgust": 0,
+        "fear": 0,
+        "happy": 0.20000000000000004,
+        "neutral": 0.5999999999999999,
+        "sad": 0.20000000000000004,
+        "surprise": 0
+      },
+      "dominant_emotion": {
+        "emotion": "neutral",
+        "probability": 0.5999999999999999
+      },
+      "emotional_variability": 0.2060315014550851,
+      "positivity_score": 0.20000000000000004,
+      "negativity_score": 0.20000000000000004,
+      "neutrality_score": 0.5999999999999999
+    },
+    "temporal_analysis": {
+      "emotion_changes": [],
+      "change_frequency": 0,
+      "emotional_consistency": "high",
+      "total_duration": 20
+    },
+    "segment_analysis": [
+      {
+        "start_time": 10,
+        "end_time": 14,
+        "emotion_statistics": {
+          "emotion_averages": {
+            "angry": 0,
+            "disgust": 0,
+            "fear": 0,
+            "happy": 0.2,
+            "neutral": 0.6,
+            "sad": 0.2,
+            "surprise": 0
+          },
+          "dominant_emotion": {
+            "emotion": "neutral",
+            "probability": 0.6
+          },
+          "emotional_variability": 0.2060315014550851,
+          "positivity_score": 0.2,
+          "negativity_score": 0.2,
+          "neutrality_score": 0.6,
+          "emotion_entropy": 0.950271278049614,
+          "num_frames": 5,
+          "emotion_change_from_previous": false
+        }
+      },
+      {
+        "start_time": 15,
+        "end_time": 19,
+        "emotion_statistics": {
+          "emotion_averages": {
+            "angry": 0,
+            "disgust": 0,
+            "fear": 0,
+            "happy": 0.2,
+            "neutral": 0.6,
+            "sad": 0.2,
+            "surprise": 0
+          },
+          "dominant_emotion": {
+            "emotion": "neutral",
+            "probability": 0.6
+          },
+          "emotional_variability": 0.2060315014550851,
+          "positivity_score": 0.2,
+          "negativity_score": 0.2,
+          "neutrality_score": 0.6,
+          "emotion_entropy": 0.950271278049614,
+          "num_frames": 5,
+          "emotion_change_from_previous": false
+        }
+      },
+      {
+        "start_time": 20,
+        "end_time": 24,
+        "emotion_statistics": {
+          "emotion_averages": {
+            "angry": 0,
+            "disgust": 0,
+            "fear": 0,
+            "happy": 0.2,
+            "neutral": 0.6,
+            "sad": 0.2,
+            "surprise": 0
+          },
+          "dominant_emotion": {
+            "emotion": "neutral",
+            "probability": 0.6
+          },
+          "emotional_variability": 0.2060315014550851,
+          "positivity_score": 0.2,
+          "negativity_score": 0.2,
+          "neutrality_score": 0.6,
+          "emotion_entropy": 0.950271278049614,
+          "num_frames": 5,
+          "emotion_change_from_previous": false
+        }
+      },
+      {
+        "start_time": 25,
+        "end_time": 29,
+        "emotion_statistics": {
+          "emotion_averages": {
+            "angry": 0,
+            "disgust": 0,
+            "fear": 0,
+            "happy": 0.2,
+            "neutral": 0.6,
+            "sad": 0.2,
+            "surprise": 0
+          },
+          "dominant_emotion": {
+            "emotion": "neutral",
+            "probability": 0.6
+          },
+          "emotional_variability": 0.2060315014550851,
+          "positivity_score": 0.2,
+          "negativity_score": 0.2,
+          "neutrality_score": 0.6,
+          "emotion_entropy": 0.950271278049614,
+          "num_frames": 5,
+          "emotion_change_from_previous": false
+        }
+      },
+      {
+        "start_time": 30,
+        "end_time": 30,
+        "emotion_statistics": {
+          "emotion_averages": {
+            "angry": 0,
+            "disgust": 0,
+            "fear": 0,
+            "happy": 0.2,
+            "neutral": 0.6,
+            "sad": 0.2,
+            "surprise": 0
+          },
+          "dominant_emotion": {
+            "emotion": "neutral",
+            "probability": 0.6
+          },
+          "emotional_variability": 0.2060315014550851,
+          "positivity_score": 0.2,
+          "negativity_score": 0.2,
+          "neutrality_score": 0.6,
+          "emotion_entropy": 0.950271278049614,
+          "num_frames": 1,
+          "emotion_change_from_previous": false
+        }
+      }
+    ],
+    "segment_variability": 0.2060315014550851,
+    "segment_entropy": 0.950271278049614,
+    "engagement_metrics": {
+      "engagement_score": 10,
+      "engagement_level": "high",
+      "visual_appeal": "medium"
+    },
+    "overall_score": 10,
+    "recommendations": [
+      "Good facial expression control! Keep up the engaging presentation style"
+    ],
+    "analysis_method": "heuristic"
+  },
+  "eye_contact": {
+    "attention_score": 10,
+    "confidence_metrics": {
+      "average_confidence": 6.774193548387096,
+      "center_attention_ratio": 0.6774193548387096
+    },
+    "presentation_patterns": {
+      "pattern_quality_score": 6.774193548387096,
+      "zone_distribution": {
+        "no_face": 10,
+        "center": 21
+      }
+    },
+    "engagement_metrics": {
+      "total_frames_analyzed": 31,
+      "frames_with_face": 21,
+      "face_detection_rate": 0.6774193548387096,
+      "average_engagement_score": 10,
+      "zone_distribution": {
+        "no_face": 10,
+        "center": 21
+      }
+    },
+    "raw_data": [
+      {
+        "timestamp": 0,
+        "pupils_detected": false,
+        "attention_zone": "no_face",
+        "engagement_score": 0
+      },
+      {
+        "timestamp": 1,
+        "pupils_detected": false,
+        "attention_zone": "no_face",
+        "engagement_score": 0
+      },
+      {
+        "timestamp": 2,
+        "pupils_detected": false,
+        "attention_zone": "no_face",
+        "engagement_score": 0
+      },
+      {
+        "timestamp": 3,
+        "pupils_detected": false,
+        "attention_zone": "no_face",
+        "engagement_score": 0
+      },
+      {
+        "timestamp": 4,
+        "pupils_detected": false,
+        "attention_zone": "no_face",
+        "engagement_score": 0
+      },
+      {
+        "timestamp": 5,
+        "pupils_detected": false,
+        "attention_zone": "no_face",
+        "engagement_score": 0
+      },
+      {
+        "timestamp": 6,
+        "pupils_detected": false,
+        "attention_zone": "no_face",
+        "engagement_score": 0
+      },
+      {
+        "timestamp": 7,
+        "pupils_detected": false,
+        "attention_zone": "no_face",
+        "engagement_score": 0
+      },
+      {
+        "timestamp": 8,
+        "pupils_detected": false,
+        "attention_zone": "no_face",
+        "engagement_score": 0
+      },
+      {
+        "timestamp": 9,
+        "pupils_detected": false,
+        "attention_zone": "no_face",
+        "engagement_score": 0
+      }
+    ]
+  },
+  "hand_gesture": {
+    "gesture_statistics": {
+      "hands_visible_percentage": 100,
+      "gesture_distribution": {
+        "open_palm": 44,
+        "thumbs_up": 1,
+        "counting": 49,
+        "fist": 5,
+        "pointing": 1
+      },
+      "gesture_effectiveness": {
+        "open_palm": 8,
+        "thumbs_up": 7,
+        "counting": 9,
+        "fist": 4,
+        "pointing": 6
+      },
+      "hand_usage_distribution": {
+        "left": 17,
+        "right": 2,
+        "both": 33
+      },
+      "zone_distribution": {
+        "upper": 0,
+        "middle": 0,
+        "lower": 100
+      },
+      "average_hands_per_frame": 1.7543859649122806,
+      "most_common_gesture": "counting",
+      "most_effective_gesture": [
+        "counting",
+        9
+      ],
+      "average_effectiveness": 8.26,
+      "average_gesture_quality": 7.817379681906328,
+      "gesture_variety": 5
+    },
+    "engagement_metrics": {
+      "gesture_engagement_score": 6,
+      "engagement_level": "moderate",
+      "hands_usage_rating": "excellent",
+      "gesture_variety_rating": "excellent",
+      "optimal_zone_usage": 0
+    },
+    "effectiveness_analysis": {
+      "average_effectiveness": 8.154970760233919,
+      "effectiveness_consistency": 7.759264558628669,
+      "effectiveness_trend": "stable",
+      "peak_effectiveness": 9,
+      "minimum_effectiveness": 4,
+      "effectiveness_range": 5
+    },
+    "temporal_patterns": {
+      "pattern_quality": 9,
+      "rhythm": "good_rhythm",
+      "gesture_frequency_std": 0.6006050094253925,
+      "average_gesture_activity": 1.7543859649122806,
+      "activity_periods": 12,
+      "peak_activity": 2.6
+    },
+    "overall_score": 7.422417683933043,
+    "gesture_effectiveness": 8.154970760233919,
+    "total_analyzed_frames": 57,
+    "analysis_duration": 30.266666666666666,
+    "recommendations": [
+      "Allow for some natural pauses in gesturing to avoid appearing overly animated.",
+      "Keep gestures in the middle zone (chest to waist level) for optimal audience visibility.",
+      "You use 'counting' gestures effectively. Continue incorporating similar movements."
+    ],
+    "presentation_insights": {
+      "strength": "Strong use of counting gestures shows good presentation instincts",
+      "improvement": "Excellent gesture usage, maintain this standard",
+      "engagement": "High gesture frequency suggests strong audience engagement potential"
+    }
+  },
+  "posture_analysis": {
+    "posture_timeline": [
+      {
+        "timestamp": 0,
+        "frame_number": 0,
+        "bad_poses": [
+          "Arms Too Close"
+        ],
+        "pose_durations": {
+          "Arms Too Close": 0
+        }
+      },
+      {
+        "timestamp": 0.3333333333333333,
+        "frame_number": 10,
+        "bad_poses": [
+          "Arms Too Close"
+        ],
+        "pose_durations": {
+          "Arms Too Close": 0.3333333333333333
+        }
+      },
+      {
+        "timestamp": 0.6666666666666666,
+        "frame_number": 20,
+        "bad_poses": [],
+        "pose_durations": {
+          "Arms Too Close": 0.3333333333333333
+        }
+      },
+      {
+        "timestamp": 1,
+        "frame_number": 30,
+        "bad_poses": [
+          "Crossed Arms",
+          "Hands on Hips",
+          "Arms Too Close"
+        ],
+        "pose_durations": {
+          "Arms Too Close": 1,
+          "Crossed Arms": 0,
+          "Hands on Hips": 0
+        }
+      },
+      {
+        "timestamp": 1.3333333333333333,
+        "frame_number": 40,
+        "bad_poses": [],
+        "pose_durations": {
+          "Arms Too Close": 1,
+          "Crossed Arms": 0,
+          "Hands on Hips": 0
+        }
+      },
+      {
+        "timestamp": 1.6666666666666667,
+        "frame_number": 50,
+        "bad_poses": [
+          "Crossed Arms",
+          "Hands on Hips",
+          "Arms Too Close"
+        ],
+        "pose_durations": {
+          "Arms Too Close": 1.6666666666666667,
+          "Crossed Arms": 0.6666666666666667,
+          "Hands on Hips": 0.6666666666666667
+        }
+      },
+      {
+        "timestamp": 2,
+        "frame_number": 60,
+        "bad_poses": [],
+        "pose_durations": {}
+      },
+      {
+        "timestamp": 2.3333333333333335,
+        "frame_number": 70,
+        "bad_poses": [],
+        "pose_durations": {}
+      },
+      {
+        "timestamp": 2.6666666666666665,
+        "frame_number": 80,
+        "bad_poses": [
+          "Hands Behind Back"
+        ],
+        "pose_durations": {
+          "Hands Behind Back": 0
+        }
+      },
+      {
+        "timestamp": 3,
+        "frame_number": 90,
+        "bad_poses": [
+          "Hands Behind Back"
+        ],
+        "pose_durations": {
+          "Hands Behind Back": 0.3333333333333335
+        }
+      },
+      {
+        "timestamp": 3.3333333333333335,
+        "frame_number": 100,
+        "bad_poses": [],
+        "pose_durations": {
+          "Hands Behind Back": 0.3333333333333335
+        }
+      },
+      {
+        "timestamp": 3.6666666666666665,
+        "frame_number": 110,
+        "bad_poses": [
+          "Hands Behind Back"
+        ],
+        "pose_durations": {
+          "Hands Behind Back": 1
+        }
+      },
+      {
+        "timestamp": 4,
+        "frame_number": 120,
+        "bad_poses": [
+          "Hands Behind Back"
+        ],
+        "pose_durations": {
+          "Hands Behind Back": 1.3333333333333335
+        }
+      },
+      {
+        "timestamp": 4.333333333333333,
+        "frame_number": 130,
+        "bad_poses": [],
+        "pose_durations": {
+          "Hands Behind Back": 1.3333333333333335
+        }
+      },
+      {
+        "timestamp": 4.666666666666667,
+        "frame_number": 140,
+        "bad_poses": [],
+        "pose_durations": {
+          "Hands Behind Back": 1.3333333333333335
+        }
+      },
+      {
+        "timestamp": 5,
+        "frame_number": 150,
+        "bad_poses": [
+          "Hands Behind Back"
+        ],
+        "pose_durations": {
+          "Hands Behind Back": 2.3333333333333335
+        }
+      },
+      {
+        "timestamp": 5.333333333333333,
+        "frame_number": 160,
+        "bad_poses": [
+          "Hands Behind Back"
+        ],
+        "pose_durations": {
+          "Hands Behind Back": 2.6666666666666665
+        }
+      },
+      {
+        "timestamp": 5.666666666666667,
+        "frame_number": 170,
+        "bad_poses": [],
+        "pose_durations": {
+          "Hands Behind Back": 2.6666666666666665
+        }
+      },
+      {
+        "timestamp": 6,
+        "frame_number": 180,
+        "bad_poses": [
+          "Hands Behind Back"
+        ],
+        "pose_durations": {
+          "Hands Behind Back": 3.3333333333333335
+        }
+      },
+      {
+        "timestamp": 6.333333333333333,
+        "frame_number": 190,
+        "bad_poses": [
+          "Hands Behind Back"
+        ],
+        "pose_durations": {
+          "Hands Behind Back": 3.6666666666666665
+        }
+      },
+      {
+        "timestamp": 6.666666666666667,
+        "frame_number": 200,
+        "bad_poses": [
+          "Hands Behind Back"
+        ],
+        "pose_durations": {
+          "Hands Behind Back": 4
+        }
+      },
+      {
+        "timestamp": 7,
+        "frame_number": 210,
+        "bad_poses": [
+          "Hands Behind Back"
+        ],
+        "pose_durations": {
+          "Hands Behind Back": 4.333333333333334
+        }
+      },
+      {
+        "timestamp": 7.333333333333333,
+        "frame_number": 220,
+        "bad_poses": [
+          "Hands Behind Back"
+        ],
+        "pose_durations": {
+          "Hands Behind Back": 4.666666666666666
+        }
+      },
+      {
+        "timestamp": 7.666666666666667,
+        "frame_number": 230,
+        "bad_poses": [
+          "Hands Behind Back"
+        ],
+        "pose_durations": {
+          "Hands Behind Back": 5
+        }
+      },
+      {
+        "timestamp": 8,
+        "frame_number": 240,
+        "bad_poses": [],
+        "pose_durations": {
+          "Hands Behind Back": 5
+        }
+      },
+      {
+        "timestamp": 8.333333333333334,
+        "frame_number": 250,
+        "bad_poses": [
+          "Hands Behind Back"
+        ],
+        "pose_durations": {
+          "Hands Behind Back": 5.666666666666668
+        }
+      },
+      {
+        "timestamp": 8.666666666666666,
+        "frame_number": 260,
+        "bad_poses": [
+          "Hands Behind Back"
+        ],
+        "pose_durations": {
+          "Hands Behind Back": 6
+        }
+      },
+      {
+        "timestamp": 9,
+        "frame_number": 270,
+        "bad_poses": [
+          "Hands Behind Back"
+        ],
+        "pose_durations": {
+          "Hands Behind Back": 6.333333333333334
+        }
+      },
+      {
+        "timestamp": 9.333333333333334,
+        "frame_number": 280,
+        "bad_poses": [],
+        "pose_durations": {
+          "Hands Behind Back": 6.333333333333334
+        }
+      },
+      {
+        "timestamp": 9.666666666666666,
+        "frame_number": 290,
+        "bad_poses": [
+          "Hands Behind Back"
+        ],
+        "pose_durations": {
+          "Hands Behind Back": 7
+        }
+      },
+      {
+        "timestamp": 10,
+        "frame_number": 300,
+        "bad_poses": [],
+        "pose_durations": {}
+      },
+      {
+        "timestamp": 10.333333333333334,
+        "frame_number": 310,
+        "bad_poses": [],
+        "pose_durations": {}
+      },
+      {
+        "timestamp": 10.666666666666666,
+        "frame_number": 320,
+        "bad_poses": [],
+        "pose_durations": {}
+      },
+      {
+        "timestamp": 11,
+        "frame_number": 330,
+        "bad_poses": [],
+        "pose_durations": {}
+      },
+      {
+        "timestamp": 11.333333333333334,
+        "frame_number": 340,
+        "bad_poses": [],
+        "pose_durations": {}
+      },
+      {
+        "timestamp": 11.666666666666666,
+        "frame_number": 350,
+        "bad_poses": [],
+        "pose_durations": {}
+      },
+      {
+        "timestamp": 12,
+        "frame_number": 360,
+        "bad_poses": [],
+        "pose_durations": {}
+      },
+      {
+        "timestamp": 12.333333333333334,
+        "frame_number": 370,
+        "bad_poses": [],
+        "pose_durations": {}
+      },
+      {
+        "timestamp": 12.666666666666666,
+        "frame_number": 380,
+        "bad_poses": [],
+        "pose_durations": {}
+      },
+      {
+        "timestamp": 13,
+        "frame_number": 390,
+        "bad_poses": [],
+        "pose_durations": {}
+      },
+      {
+        "timestamp": 13.333333333333334,
+        "frame_number": 400,
+        "bad_poses": [],
+        "pose_durations": {}
+      },
+      {
+        "timestamp": 13.666666666666666,
+        "frame_number": 410,
+        "bad_poses": [],
+        "pose_durations": {}
+      },
+      {
+        "timestamp": 14,
+        "frame_number": 420,
+        "bad_poses": [],
+        "pose_durations": {}
+      },
+      {
+        "timestamp": 14.333333333333334,
+        "frame_number": 430,
+        "bad_poses": [],
+        "pose_durations": {}
+      },
+      {
+        "timestamp": 14.666666666666666,
+        "frame_number": 440,
+        "bad_poses": [],
+        "pose_durations": {}
+      },
+      {
+        "timestamp": 15,
+        "frame_number": 450,
+        "bad_poses": [],
+        "pose_durations": {}
+      },
+      {
+        "timestamp": 15.333333333333334,
+        "frame_number": 460,
+        "bad_poses": [],
+        "pose_durations": {}
+      },
+      {
+        "timestamp": 15.666666666666666,
+        "frame_number": 470,
+        "bad_poses": [],
+        "pose_durations": {}
+      },
+      {
+        "timestamp": 16,
+        "frame_number": 480,
+        "bad_poses": [],
+        "pose_durations": {}
+      },
+      {
+        "timestamp": 16.333333333333332,
+        "frame_number": 490,
+        "bad_poses": [],
+        "pose_durations": {}
+      },
+      {
+        "timestamp": 16.666666666666668,
+        "frame_number": 500,
+        "bad_poses": [],
+        "pose_durations": {}
+      },
+      {
+        "timestamp": 17,
+        "frame_number": 510,
+        "bad_poses": [],
+        "pose_durations": {}
+      },
+      {
+        "timestamp": 17.333333333333332,
+        "frame_number": 520,
+        "bad_poses": [],
+        "pose_durations": {}
+      },
+      {
+        "timestamp": 17.666666666666668,
+        "frame_number": 530,
+        "bad_poses": [],
+        "pose_durations": {}
+      },
+      {
+        "timestamp": 18,
+        "frame_number": 540,
+        "bad_poses": [],
+        "pose_durations": {}
+      },
+      {
+        "timestamp": 18.333333333333332,
+        "frame_number": 550,
+        "bad_poses": [],
+        "pose_durations": {}
+      },
+      {
+        "timestamp": 18.666666666666668,
+        "frame_number": 560,
+        "bad_poses": [],
+        "pose_durations": {}
+      },
+      {
+        "timestamp": 19,
+        "frame_number": 570,
+        "bad_poses": [],
+        "pose_durations": {}
+      },
+      {
+        "timestamp": 19.333333333333332,
+        "frame_number": 580,
+        "bad_poses": [],
+        "pose_durations": {}
+      },
+      {
+        "timestamp": 19.666666666666668,
+        "frame_number": 590,
+        "bad_poses": [],
+        "pose_durations": {}
+      },
+      {
+        "timestamp": 20,
+        "frame_number": 600,
+        "bad_poses": [],
+        "pose_durations": {}
+      },
+      {
+        "timestamp": 20.333333333333332,
+        "frame_number": 610,
+        "bad_poses": [],
+        "pose_durations": {}
+      },
+      {
+        "timestamp": 20.666666666666668,
+        "frame_number": 620,
+        "bad_poses": [],
+        "pose_durations": {}
+      },
+      {
+        "timestamp": 21,
+        "frame_number": 630,
+        "bad_poses": [],
+        "pose_durations": {}
+      },
+      {
+        "timestamp": 21.333333333333332,
+        "frame_number": 640,
+        "bad_poses": [],
+        "pose_durations": {}
+      },
+      {
+        "timestamp": 21.666666666666668,
+        "frame_number": 650,
+        "bad_poses": [],
+        "pose_durations": {}
+      },
+      {
+        "timestamp": 22,
+        "frame_number": 660,
+        "bad_poses": [],
+        "pose_durations": {}
+      },
+      {
+        "timestamp": 22.333333333333332,
+        "frame_number": 670,
+        "bad_poses": [],
+        "pose_durations": {}
+      },
+      {
+        "timestamp": 22.666666666666668,
+        "frame_number": 680,
+        "bad_poses": [],
+        "pose_durations": {}
+      },
+      {
+        "timestamp": 23,
+        "frame_number": 690,
+        "bad_poses": [],
+        "pose_durations": {}
+      },
+      {
+        "timestamp": 23.333333333333332,
+        "frame_number": 700,
+        "bad_poses": [],
+        "pose_durations": {}
+      },
+      {
+        "timestamp": 23.666666666666668,
+        "frame_number": 710,
+        "bad_poses": [],
+        "pose_durations": {}
+      },
+      {
+        "timestamp": 24,
+        "frame_number": 720,
+        "bad_poses": [],
+        "pose_durations": {}
+      },
+      {
+        "timestamp": 24.333333333333332,
+        "frame_number": 730,
+        "bad_poses": [],
+        "pose_durations": {}
+      },
+      {
+        "timestamp": 24.666666666666668,
+        "frame_number": 740,
+        "bad_poses": [],
+        "pose_durations": {}
+      },
+      {
+        "timestamp": 25,
+        "frame_number": 750,
+        "bad_poses": [],
+        "pose_durations": {}
+      },
+      {
+        "timestamp": 25.333333333333332,
+        "frame_number": 760,
+        "bad_poses": [],
+        "pose_durations": {}
+      },
+      {
+        "timestamp": 25.666666666666668,
+        "frame_number": 770,
+        "bad_poses": [],
+        "pose_durations": {}
+      },
+      {
+        "timestamp": 26,
+        "frame_number": 780,
+        "bad_poses": [],
+        "pose_durations": {}
+      },
+      {
+        "timestamp": 26.333333333333332,
+        "frame_number": 790,
+        "bad_poses": [],
+        "pose_durations": {}
+      },
+      {
+        "timestamp": 26.666666666666668,
+        "frame_number": 800,
+        "bad_poses": [],
+        "pose_durations": {}
+      },
+      {
+        "timestamp": 27,
+        "frame_number": 810,
+        "bad_poses": [],
+        "pose_durations": {}
+      },
+      {
+        "timestamp": 27.333333333333332,
+        "frame_number": 820,
+        "bad_poses": [],
+        "pose_durations": {}
+      },
+      {
+        "timestamp": 27.666666666666668,
+        "frame_number": 830,
+        "bad_poses": [],
+        "pose_durations": {}
+      },
+      {
+        "timestamp": 28,
+        "frame_number": 840,
+        "bad_poses": [],
+        "pose_durations": {}
+      },
+      {
+        "timestamp": 28.333333333333332,
+        "frame_number": 850,
+        "bad_poses": [],
+        "pose_durations": {}
+      },
+      {
+        "timestamp": 28.666666666666668,
+        "frame_number": 860,
+        "bad_poses": [],
+        "pose_durations": {}
+      },
+      {
+        "timestamp": 29,
+        "frame_number": 870,
+        "bad_poses": [],
+        "pose_durations": {}
+      },
+      {
+        "timestamp": 29.333333333333332,
+        "frame_number": 880,
+        "bad_poses": [],
+        "pose_durations": {}
+      },
+      {
+        "timestamp": 29.666666666666668,
+        "frame_number": 890,
+        "bad_poses": [],
+        "pose_durations": {}
+      },
+      {
+        "timestamp": 30,
+        "frame_number": 900,
+        "bad_poses": [],
+        "pose_durations": {}
+      }
+    ],
+    "bad_posture_summary": {
+      "pose_counts": {
+        "Arms Too Close": 4,
+        "Crossed Arms": 2,
+        "Hands on Hips": 2,
+        "Hands Behind Back": 16
+      },
+      "pose_percentages": {
+        "Arms Too Close": 4.395604395604396,
+        "Crossed Arms": 2.197802197802198,
+        "Hands on Hips": 2.197802197802198,
+        "Hands Behind Back": 17.582417582417584
+      },
+      "pose_max_durations": {
+        "Arms Too Close": 1.6666666666666667,
+        "Crossed Arms": 0.6666666666666667,
+        "Hands on Hips": 0.6666666666666667,
+        "Hands Behind Back": 7
+      },
+      "pose_segments": {
+        "Hands Behind Back": [
+          {
+            "pose_type": "Hands Behind Back",
+            "start_time": 2.6666666666666665,
+            "end_time": 10,
+            "duration": 7.333333333333334
+          }
+        ]
+      },
+      "total_frames_analyzed": 91,
+      "most_common_issues": [
+        [
+          "Hands Behind Back",
+          16
+        ],
+        [
+          "Arms Too Close",
+          4
+        ],
+        [
+          "Crossed Arms",
+          2
+        ]
+      ]
+    },
+    "pose_segments": {
+      "Hands Behind Back": [
+        {
+          "pose_type": "Hands Behind Back",
+          "start_time": 2.6666666666666665,
+          "end_time": 10,
+          "duration": 7.333333333333334
+        }
+      ]
+    },
+    "flat_pose_segments": [
+      {
+        "bad_pose": "Hands Behind Back",
+        "start_time": 2.6666666666666665,
+        "end_time": 10,
+        "duration": 7.333333333333334
+      }
+    ],
+    "posture_metrics": {
+      "overall_posture_score": 9.103296703296703,
+      "posture_quality": "excellent",
+      "main_issues": [
+        "Arms Too Close",
+        "Crossed Arms",
+        "Hands on Hips",
+        "Hands Behind Back"
+      ],
+      "most_problematic": "Hands Behind Back",
+      "total_penalty_points": 0.8967032967032968,
+      "professionalism_impact": "low"
+    },
+    "recommendations": [
+      "Give your arms space to move naturally",
+      "Practice gestures that extend slightly away from your body",
+      "Keep arms uncrossed - use open gestures to appear more approachable",
+      "Practice holding your hands loosely at your sides or in front",
+      "Avoid hands on hips - it can appear confrontational or impatient",
+      "Use purposeful hand gestures to emphasize points instead"
+    ],
+    "overall_score": 9.103296703296703
+  },
+  "keyword_relevance": {
+    "language": "english",
+    "transcript_length": 81,
+    "extracted_keywords": {
+      "keybert": [
+        {
+          "keyword": "learning algorithms class",
+          "score": 0.657
+        },
+        {
+          "keyword": "algorithms class learn",
+          "score": 0.6304
+        },
+        {
+          "keyword": "implementing machine learning",
+          "score": 0.6301
+        },
+        {
+          "keyword": "ai learning algorithms",
+          "score": 0.6256
+        },
+        {
+          "keyword": "algorithms learn important",
+          "score": 0.6254
+        },
+        {
+          "keyword": "algorithms learn",
+          "score": 0.618
+        },
+        {
+          "keyword": "learning algorithms learn",
+          "score": 0.6165
+        },
+        {
+          "keyword": "learning algorithms exactly",
+          "score": 0.6068
+        },
+        {
+          "keyword": "important machine learning",
+          "score": 0.5968
+        },
+        {
+          "keyword": "machine learning algorithms",
+          "score": 0.5922
+        },
+        {
+          "keyword": "ai learning",
+          "score": 0.5803
+        },
+        {
+          "keyword": "learn important machine",
+          "score": 0.5679
+        },
+        {
+          "keyword": "learning algorithms",
+          "score": 0.5548
+        },
+        {
+          "keyword": "ai large tech",
+          "score": 0.5368
+        },
+        {
+          "keyword": "algorithms class",
+          "score": 0.5343
+        }
+      ],
+      "combined": [
+        {
+          "keyword": "learning algorithms class",
+          "score": 0.657
+        },
+        {
+          "keyword": "algorithms class learn",
+          "score": 0.6304
+        },
+        {
+          "keyword": "implementing machine learning",
+          "score": 0.6301
+        },
+        {
+          "keyword": "ai learning algorithms",
+          "score": 0.6256
+        },
+        {
+          "keyword": "algorithms learn important",
+          "score": 0.6254
+        },
+        {
+          "keyword": "algorithms learn",
+          "score": 0.618
+        },
+        {
+          "keyword": "learning algorithms learn",
+          "score": 0.6165
+        },
+        {
+          "keyword": "learning algorithms exactly",
+          "score": 0.6068
+        },
+        {
+          "keyword": "important machine learning",
+          "score": 0.5968
+        },
+        {
+          "keyword": "machine learning algorithms",
+          "score": 0.5922
+        },
+        {
+          "keyword": "ai learning",
+          "score": 0.5803
+        },
+        {
+          "keyword": "learn important machine",
+          "score": 0.5679
+        },
+        {
+          "keyword": "learning algorithms",
+          "score": 0.5548
+        },
+        {
+          "keyword": "ai large tech",
+          "score": 0.5368
+        },
+        {
+          "keyword": "algorithms class",
+          "score": 0.5343
+        }
+      ]
+    },
+    "topic_coherence": {
+      "coherence_score": 0.546448380947113,
+      "topic_focus": "highly_focused",
+      "keyword_coverage_percentage": 30,
+      "semantic_coherence": 0.7107473015785217,
+      "keyword_mentions": {
+        "learning algorithms class": 0,
+        "algorithms class learn": 0,
+        "implementing machine learning": 1,
+        "ai learning algorithms": 0,
+        "algorithms learn important": 0,
+        "algorithms learn": 0,
+        "learning algorithms learn": 0,
+        "learning algorithms exactly": 0,
+        "important machine learning": 1,
+        "machine learning algorithms": 2
+      },
+      "top_keywords": [
+        "learning algorithms class",
+        "algorithms class learn",
+        "implementing machine learning",
+        "ai learning algorithms",
+        "algorithms learn important",
+        "algorithms learn",
+        "learning algorithms learn",
+        "learning algorithms exactly",
+        "important machine learning",
+        "machine learning algorithms"
+      ]
+    },
+    "target_keyword_analysis": {},
+    "keyword_diversity": {
+      "diversity_score": 0.012544379555555554,
+      "keyword_distribution": "low_diversity",
+      "score_variance": 0.0012544379555555554,
+      "score_range": 0.12270000000000003,
+      "average_keyword_length": 2.7333333333333334,
+      "total_unique_keywords": 15
+    },
+    "relevance_assessment": {
+      "overall_relevance_score": 3.3288678039049002,
+      "assessment_level": "fair",
+      "topic_focus_quality": "highly_focused",
+      "content_alignment": "no_target",
+      "keyword_quality": "low"
+    },
+    "recommendations": [
+      "Use more specific and technical vocabulary related to your topic"
+    ]
+  },
+  "lexical_richness\"": {
+    "error": "Unknown service: lexical_richness\""
+  },
+  "enhanced_feedback": {
+    "individual_model_scores": {
+      "wpm_analysis": {
+        "score": 0.4,
+        "normalized_score": 4,
+        "description": "Speaking pace and consistency",
+        "weight": 0.1,
+        "category": "speech",
+        "details": {
+          "wpm": 162.5,
+          "word_count": 82,
+          "pace_consistency": {
+            "score": 0.4,
+            "status": "fair"
+          },
+          "assessment": {
+            "status": "too_fast",
+            "message": "Speaking pace is too fast for presentation",
+            "optimal_range": "120-160 WPM",
+            "optimal_target": "140 WPM"
+          }
+        }
+      },
+      "pitch_analysis": {
+        "score": 10,
+        "normalized_score": 10,
+        "description": "Vocal variety and emphasis",
+        "weight": 0.09,
+        "category": "speech",
+        "details": {}
+      },
+      "filler_detection": {
+        "score": 8,
+        "normalized_score": 8,
+        "description": "Speech clarity and professionalism",
+        "weight": 0.08,
+        "category": "speech",
+        "details": {
+          "filler_count": 0,
+          "filler_words": [],
+          "filler_frequency": 0
+        }
+      },
+      "stutter_detection": {
+        "score": 7.304869331419468,
+        "normalized_score": 7.304869331419468,
+        "description": "Speech fluency and confidence",
+        "weight": 0.12,
+        "category": "speech",
+        "details": {
+          "stutter_count": 0,
+          "stutter_frequency": 0,
+          "fluency_issues": []
+        }
+      },
+      "facial_emotion": {
+        "score": 10,
+        "normalized_score": 10,
+        "description": "Facial expression and emotional connection",
+        "weight": 0.1,
+        "category": "visual",
+        "details": {
+          "engagement_score": 10,
+          "confidence_score": 0,
+          "face_detection_rate": 0.6774193548387096,
+          "dominant_emotion": {
+            "emotion": "neutral",
+            "probability": 0.5999999999999999
+          },
+          "positivity_score": 0.20000000000000004,
+          "analysis_method": "heuristic"
+        }
+      },
+      "eye_contact": {
+        "score": 10,
+        "normalized_score": 10,
+        "description": "Audience engagement through eye contact",
+        "weight": 0.12,
+        "category": "visual",
+        "details": {
+          "eye_contact_percentage": 0,
+          "attention_score": 10,
+          "gaze_patterns": {}
+        }
+      },
+      "hand_gesture": {
+        "score": 8.154970760233919,
+        "normalized_score": 8.154970760233919,
+        "description": "Non-verbal communication effectiveness",
+        "weight": 0.06,
+        "category": "visual",
+        "details": {}
+      },
+      "posture_analysis": {
+        "score": 9.103296703296703,
+        "normalized_score": 9.103296703296703,
+        "description": "Professional appearance and confidence",
+        "weight": 0.12,
+        "category": "visual",
+        "details": {
+          "posture_score": 0,
+          "confidence_score": 0,
+          "posture_issues": []
+        }
+      },
+      "keyword_relevance": {
+        "score": null,
+        "normalized_score": 5,
+        "description": "Content relevance and focus",
+        "weight": 0.05,
+        "category": "content",
+        "status": "no_score_available",
+        "details": {
+          "language": "english",
+          "transcript_length": 81,
+          "extracted_keywords": {
+            "keybert": [
+              {
+                "keyword": "learning algorithms class",
+                "score": 0.657
+              },
+              {
+                "keyword": "algorithms class learn",
+                "score": 0.6304
+              },
+              {
+                "keyword": "implementing machine learning",
+                "score": 0.6301
+              },
+              {
+                "keyword": "ai learning algorithms",
+                "score": 0.6256
+              },
+              {
+                "keyword": "algorithms learn important",
+                "score": 0.6254
+              },
+              {
+                "keyword": "algorithms learn",
+                "score": 0.618
+              },
+              {
+                "keyword": "learning algorithms learn",
+                "score": 0.6165
+              },
+              {
+                "keyword": "learning algorithms exactly",
+                "score": 0.6068
+              },
+              {
+                "keyword": "important machine learning",
+                "score": 0.5968
+              },
+              {
+                "keyword": "machine learning algorithms",
+                "score": 0.5922
+              },
+              {
+                "keyword": "ai learning",
+                "score": 0.5803
+              },
+              {
+                "keyword": "learn important machine",
+                "score": 0.5679
+              },
+              {
+                "keyword": "learning algorithms",
+                "score": 0.5548
+              },
+              {
+                "keyword": "ai large tech",
+                "score": 0.5368
+              },
+              {
+                "keyword": "algorithms class",
+                "score": 0.5343
+              }
+            ],
+            "combined": [
+              {
+                "keyword": "learning algorithms class",
+                "score": 0.657
+              },
+              {
+                "keyword": "algorithms class learn",
+                "score": 0.6304
+              },
+              {
+                "keyword": "implementing machine learning",
+                "score": 0.6301
+              },
+              {
+                "keyword": "ai learning algorithms",
+                "score": 0.6256
+              },
+              {
+                "keyword": "algorithms learn important",
+                "score": 0.6254
+              },
+              {
+                "keyword": "algorithms learn",
+                "score": 0.618
+              },
+              {
+                "keyword": "learning algorithms learn",
+                "score": 0.6165
+              },
+              {
+                "keyword": "learning algorithms exactly",
+                "score": 0.6068
+              },
+              {
+                "keyword": "important machine learning",
+                "score": 0.5968
+              },
+              {
+                "keyword": "machine learning algorithms",
+                "score": 0.5922
+              },
+              {
+                "keyword": "ai learning",
+                "score": 0.5803
+              },
+              {
+                "keyword": "learn important machine",
+                "score": 0.5679
+              },
+              {
+                "keyword": "learning algorithms",
+                "score": 0.5548
+              },
+              {
+                "keyword": "ai large tech",
+                "score": 0.5368
+              },
+              {
+                "keyword": "algorithms class",
+                "score": 0.5343
+              }
+            ]
+          },
+          "topic_coherence": {
+            "coherence_score": 0.546448380947113,
+            "topic_focus": "highly_focused",
+            "keyword_coverage_percentage": 30,
+            "semantic_coherence": 0.7107473015785217,
+            "keyword_mentions": {
+              "learning algorithms class": 0,
+              "algorithms class learn": 0,
+              "implementing machine learning": 1,
+              "ai learning algorithms": 0,
+              "algorithms learn important": 0,
+              "algorithms learn": 0,
+              "learning algorithms learn": 0,
+              "learning algorithms exactly": 0,
+              "important machine learning": 1,
+              "machine learning algorithms": 2
+            },
+            "top_keywords": [
+              "learning algorithms class",
+              "algorithms class learn",
+              "implementing machine learning",
+              "ai learning algorithms",
+              "algorithms learn important",
+              "algorithms learn",
+              "learning algorithms learn",
+              "learning algorithms exactly",
+              "important machine learning",
+              "machine learning algorithms"
+            ]
+          },
+          "target_keyword_analysis": {},
+          "keyword_diversity": {
+            "diversity_score": 0.012544379555555554,
+            "keyword_distribution": "low_diversity",
+            "score_variance": 0.0012544379555555554,
+            "score_range": 0.12270000000000003,
+            "average_keyword_length": 2.7333333333333334,
+            "total_unique_keywords": 15
+          },
+          "relevance_assessment": {
+            "overall_relevance_score": 3.3288678039049002,
+            "assessment_level": "fair",
+            "topic_focus_quality": "highly_focused",
+            "content_alignment": "no_target",
+            "keyword_quality": "low"
+          },
+          "recommendations": [
+            "Use more specific and technical vocabulary related to your topic"
+          ]
+        }
+      }
+    },
+    "category_scores": {
+      "speech": {
+        "score": 7.22,
+        "description": "Speech and vocal delivery analysis",
+        "weight": 0.4,
+        "models_used": 4,
+        "total_models": 7
+      },
+      "visual": {
+        "score": 9.45,
+        "description": "Visual presentation and body language",
+        "weight": 0.35,
+        "models_used": 4,
+        "total_models": 4
+      },
+      "content": {
+        "score": 5,
+        "description": "Content relevance and focus",
+        "weight": 0.15,
+        "models_used": 1,
+        "total_models": 1
+      },
+      "confidence": {
+        "score": 5,
+        "description": "Overall presenter confidence assessment",
+        "weight": 0.1,
+        "models_used": 0,
+        "total_models": 1
+      }
+    },
+    "overall_score": 7.45,
+    "detailed_feedback": {
+      "speech_feedback": {
+        "overall_assessment": "Strong speech skills with good vocal control and expression.",
+        "key_metrics": {
+          "average_score": 7.22,
+          "components_analyzed": 4,
+          "weighted_average": true
+        },
+        "specific_feedback": {
+          "wpm_analysis": {
+            "score": 4,
+            "assessment": "Below Average",
+            "feedback": "Speaking pace is fast (162.5 WPM). Consider slowing down for better comprehension.",
+            "status": "needs_improvement"
+          },
+          "pitch_analysis": {
+            "score": 10,
+            "assessment": "Excellent",
+            "feedback": "Excellent pitch analysis performance.",
+            "status": "excellent"
+          },
+          "filler_detection": {
+            "score": 8,
+            "assessment": "Very Good",
+            "feedback": "Excellent filler detection performance.",
+            "status": "excellent"
+          },
+          "stutter_detection": {
+            "score": 7.304869331419468,
+            "assessment": "Very Good",
+            "feedback": "Good stutter detection. Room for improvement.",
+            "status": "good"
+          }
+        }
+      },
+      "visual_feedback": {
+        "overall_assessment": "Outstanding visual presentation with excellent body language and engagement.",
+        "key_metrics": {
+          "average_score": 9.45,
+          "components_analyzed": 4,
+          "weighted_average": true
+        },
+        "specific_feedback": {
+          "facial_emotion": {
+            "score": 10,
+            "assessment": "Excellent",
+            "feedback": "Excellent facial expressions and emotional engagement. Face detection rate: 67.7%.",
+            "status": "excellent"
+          },
+          "eye_contact": {
+            "score": 10,
+            "assessment": "Excellent",
+            "feedback": "Limited eye contact (0%). Practice looking at your audience more.",
+            "status": "excellent"
+          },
+          "hand_gesture": {
+            "score": 8.154970760233919,
+            "assessment": "Very Good",
+            "feedback": "Excellent hand gesture performance.",
+            "status": "excellent"
+          },
+          "posture_analysis": {
+            "score": 9.103296703296703,
+            "assessment": "Excellent",
+            "feedback": "Excellent posture and professional appearance. Projects confidence.",
+            "status": "excellent"
+          }
+        }
+      },
+      "content_feedback": {
+        "overall_assessment": "Content could be more focused and relevant to the main topic.",
+        "key_metrics": {
+          "relevance_score": 5
+        },
+        "specific_feedback": {
+          "keyword_relevance": {
+            "score": 5,
+            "assessment": "Average",
+            "feedback": "Content could be more focused and relevant to the main topic (relevance score: 0.0/10).",
+            "status": "needs_improvement"
+          }
+        }
+      },
+      "strengths": [
+        "Strong vocal variety and emphasis",
+        "Strong speech clarity and professionalism",
+        "Strong facial expression and emotional connection",
+        "Excellent visual skills"
+      ],
+      "areas_for_improvement": [
+        "Improve speaking pace and consistency",
+        "Improve content relevance and focus",
+        "Focus on content development",
+        "Focus on confidence development"
+      ]
+    },
+    "recommendations": [
+      "Practice with a metronome to develop consistent pacing",
+      "Use strategic pauses to emphasize key points",
+      "Record and time your presentations to monitor pace"
+    ],
+    "summary": {
+      "overall_performance": "Good",
+      "key_highlights": [
+        "Strong visual performance"
+      ],
+      "primary_focus_areas": [
+        "content development",
+        "confidence development"
+      ]
+    },
+    "score_breakdown": {
+      "overall_score": 7.45,
+      "category_breakdown": {
+        "speech": {
+          "score": 7.22,
+          "weight": 0.4,
+          "contribution": 2.888
+        },
+        "visual": {
+          "score": 9.45,
+          "weight": 0.35,
+          "contribution": 3.3074999999999997
+        },
+        "content": {
+          "score": 5,
+          "weight": 0.15,
+          "contribution": 0.75
+        },
+        "confidence": {
+          "score": 5,
+          "weight": 0.1,
+          "contribution": 0.5
+        }
+      },
+      "model_breakdown": {
+        "wpm_analysis": {
+          "score": 4,
+          "weight": 0.1,
+          "contribution": 0.4
+        },
+        "pitch_analysis": {
+          "score": 10,
+          "weight": 0.09,
+          "contribution": 0.8999999999999999
+        },
+        "filler_detection": {
+          "score": 8,
+          "weight": 0.08,
+          "contribution": 0.64
+        },
+        "stutter_detection": {
+          "score": 7.304869331419468,
+          "weight": 0.12,
+          "contribution": 0.8765843197703361
+        },
+        "facial_emotion": {
+          "score": 10,
+          "weight": 0.1,
+          "contribution": 1
+        },
+        "eye_contact": {
+          "score": 10,
+          "weight": 0.12,
+          "contribution": 1.2
+        },
+        "hand_gesture": {
+          "score": 8.154970760233919,
+          "weight": 0.06,
+          "contribution": 0.4892982456140351
+        },
+        "posture_analysis": {
+          "score": 9.103296703296703,
+          "weight": 0.12,
+          "contribution": 1.0923956043956042
+        },
+        "keyword_relevance": {
+          "score": 5,
+          "weight": 0.05,
+          "contribution": 0.25
+        }
+      },
+      "score_distribution": {
+        "excellent": 6,
+        "good": 1,
+        "average": 1,
+        "below_average": 1,
+        "poor": 0
+      }
+    }
+  },
+  "transcription_info": {
+    "transcription_length": 468,
+    "transcription_preview": "In this class, you learn about the state of the art and also practice implementing machine learning algorithms yourself. You learn about the most important machine learning algorithms, some of which a...",
+    "transcription_full": "In this class, you learn about the state of the art and also practice implementing machine learning algorithms yourself. You learn about the most important machine learning algorithms, some of which are exactly what's being used in large AI or large tech companies today, and you get a sense of what is the state of the art in AI. Beyond learning the algorithms though, in this class, you also learn all the important practical tips and tricks for making them perform.",
+    "transcription_success": true
+  }
+}

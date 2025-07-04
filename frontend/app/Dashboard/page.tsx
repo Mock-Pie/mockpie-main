@@ -24,6 +24,10 @@ const Dashboard = () => {
   const [submittedTrialsData, setSubmittedTrialsData] = useState<any[]>([]);
   const [upcomingPresentations, setUpcomingPresentations] = useState<UpcomingPresentation[]>([]);
   const [upcomingLoading, setUpcomingLoading] = useState(true);
+  const [improvementScores, setImprovementScores] = useState<number[]>([]);
+  const [improvementLabels, setImprovementLabels] = useState<string[]>([]);
+  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
+  const [availableYears, setAvailableYears] = useState<number[]>([new Date().getFullYear()]);
 
   useEffect(() => {
     fetchUserData();
@@ -60,6 +64,45 @@ const Dashboard = () => {
         const presentations = (result.data as any).videos || [];
         setSubmittedTrialsCount(presentations.length);
         setSubmittedTrialsData(presentations);
+        // Extract years from presentations
+        const years = Array.from(
+          new Set(
+            presentations.map((p: any): number => new Date(p.uploaded_at).getFullYear() as number)
+          )
+        ) as number[];
+        years.sort((a: number, b: number) => b - a); // Descending order
+        setAvailableYears(years.length ? years : [new Date().getFullYear()]);
+        // Filter presentations by selected year
+        let filteredPresentations = presentations.filter((p: any) => new Date(p.uploaded_at).getFullYear() === selectedYear);
+        // Sort by date ascending
+        filteredPresentations = filteredPresentations.sort((a: any, b: any) => new Date(a.uploaded_at).getTime() - new Date(b.uploaded_at).getTime());
+        // Prepare date labels for the chart
+        const dateLabels = filteredPresentations.map((p: any) => new Date(p.uploaded_at).toLocaleDateString());
+        // Fetch feedback for each presentation to get overall_score
+        const scores = await Promise.all(
+          filteredPresentations.map(async (presentation: any) => {
+            try {
+              const feedbackResponse = await fetch(`http://localhost:8081/feedback/presentation/${presentation.id}/feedback`, {
+                headers: {
+                  'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+                  'Content-Type': 'application/json',
+                },
+              });
+              if (feedbackResponse.ok) {
+                const feedbackData = await feedbackResponse.json();
+                const enhanced = feedbackData.enhanced_feedback || {};
+                const overallScore = enhanced.overall_score || feedbackData.overall_score || feedbackData.score || null;
+                return typeof overallScore === 'number' ? overallScore : null;
+              } else {
+                return null;
+              }
+            } catch (error) {
+              return null;
+            }
+          })
+        );
+        setImprovementScores(scores.filter((s): s is number => s !== null));
+        setImprovementLabels(dateLabels);
       } else {
         console.error('Failed to fetch presentations data:', result.error);
         if (result.error?.includes('Authentication expired')) {
@@ -72,6 +115,12 @@ const Dashboard = () => {
       setPresentationsLoading(false);
     }
   };
+
+  // Refetch scores when year changes
+  useEffect(() => {
+    fetchPresentationsData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedYear]);
 
   const fetchUpcomingPresentations = async () => {
     try {
@@ -194,7 +243,13 @@ const Dashboard = () => {
           {/* Left Column - Main Content */}
           <div className={styles.leftColumn}>
           {/* Improvement Chart Section */}
-          <ImprovementChart />
+          <ImprovementChart
+            scores={improvementScores}
+            labels={improvementLabels}
+            year={selectedYear}
+            availableYears={availableYears}
+            onYearChange={setSelectedYear}
+          />
 
             {/* Stats Cards Row */}
             <div className={styles.statsCardsRow}>
@@ -240,10 +295,7 @@ const Dashboard = () => {
             {/* Stats Summary */}
             <div className={styles.statsSummaryCard}>
               <div className={styles.statsSummaryHeader}>
-                <span className={styles.dateRange}>10th - 12th Jun</span>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={styles.chevronDown}>
-                  <path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
+                <span className={styles.dateRange}>Stats Summary</span>
               </div>
               <StatsSummary />
             </div>
