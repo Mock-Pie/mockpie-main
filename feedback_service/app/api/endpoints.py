@@ -87,7 +87,7 @@ async def api_keyword_relevance(file: UploadFile = File(...), language: str = Fo
     try:
         file_path = await analyzers["file_processor"].save_uploaded_file(file)
         audio_path, _, _ = await analyzers["file_processor"].extract_components(file_path)
-        result = analyzers["keyword_relevance"].analyze(audio_path, keywords, language=language)
+        result = await analyzers["keyword_relevance"].analyze(audio_path, keywords, language=language)
         return JSONResponse(content=result, status_code=200)
     except Exception as e:
         logger.error(f"Keyword relevance API error: {e}")
@@ -101,7 +101,7 @@ async def api_wpm_calculator(file: UploadFile = File(...), language: str = Form(
     try:
         file_path = await analyzers["file_processor"].save_uploaded_file(file)
         audio_path, _, _ = await analyzers["file_processor"].extract_components(file_path)
-        result = analyzers["wpm_calculator"].analyze(audio_path, language=language, context='presentation')
+        result = await analyzers["wpm_calculator"].analyze(audio_path, language=language, context='presentation')
         return JSONResponse(content=result, status_code=200)
     except Exception as e:
         logger.error(f"WPM calculator API error: {e}")
@@ -205,7 +205,11 @@ async def api_enhanced_overall_feedback(file: UploadFile = File(...), language: 
         # Execute all analyses
         for name, task in analysis_tasks:
             try:
-                result = task
+                # Handle async tasks
+                if hasattr(task, '__await__'):
+                    result = await task
+                else:
+                    result = task
                 results[name] = result if isinstance(result, dict) else {"error": "Invalid result"}
             except Exception as e:
                 logger.error(f"{name} analysis error: {e}")
@@ -272,7 +276,11 @@ async def api_overall_feedback(file: UploadFile = File(...), language: str = For
             ])
         for name, task in analysis_tasks:
             try:
-                result = task
+                # Handle async tasks
+                if hasattr(task, '__await__'):
+                    result = await task
+                else:
+                    result = task
                 results[name] = result if isinstance(result, dict) else {"error": "Invalid result"}
             except Exception as e:
                 logger.error(f"{name} analysis error: {e}")
@@ -334,7 +342,11 @@ async def api_audio_only_feedback(file: UploadFile = File(...), language: str = 
         
         for name, task in analysis_tasks:
             try:
-                result = task
+                # Handle async tasks
+                if hasattr(task, '__await__'):
+                    result = await task
+                else:
+                    result = task
                 results[name] = result if isinstance(result, dict) else {"error": "Invalid result"}
             except Exception as e:
                 logger.error(f"{name} analysis error: {e}")
@@ -534,7 +546,7 @@ async def api_custom_feedback(
             "filler_detection": ("filler_detection", "audio", "analyze", {"language": language}),
             "stutter_detection": ("stutter_detection", "audio", "analyze", {}),
             "lexical_richness": ("lexical_richness", "audio", "analyze", {"language": language}),
-            "wpm_analysis": ("wpm_calculator", "audio", "analyze", {"transcription": transcription, "context": "presentation"}),
+            "wpm_analysis": ("wpm_calculator", "audio", "analyze", {"language": language, "context": "presentation"}),
             "keyword_relevance": ("keyword_relevance", "audio", "analyze", {"language": language}),
             "facial_emotion": ("facial_emotion", "video", "analyze", {}),
             "eye_contact": ("eye_contact", "video", "analyze_eye_contact", {}),
@@ -573,6 +585,9 @@ async def api_custom_feedback(
                     result = analyze_method(input_path, **extra_kwargs)
                 else:
                     result = analyze_method(input_path)
+                # Handle async methods
+                if hasattr(result, '__await__'):
+                    result = await result
                 results[service] = result if isinstance(result, dict) else {"error": "Invalid result"}
             except Exception as e:
                 logger.error(f"{service} analysis error: {e}")

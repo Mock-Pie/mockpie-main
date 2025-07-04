@@ -59,9 +59,12 @@ class FacialEmotionAnalyzer:
             frame_count += 1
         cap.release()
 
-        # Parallel analysis
-        with ProcessPoolExecutor() as executor:
-            results = list(executor.map(self._analyze_frame_worker, zip(frames_to_analyze, timestamps)))
+        # Sequential analysis to avoid pickling issues with transformers
+        results = []
+        for frame, timestamp in zip(frames_to_analyze, timestamps):
+            result = self._analyze_frame_worker((frame, timestamp))
+            if result is not None:
+                results.append(result)
 
         emotions_over_time = [res for res in results if res is not None]
         if not emotions_over_time:

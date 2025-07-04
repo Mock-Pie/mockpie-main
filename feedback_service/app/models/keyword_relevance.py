@@ -57,14 +57,14 @@ class KeywordRelevanceAnalyzer:
             'آآ','أين', 'متى', 'لماذا', 'ال', 'لا', 'نعم', 'أيضا', 'فقط', 'حيث', 'عندما'
         }
 
-    def analyze(self, audio_path: str, language: str, target_keywords: str = "") -> Dict[str, Any]:
+    async def analyze(self, audio_path: str, language: str, target_keywords: str = "") -> Dict[str, Any]:
         logger.info(f"Starting Keyword Relevance Analysis for {audio_path} with language: {language}")
         try:
             # Get transcript using centralized service
             if language == 'arabic' and self.transcription_service_arabic:
-                transcript = self.transcription_service_arabic.get_transcription(audio_path, language)
+                transcript = await self.transcription_service_arabic.get_transcription(audio_path, language)
             elif language == 'english' and self.transcription_service_english:
-                transcript = self.transcription_service_english.get_transcription(audio_path, language)
+                transcript = await self.transcription_service_english.get_transcription(audio_path, language)
             else:
                 transcript = None
 

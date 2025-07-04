@@ -21,13 +21,13 @@ class WPMCalculator:
             'audiobook': {'min': 150, 'max': 200, 'optimal': 175}
         }
 
-    def analyze(self, audio_path: str, language: str, context: str = 'presentation') -> Dict[str, Any]:
+    async def analyze(self, audio_path: str, language: str, context: str = 'presentation') -> Dict[str, Any]:
         logger.info(f"Starting WPM Calculator Analysis for {audio_path}")
         try:
             audio_data, sample_rate = librosa.load(audio_path, sr=16000)
             duration = len(audio_data) / sample_rate
 
-            transcription = self._get_transcription(audio_path, language)
+            transcription = await self._get_transcription(audio_path, language)
             if not transcription:
                 return self._create_error_result("Failed to transcribe audio")
 
@@ -67,12 +67,12 @@ class WPMCalculator:
             logger.error(f"Error in WPM analysis: {str(e)}")
             return self._create_error_result(f"Analysis failed: {str(e)}")
 
-    def _get_transcription(self, audio_path: str, language: str = 'english') -> Optional[str]:
+    async def _get_transcription(self, audio_path: str, language: str = 'english') -> Optional[str]:
         try:
             if language == 'arabic' and self.transcription_service_arabic:
-                return self.transcription_service_arabic.get_transcription(audio_path)
+                return await self.transcription_service_arabic.get_transcription(audio_path, language)
             elif self.transcription_service_english:
-                return self.transcription_service_english.get_transcription(audio_path)
+                return await self.transcription_service_english.get_transcription(audio_path, language)
             else:
                 return None
         except Exception as e:
