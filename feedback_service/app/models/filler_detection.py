@@ -15,8 +15,9 @@ class FillerWordDetector:
     Detects common filler words like "um", "uh", "er", etc.
     """
     
-    def __init__(self, transcription_service=None):
-        self.transcription_service = transcription_service
+    def __init__(self, transcription_service_english=None, transcription_service_arabic=None):
+        self.transcription_service_english = transcription_service_english
+        self.transcription_service_arabic = transcription_service_arabic
         self.model = None
         
         # Initialize Whisper model for fallback
@@ -38,12 +39,13 @@ class FillerWordDetector:
         self.min_pause_duration = 0.3  # seconds
         self.energy_threshold = 0.01
     
-    async def analyze(self, audio_path: str) -> Dict[str, Any]:
+    async def analyze(self, audio_path: str, language) -> Dict[str, Any]:
         """
         Analyze filler words and pauses in audio
         
         Args:
             audio_path: Path to audio file
+            language: Language of the audio ('english' or 'arabic')
             
         Returns:
             Dictionary containing filler word analysis results
@@ -52,7 +54,7 @@ class FillerWordDetector:
         
         try:
             # Get transcript with timestamps
-            transcript_result = await self._transcribe_audio(audio_path)
+            transcript_result = await self._transcribe_audio(audio_path, language)
             
             if not transcript_result or "error" in transcript_result:
                 return {
@@ -92,13 +94,28 @@ class FillerWordDetector:
                 "overall_score": 5.0
             }
     
-    async def _transcribe_audio(self, audio_path: str) -> Dict[str, Any]:
+    async def _transcribe_audio(self, audio_path: str, language) -> Dict[str, Any]:
         """Transcribe audio using centralized service or Whisper with minimal normalization"""
         try:
             # Try centralized transcription service first
-            if self.transcription_service:
+            if language == 'arabic' and self.transcription_service_arabic:
                 try:
-                    transcription = await self.transcription_service.get_transcription(audio_path)
+                    transcription = await self.transcription_service_arabic.get_transcription(audio_path)
+                    
+                    if transcription:
+                        return {
+                            "text": transcription,
+                            "segments": [{"text": transcription, "start": 0, "end": 0}],
+                            "word_timestamps": []
+                        }
+                    else:
+                        logger.warning("Centralized transcription failed, falling back to Whisper")
+                except Exception as e:
+                    logger.warning(f"Centralized transcription error: {e}, falling back to Whisper")
+            
+            elif self.transcription_service_english:
+                try:
+                    transcription = await self.transcription_service_english.get_transcription(audio_path)
                     
                     if transcription:
                         return {

@@ -1,0 +1,231 @@
+.videoPlayerContainer {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 30px;
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.videoPlayerContainer:hover {
+    border-color: rgba(255, 214, 10, 0.3);
+    transform: translateY(-2px);
+}
+
+.videoTitle {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--white);
+    margin: 0 0 20px 0;
+    text-align: center;
+}
+
+.videoWrapper {
+    position: relative;
+    width: 100%;
+    border-radius: 15px;
+    overflow: hidden;
+    background: #000;
+}
+
+.video {
+    width: 100%;
+    height: auto;
+    display: block;
+    cursor: pointer;
+}
+
+.controls {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+    padding: 20px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.videoWrapper:hover .controls {
+    opacity: 1;
+}
+
+.progressBar {
+    margin-bottom: 15px;
+}
+
+.progressSlider {
+    width: 100%;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+.progressSlider::-webkit-slider-thumb {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    background: var(--naples-yellow);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.progressSlider::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+}
+
+.progressSlider::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    background: var(--naples-yellow);
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+}
+
+.progressSlider::-moz-range-thumb:hover {
+    transform: scale(1.2);
+}
+
+.timeDisplay {
+    display: flex;
+    justify-content: space-between;
+    color: var(--white);
+    font-size: 0.9rem;
+    margin-top: 8px;
+}
+
+.controlButtons {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.controlButton {
+    background: none;
+    border: none;
+    color: var(--white);
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.controlButton:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: scale(1.1);
+}
+
+.volumeControl {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.volumeSlider {
+    width: 80px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+.volumeSlider::-webkit-slider-thumb {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 12px;
+    height: 12px;
+    background: var(--naples-yellow);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.volumeSlider::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+}
+
+.volumeSlider::-moz-range-thumb {
+    width: 12px;
+    height: 12px;
+    background: var(--naples-yellow);
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+}
+
+.volumeSlider::-moz-range-thumb:hover {
+    transform: scale(1.2);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .videoPlayerContainer {
+        padding: 20px;
+        height: auto;
+    }
+    
+    .videoTitle {
+        font-size: 1.1rem;
+        margin-bottom: 15px;
+    }
+    
+    .controls {
+        padding: 15px;
+    }
+    
+    .controlButtons {
+        gap: 10px;
+    }
+    
+    .volumeSlider {
+        width: 60px;
+    }
+    
+    .controlButton {
+        font-size: 1rem;
+        padding: 6px;
+    }
+}
+
+@media (max-width: 576px) {
+    .videoPlayerContainer {
+        padding: 15px;
+    }
+    
+    .videoTitle {
+        font-size: 1rem;
+    }
+    
+    .controls {
+        padding: 10px;
+    }
+    
+    .timeDisplay {
+        font-size: 0.8rem;
+    }
+    
+    .volumeControl {
+        gap: 5px;
+    }
+    
+    .volumeSlider {
+        width: 50px;
+    }
+} 

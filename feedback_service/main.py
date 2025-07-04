@@ -76,58 +76,55 @@ async def startup_event():
     """Initialize all analyzers on startup"""
     try:
         logger.info("Initializing analyzers...")
-        
         # Get transcription configuration
         transcription_config = config.get_transcription_config()
-        
-        # Initialize Whisper transcriber if using Whisper or auto mode
+        # Initialize Whisper transcriber for English
         whisper_transcriber = None
-        if transcription_config["transcription_method"] in ["whisper", "auto"]:
-            try:
-                from app.utils.whisper_transcriber import WhisperTranscriber
-                whisper_config = config.get_whisper_config()
-                whisper_transcriber = WhisperTranscriber(whisper_config["model_size"])
-                analyzers["whisper_transcriber"] = whisper_transcriber
-                logger.info(f"Whisper transcriber initialized with model: {whisper_config['model_size']}")
-            except Exception as e:
-                logger.error(f"Failed to initialize Whisper transcriber: {e}")
-                # Don't change the transcription service config - let it use the original method
-                # The transcription service will handle fallback internally
-                logger.info("Whisper transcriber failed to initialize, but keeping original transcription method")
-        
-        # Configure transcription service with Whisper transcriber
-        transcription_service = TranscriptionService(whisper_transcriber)
-        transcription_service.set_config(
-            method=transcription_config["transcription_method"],
-            language=transcription_config["language"]
-        )
-        logger.info("Transcription service configured")
-        
-        # Initialize analyzers
+        try:
+            from app.utils.whisper_transcriber import WhisperTranscriber
+            whisper_config = config.get_whisper_config()
+            whisper_transcriber = WhisperTranscriber(whisper_config["model_size"])
+            logger.info(f"Whisper transcriber initialized with model: {whisper_config['model_size']}")
+        except Exception as e:
+            logger.error(f"Failed to initialize Whisper transcriber: {e}")
+        # Initialize Wit transcriber for Arabic
+        from app.utils.transcription_service import TranscriptionService
+        transcription_service_english = TranscriptionService(whisper_transcriber)
+        transcription_service_english.set_config(method="whisper", language="english")
+        transcription_service_arabic = TranscriptionService(None)
+        transcription_service_arabic.set_config(method="wit", language="arabic")
+        analyzers["transcription_service_english"] = transcription_service_english
+        analyzers["transcription_service_arabic"] = transcription_service_arabic
+        # Initialize analyzers with both transcription services where needed
         analyzers["speech_emotion"] = SpeechEmotionAnalyzer()
         analyzers["pitch_analysis"] = PitchAnalyzer()
         analyzers["volume_consistency"] = VolumeConsistencyAnalyzer()
         analyzers["filler_detection"] = FillerWordDetector(
-            transcription_service=transcription_service
+            transcription_service_english=transcription_service_english,
+            transcription_service_arabic=transcription_service_arabic
         )
         analyzers["stutter_detection"] = StutterDetectionAnalyzer()
         analyzers["lexical_richness"] = LexicalRichnessAnalyzer(
-            transcription_service=transcription_service
+            transcription_service_english=transcription_service_english,
+            transcription_service_arabic=transcription_service_arabic
         )
         analyzers["keyword_relevance"] = KeywordRelevanceAnalyzer(
-            transcription_service=transcription_service
+            transcription_service_english=transcription_service_english,
+            transcription_service_arabic=transcription_service_arabic
         )
         analyzers["facial_emotion"] = FacialEmotionAnalyzer()
         analyzers["eye_contact"] = EyeContactAnalyzer()
         analyzers["hand_gesture"] = HandGestureDetector()
         analyzers["posture_analysis"] = PostureAnalyzer()
         analyzers["wpm_calculator"] = WPMCalculator(
-            transcription_service=transcription_service
+            transcription_service_english=transcription_service_english,
+            transcription_service_arabic=transcription_service_arabic
         )
         analyzers["composite_scorer"] = CompositeScorer()
         analyzers["enhanced_feedback_generator"] = EnhancedFeedbackGenerator()
         analyzers["file_processor"] = FileProcessor()
-        analyzers["transcription_service"] = transcription_service
+        # Keep the default transcription_service for backward compatibility
+        analyzers["transcription_service"] = transcription_service_english
         
         # Initialize async analyzers (only those that have initialize method)
         async_analyzers = []  # Only known async analyzers

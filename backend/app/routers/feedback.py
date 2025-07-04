@@ -104,13 +104,14 @@ async def custom_feedback(
     file: UploadFile = File(...),
     services: str = Form(...),
     presentation_id: int = Form(...),
+    language: str = Form('english'),
     db: Session = Depends(get_db)
 ):
     # Call feedback service
     url = f"{FEEDBACK_SERVICE_URL}/custom-feedback"
     try:
         async with httpx.AsyncClient(timeout=120) as client:
-            form_data = {"services": services, "presentation_id": str(presentation_id)}
+            form_data = {"services": services, "presentation_id": str(presentation_id), "language": language}
             files = {"file": (file.filename, await file.read(), file.content_type)}
             resp = await client.post(url, files=files, data=form_data)
             feedback_data = resp.json()
