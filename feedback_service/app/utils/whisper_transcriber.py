@@ -90,10 +90,9 @@ class WhisperTranscriber:
             if result and "text" in result:
                 transcription = result["text"].strip()
                 logger.info(f"Transcription completed: {len(transcription)} characters")
-                logger.info(f"Transcription preview: {transcription[:100]}...")
                 return transcription
             else:
-                logger.warning(f"Whisper returned empty result: {result}")
+                logger.warning("Whisper returned empty result")
                 return None
                 
         except Exception as e:

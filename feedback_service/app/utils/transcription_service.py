@@ -37,11 +37,6 @@ class TranscriptionService:
             # Always perform transcription (no cache)
             logger.info(f"Transcribing audio: {audio_path} (lang: {language}) [no cache]")
             transcription = await self._perform_transcription(audio_path, language)
-            logger.info(f"Transcription completed. Result: {type(transcription)}, length: {len(transcription) if transcription else 0}")
-            if transcription:
-                logger.info(f"Transcription preview: {transcription[:100]}...")
-            else:
-                logger.warning("Transcription returned None or empty string")
             return transcription
         except Exception as e:
             logger.error(f"Error getting transcription for {audio_path}: {e}")
@@ -94,15 +89,12 @@ class TranscriptionService:
     async def _transcribe_with_whisper(self, audio_path: str, language: str = "english") -> Optional[str]:
         """Transcribe using Whisper"""
         try:
-            logger.info(f"Starting Whisper transcription for {audio_path} with language {language}")
-            
             # Use the configured Whisper transcriber if available
             if self._whisper_transcriber:
                 whisper_transcriber = self._whisper_transcriber
                 logger.info(f"Using configured Whisper transcriber with model: {whisper_transcriber.model_size}")
             else:
                 # Fallback to creating a new instance with current config
-                logger.info("No configured Whisper transcriber, creating new instance")
                 from app.utils.whisper_transcriber import WhisperTranscriber
                 from app.utils.config import config
                 whisper_config = config.get_whisper_config()
@@ -118,16 +110,13 @@ class TranscriptionService:
             }
             
             whisper_language = language_map.get(language.lower(), "en")
-            logger.info(f"Mapped language '{language}' to Whisper language '{whisper_language}'")
             
             # Use Whisper transcriber
-            logger.info(f"Calling Whisper transcriber.transcribe({audio_path}, {whisper_language})")
             transcription = await whisper_transcriber.transcribe(
                 audio_path, 
                 whisper_language
             )
             
-            logger.info(f"Whisper transcription result: {type(transcription)}, length: {len(transcription) if transcription else 0}")
             return transcription
             
         except Exception as e:
