@@ -20,7 +20,7 @@ async def api_speech_emotion(file: UploadFile = File(...)):
     try:
         file_path = await analyzers["file_processor"].save_uploaded_file(file)
         audio_path, _, _ = await analyzers["file_processor"].extract_components(file_path)
-        result = await analyzers["speech_emotion"].analyze(audio_path)
+        result = analyzers["speech_emotion"].analyze(audio_path)
         return JSONResponse(content=result, status_code=200)
     except Exception as e:
         logger.error(f"Speech emotion API error: {e}")
@@ -31,7 +31,7 @@ async def api_pitch_analysis(file: UploadFile = File(...)):
     try:
         file_path = await analyzers["file_processor"].save_uploaded_file(file)
         audio_path, _, _ = await analyzers["file_processor"].extract_components(file_path)
-        result = await analyzers["pitch_analysis"].analyze(audio_path)
+        result = analyzers["pitch_analysis"].analyze(audio_path)
         return JSONResponse(content=result, status_code=200)
     except Exception as e:
         logger.error(f"Pitch analysis API error: {e}")
@@ -42,7 +42,7 @@ async def api_volume_consistency(file: UploadFile = File(...)):
     try:
         file_path = await analyzers["file_processor"].save_uploaded_file(file)
         audio_path, _, _ = await analyzers["file_processor"].extract_components(file_path)
-        result = await analyzers["volume_consistency"].analyze(audio_path)
+        result = analyzers["volume_consistency"].analyze(audio_path)
         return JSONResponse(content=result, status_code=200)
     except Exception as e:
         logger.error(f"Volume consistency API error: {e}")
@@ -53,7 +53,7 @@ async def api_filler_detection(file: UploadFile = File(...), language: str = For
     try:
         file_path = await analyzers["file_processor"].save_uploaded_file(file)
         audio_path, _, _ = await analyzers["file_processor"].extract_components(file_path)
-        result = await analyzers["filler_detection"].analyze(audio_path, language=language)
+        result = analyzers["filler_detection"].analyze(audio_path, language=language)
         return JSONResponse(content=result, status_code=200)
     except Exception as e:
         logger.error(f"Filler detection API error: {e}")
@@ -64,7 +64,7 @@ async def api_stutter_detection(file: UploadFile = File(...)):
     try:
         file_path = await analyzers["file_processor"].save_uploaded_file(file)
         audio_path, _, _ = await analyzers["file_processor"].extract_components(file_path)
-        result = await analyzers["stutter_detection"].analyze(audio_path)
+        result = analyzers["stutter_detection"].analyze(audio_path)
         return JSONResponse(content=result, status_code=200)
     except Exception as e:
         logger.error(f"Stutter detection API error: {e}")
@@ -75,7 +75,7 @@ async def api_lexical_richness(file: UploadFile = File(...), language: str = For
     try:
         file_path = await analyzers["file_processor"].save_uploaded_file(file)
         audio_path, _, _ = await analyzers["file_processor"].extract_components(file_path)
-        result = await analyzers["lexical_richness"].analyze(audio_path, language=language)
+        result = analyzers["lexical_richness"].analyze(audio_path, language=language)
         return JSONResponse(content=result, status_code=200)
     except Exception as e:
         logger.error(f"Lexical richness API error: {e}")
@@ -87,7 +87,7 @@ async def api_keyword_relevance(file: UploadFile = File(...), language: str = Fo
     try:
         file_path = await analyzers["file_processor"].save_uploaded_file(file)
         audio_path, _, _ = await analyzers["file_processor"].extract_components(file_path)
-        result = await analyzers["keyword_relevance"].analyze(audio_path, keywords, language=language)
+        result = analyzers["keyword_relevance"].analyze(audio_path, keywords, language=language)
         return JSONResponse(content=result, status_code=200)
     except Exception as e:
         logger.error(f"Keyword relevance API error: {e}")
@@ -101,7 +101,7 @@ async def api_wpm_calculator(file: UploadFile = File(...), language: str = Form(
     try:
         file_path = await analyzers["file_processor"].save_uploaded_file(file)
         audio_path, _, _ = await analyzers["file_processor"].extract_components(file_path)
-        result = await analyzers["wpm_calculator"].analyze_async(audio_path, context='presentation', language=language)
+        result = analyzers["wpm_calculator"].analyze(audio_path, language=language, context='presentation')
         return JSONResponse(content=result, status_code=200)
     except Exception as e:
         logger.error(f"WPM calculator API error: {e}")
@@ -114,7 +114,7 @@ async def api_facial_emotion(file: UploadFile = File(...)):
         _, video_path, has_video = await analyzers["file_processor"].extract_components(file_path)
         if not has_video or not video_path:
             return JSONResponse(content={"error": "No video content found in uploaded file"}, status_code=400)
-        result = await analyzers["facial_emotion"].analyze(video_path)
+        result = analyzers["facial_emotion"].analyze(video_path)
         return JSONResponse(content=result, status_code=200)
     except Exception as e:
         logger.error(f"Facial emotion API error: {e}")
@@ -127,7 +127,7 @@ async def api_eye_contact(file: UploadFile = File(...)):
         _, video_path, has_video = await analyzers["file_processor"].extract_components(file_path)
         if not has_video or not video_path:
             return JSONResponse(content={"error": "No video content found in uploaded file"}, status_code=400)
-        result = await analyzers["eye_contact"].analyze_eye_contact(video_path)
+        result = analyzers["eye_contact"].analyze_eye_contact(video_path)
         return JSONResponse(content=result, status_code=200)
     except Exception as e:
         logger.error(f"Eye contact API error: {e}")
@@ -140,7 +140,7 @@ async def api_hand_gesture(file: UploadFile = File(...)):
         _, video_path, has_video = await analyzers["file_processor"].extract_components(file_path)
         if not has_video or not video_path:
             return JSONResponse(content={"error": "No video content found in uploaded file"}, status_code=400)
-        result = await analyzers["hand_gesture"].analyze(video_path)
+        result = analyzers["hand_gesture"].analyze(video_path)
         return JSONResponse(content=result, status_code=200)
     except Exception as e:
         logger.error(f"Hand gesture API error: {e}")
@@ -153,7 +153,7 @@ async def api_posture_analysis(file: UploadFile = File(...)):
         _, video_path, has_video = await analyzers["file_processor"].extract_components(file_path)
         if not has_video or not video_path:
             return JSONResponse(content={"error": "No video content found in uploaded file"}, status_code=400)
-        result = await analyzers["posture_analysis"].analyze(video_path)
+        result = analyzers["posture_analysis"].analyze(video_path)
         return JSONResponse(content=result, status_code=200)
     except Exception as e:
         logger.error(f"Posture analysis API error: {e}")
@@ -186,7 +186,7 @@ async def api_enhanced_overall_feedback(file: UploadFile = File(...), language: 
         results = {}
         analysis_tasks = [
             ("speech_emotion", analyzers["speech_emotion"].analyze(audio_path)),
-            ("wpm_analysis", analyzers["wpm_calculator"].analyze_async(audio_path, 'presentation', language=language)),
+            ("wpm_analysis", analyzers["wpm_calculator"].analyze(audio_path, language=language, context='presentation')),
             ("pitch_analysis", analyzers["pitch_analysis"].analyze(audio_path)),
             ("volume_consistency", analyzers["volume_consistency"].analyze(audio_path)),
             ("filler_detection", analyzers["filler_detection"].analyze(audio_path, language=language)),
@@ -205,10 +205,7 @@ async def api_enhanced_overall_feedback(file: UploadFile = File(...), language: 
         # Execute all analyses
         for name, task in analysis_tasks:
             try:
-                if asyncio.iscoroutine(task):
-                    result = await task
-                else:
-                    result = await task
+                result = task
                 results[name] = result if isinstance(result, dict) else {"error": "Invalid result"}
             except Exception as e:
                 logger.error(f"{name} analysis error: {e}")
@@ -259,7 +256,7 @@ async def api_overall_feedback(file: UploadFile = File(...), language: str = For
         results = {}
         analysis_tasks = [
             ("speech_emotion", analyzers["speech_emotion"].analyze(audio_path)),
-            ("wpm_analysis", analyzers["wpm_calculator"].analyze_async(audio_path, 'presentation', language=language)),
+            ("wpm_analysis", analyzers["wpm_calculator"].analyze(audio_path, language=language, context='presentation')),
             ("pitch_analysis", analyzers["pitch_analysis"].analyze(audio_path)),
             ("volume_consistency", analyzers["volume_consistency"].analyze(audio_path)),
             ("filler_detection", analyzers["filler_detection"].analyze(audio_path, language=language)),
@@ -275,10 +272,7 @@ async def api_overall_feedback(file: UploadFile = File(...), language: str = For
             ])
         for name, task in analysis_tasks:
             try:
-                if asyncio.iscoroutine(task):
-                    result = await task
-                else:
-                    result = await task
+                result = task
                 results[name] = result if isinstance(result, dict) else {"error": "Invalid result"}
             except Exception as e:
                 logger.error(f"{name} analysis error: {e}")
@@ -330,7 +324,7 @@ async def api_audio_only_feedback(file: UploadFile = File(...), language: str = 
         results = {}
         analysis_tasks = [
             ("speech_emotion", analyzers["speech_emotion"].analyze(audio_path)),
-            ("wpm_analysis", analyzers["wpm_calculator"].analyze_async(audio_path, 'presentation', language=language)),
+            ("wpm_analysis", analyzers["wpm_calculator"].analyze(audio_path, language=language, context='presentation')),
             ("pitch_analysis", analyzers["pitch_analysis"].analyze(audio_path)),
             ("volume_consistency", analyzers["volume_consistency"].analyze(audio_path)),
             ("filler_detection", analyzers["filler_detection"].analyze(audio_path, language=language)),
@@ -340,10 +334,7 @@ async def api_audio_only_feedback(file: UploadFile = File(...), language: str = 
         
         for name, task in analysis_tasks:
             try:
-                if asyncio.iscoroutine(task):
-                    result = await task
-                else:
-                    result = await task
+                result = task
                 results[name] = result if isinstance(result, dict) else {"error": "Invalid result"}
             except Exception as e:
                 logger.error(f"{name} analysis error: {e}")
@@ -543,7 +534,7 @@ async def api_custom_feedback(
             "filler_detection": ("filler_detection", "audio", "analyze", {"language": language}),
             "stutter_detection": ("stutter_detection", "audio", "analyze", {}),
             "lexical_richness": ("lexical_richness", "audio", "analyze", {"language": language}),
-            "wpm_analysis": ("wpm_calculator", "audio", "analyze_with_transcription", {"transcription": transcription, "context": "presentation"}),
+            "wpm_analysis": ("wpm_calculator", "audio", "analyze", {"transcription": transcription, "context": "presentation"}),
             "keyword_relevance": ("keyword_relevance", "audio", "analyze", {"language": language}),
             "facial_emotion": ("facial_emotion", "video", "analyze", {}),
             "eye_contact": ("eye_contact", "video", "analyze_eye_contact", {}),
@@ -579,9 +570,9 @@ async def api_custom_feedback(
             try:
                 analyze_method = getattr(analyzer, method)
                 if extra_kwargs:
-                    result = await analyze_method(input_path, **extra_kwargs)
+                    result = analyze_method(input_path, **extra_kwargs)
                 else:
-                    result = await analyze_method(input_path)
+                    result = analyze_method(input_path)
                 results[service] = result if isinstance(result, dict) else {"error": "Invalid result"}
             except Exception as e:
                 logger.error(f"{service} analysis error: {e}")

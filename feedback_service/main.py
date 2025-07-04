@@ -193,7 +193,7 @@ async def analyze_full(file: UploadFile = File(...)):
         
         try:
             logger.info("Starting WPM analysis...")
-            wpm_result = await analyzers["wpm_calculator"].analyze_async(audio_path, context='presentation')
+            wpm_result = analyzers["wpm_calculator"].analyze(audio_path, context='presentation')
             results["wpm_analysis"] = wpm_result if isinstance(wpm_result, dict) else {"error": "Invalid result"}
             logger.info("WPM analysis completed")
         except Exception as e:
