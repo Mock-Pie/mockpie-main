@@ -9,7 +9,7 @@ from backend.app.crud.feedback import create_feedback, get_feedback_by_presentat
 
 router = APIRouter(prefix="/feedback", tags=["Feedback Service"])
 
-FEEDBACK_SERVICE_URL = "http://host.docker.internal:8082/api"
+FEEDBACK_SERVICE_URL = "http://presentation-analyzer:8082/api"
 
 async def proxy_to_feedback_service(endpoint: str, file: UploadFile, extra_form: Optional[dict] = None):
     url = f"{FEEDBACK_SERVICE_URL}/{endpoint}"
