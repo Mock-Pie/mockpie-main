@@ -73,9 +73,9 @@ class LexicalRichnessAnalyzer:
         try:
             # Get transcript using centralized service
             if language == 'arabic' and self.transcription_service_arabic:
-                transcript = await self.transcription_service_arabic.get_transcription(audio_path)
+                transcript = await self.transcription_service_arabic.get_transcription(audio_path, language)
             elif self.transcription_service_english:
-                transcript = await self.transcription_service_english.get_transcription(audio_path)
+                transcript = await self.transcription_service_english.get_transcription(audio_path, language)
             else:
                 transcript = None
             
@@ -137,7 +137,7 @@ class LexicalRichnessAnalyzer:
         try:
             if self.transcription_service:
                 # Use centralized transcription service
-                transcription = await self.transcription_service.get_transcription(audio_path)
+                transcription = await self.transcription_service.get_transcription(audio_path, language)
                 
                 if transcription:
                     logger.info(f"Transcription successful: {transcription[:100]}...")
