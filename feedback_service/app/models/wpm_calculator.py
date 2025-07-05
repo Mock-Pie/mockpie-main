@@ -252,17 +252,32 @@ class WPMCalculator:
 
     def _calculate_overall_score(self, wpm: float, consistency: float, assessment: Dict, context: str) -> float:
         ranges = self.wpm_ranges.get(context, self.wpm_ranges['presentation'])
-        if assessment['status'] == 'excellent':
-            wpm_score = 10
-        elif assessment['status'] == 'good':
-            wpm_score = 7
-        elif assessment['status'] == 'acceptable':
-            wpm_score = 5
+        min_wpm, max_wpm, optimal = ranges['min'], ranges['max'], ranges['optimal']
+        
+        # Gradual penalty for being close to the boundary (within 10 WPM)
+        if min_wpm - 10 <= wpm < min_wpm:
+            wpm_score = 5 + 5 * (wpm - (min_wpm - 10)) / 10  # linearly from 5 to 10
+        elif max_wpm < wpm <= max_wpm + 10:
+            wpm_score = 5 + 5 * ((max_wpm + 10) - wpm) / 10  # linearly from 10 to 5
+        elif wpm < min_wpm - 10 or wpm > max_wpm + 10:
+            wpm_score = 2  # heavy penalty for being way out of range
         else:
-            wpm_score = 0
+            # Inside the range: score higher for closer to optimal
+            deviation = abs(wpm - optimal) / (max_wpm - min_wpm)
+            if deviation < 0.05:
+                wpm_score = 10
+            elif deviation < 0.15:
+                wpm_score = 8
+            elif deviation < 0.25:
+                wpm_score = 6
+            else:
+                wpm_score = 5
+
+        # Consistency score as before
         consistency_score = 10 * consistency
         overall_score = (wpm_score + consistency_score) / 2
         return round(overall_score, 2)
+
 
     def _create_error_result(self, error_message: str) -> Dict:
         return {
