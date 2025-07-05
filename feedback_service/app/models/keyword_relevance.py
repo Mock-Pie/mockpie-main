@@ -284,17 +284,27 @@ class KeywordRelevanceAnalyzer:
 
     def _generate_relevance_assessment(self, coherence: Dict, target_analysis: Dict, diversity: Dict, language: str) -> Dict[str, Any]:
         try:
-            # Extract the three key scores
+            # Extract the key scores
             semantic_coherence = coherence.get("semantic_coherence", 0.5)  # 0-1 range
             coherence_score = coherence.get("coherence_score", 0)  # 0-1 range
             diversity_score = diversity.get("diversity_score", 0)  # 0-1 range
             
-            # Calculate overall score using balanced mix of all three scores
-            # Weights: semantic_coherence (40%), coherence_score (35%), diversity_score (25%)
+            # Calculate target keyword relevance score (0-1 range)
+            target_relevance_score = 0.5  # Default neutral score
+            if target_analysis and target_analysis.get("relevance_score"):
+                # Convert from 0-100 range to 0-1 range
+                target_relevance_score = target_analysis.get("relevance_score", 0) / 100.0
+            elif target_analysis:
+                # If target analysis exists but no relevance score, use coverage percentage
+                target_relevance_score = target_analysis.get("total_coverage_percentage", 0) / 100.0
+            
+            # Calculate overall score using balanced mix of all four scores
+            # Weights: semantic_coherence (30%), coherence_score (25%), diversity_score (20%), target_relevance (25%)
             overall_score = (
-                semantic_coherence * 0.40 +  # Semantic similarity between text and keywords
-                coherence_score * 0.35 +     # Topic focus and keyword coverage
-                diversity_score * 0.25       # Keyword variety and distribution
+                semantic_coherence * 0.30 +    # Semantic similarity between text and keywords
+                coherence_score * 0.25 +       # Topic focus and keyword coverage
+                diversity_score * 0.20 +       # Keyword variety and distribution
+                target_relevance_score * 0.25  # Relevance to target keywords
             )
             
             # Scale to 0-10 range
@@ -324,10 +334,12 @@ class KeywordRelevanceAnalyzer:
                     "semantic_coherence": float(semantic_coherence * 10),  # 0-10 range
                     "coherence_score": float(coherence_score * 10),        # 0-10 range  
                     "diversity_score": float(diversity_score * 10),        # 0-10 range
+                    "target_relevance": float(target_relevance_score * 10), # 0-10 range
                     "weights": {
-                        "semantic_coherence": 0.40,
-                        "coherence_score": 0.35,
-                        "diversity_score": 0.25
+                        "semantic_coherence": 0.30,
+                        "coherence_score": 0.25,
+                        "diversity_score": 0.20,
+                        "target_relevance": 0.25
                     }
                 }
             }
@@ -341,10 +353,12 @@ class KeywordRelevanceAnalyzer:
                     "semantic_coherence": 5.0,
                     "coherence_score": 5.0,
                     "diversity_score": 5.0,
+                    "target_relevance": 5.0,
                     "weights": {
-                        "semantic_coherence": 0.40,
-                        "coherence_score": 0.35,
-                        "diversity_score": 0.25
+                        "semantic_coherence": 0.30,
+                        "coherence_score": 0.25,
+                        "diversity_score": 0.20,
+                        "target_relevance": 0.25
                     }
                 }
             }
