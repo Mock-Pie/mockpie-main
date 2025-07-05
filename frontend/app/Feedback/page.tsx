@@ -196,6 +196,18 @@ const Feedback = () => {
                isValidValue(metric.description);
     };
 
+    // Helper function to add descriptions to detail objects
+    const addDetailDescriptions = (details: any, descriptions: any): any => {
+        if (!details || typeof details !== 'object') return details;
+        const enhancedDetails: any = {};
+        Object.keys(details).forEach(key => {
+            if (isValidValue(details[key])) {
+                enhancedDetails[key] = details[key];
+            }
+        });
+        return Object.keys(enhancedDetails).length > 0 ? enhancedDetails : undefined;
+    };
+
     // --- Analysis Overview ---
     const enhanced = feedback.enhanced_feedback || {};
     const overviewProps = {
@@ -328,13 +340,25 @@ const Feedback = () => {
             confidence: feedback.speech_emotion?.dominant_emotion?.confidence,
             recommendation: Array.isArray(feedback.speech_emotion?.recommendations) ? feedback.speech_emotion.recommendations[0] : undefined,
             recommendations: feedback.speech_emotion?.recommendations,
-            details: feedback.speech_emotion?.emotions ? {
+            details: feedback.speech_emotion?.emotions ? addDetailDescriptions({
                 ...feedback.speech_emotion.emotions,
                 emotional_range: feedback.speech_emotion?.presentation_metrics?.emotional_range,
                 emotion_consistency: feedback.speech_emotion?.presentation_metrics?.emotion_consistency,
                 engagement_score: feedback.speech_emotion?.presentation_metrics?.engagement_score,
                 emotion_std: feedback.speech_emotion?.emotion_analysis?.angry?.std,
-            } : undefined,
+            }, {
+                happy: "The percentage of time you expressed happiness in your speech",
+                sad: "The percentage of time you expressed sadness in your speech",
+                angry: "The percentage of time you expressed anger in your speech",
+                fearful: "The percentage of time you expressed fear in your speech",
+                disgusted: "The percentage of time you expressed disgust in your speech",
+                surprised: "The percentage of time you expressed surprise in your speech",
+                neutral: "The percentage of time you spoke in a neutral tone",
+                emotional_range: "How much your emotions varied throughout the presentation",
+                emotion_consistency: "How consistently you maintained emotional expression",
+                engagement_score: "How engaging your emotional delivery was to listeners",
+                emotion_std: "The standard deviation of your emotional expression"
+            }) : undefined,
             description: `Confidence: ${(feedback.speech_emotion?.dominant_emotion?.confidence * 100).toFixed(1)}%`
         },
         {
@@ -345,7 +369,7 @@ const Feedback = () => {
             status: feedback.wpm_analysis?.assessment?.status,
             recommendation: Array.isArray(feedback.wpm_analysis?.recommendations) ? feedback.wpm_analysis.recommendations[0] : undefined,
             recommendations: feedback.wpm_analysis?.recommendations,
-            details: {
+            details: addDetailDescriptions({
                 word_count: feedback.wpm_analysis?.word_count,
                 duration_minutes: feedback.wpm_analysis?.duration_minutes,
                 pace_consistency: feedback.wpm_analysis?.pace_consistency?.score,
@@ -354,7 +378,16 @@ const Feedback = () => {
                 avg_pause_duration: feedback.wpm_analysis?.pause_analysis?.average_pause_duration,
                 pause_count: feedback.wpm_analysis?.pause_analysis?.pause_count,
                 wpm_variance: feedback.wpm_analysis?.segment_analysis?.wpm_variance,
-            },
+            }, {
+                word_count: "The total number of words spoken in your presentation",
+                duration_minutes: "The total duration of your presentation in minutes",
+                pace_consistency: "How consistently you maintained your speaking pace throughout",
+                pause_percentage: "The percentage of time spent in silence during your speech",
+                total_pause_time: "The total amount of time you paused during your presentation",
+                avg_pause_duration: "The average length of each pause you took",
+                pause_count: "The total number of pauses you made during your presentation",
+                wpm_variance: "How much your speaking speed varied throughout the presentation"
+            }),
             description: feedback.wpm_analysis?.assessment?.message
         },
         {
@@ -364,12 +397,19 @@ const Feedback = () => {
             score: modelScores.pitch_analysis?.normalized_score ?? undefined,
             recommendation: Array.isArray(feedback.pitch_analysis?.recommendations) ? feedback.pitch_analysis.recommendations[0] : undefined,
             recommendations: feedback.pitch_analysis?.recommendations,
-            details: feedback.pitch_analysis?.pitch_statistics ? {
+            details: feedback.pitch_analysis?.pitch_statistics ? addDetailDescriptions({
                 ...feedback.pitch_analysis.pitch_statistics,
                 intonation_variability: feedback.pitch_analysis?.intonation_patterns?.intonation_variability,
                 pitch_dynamism: feedback.pitch_analysis?.variation_metrics?.pitch_dynamism,
                 semitone_range: feedback.pitch_analysis?.variation_metrics?.semitone_range,
-            } : undefined,
+            }, {
+                mean_pitch: "The average pitch of your voice throughout the presentation",
+                pitch_range: "The difference between your highest and lowest pitch",
+                pitch_std: "How much your pitch varied from the average",
+                intonation_variability: "How much your voice tone changed during speech",
+                pitch_dynamism: "How dynamic and expressive your pitch changes were",
+                semitone_range: "The range of musical notes your voice covered"
+            }) : undefined,
             description: `Range: ${feedback.pitch_analysis?.pitch_statistics?.pitch_range?.toFixed(1) || 'N/A'} Hz`
         },
         {
@@ -380,12 +420,19 @@ const Feedback = () => {
             recommendation: Array.isArray(feedback.filler_detection?.recommendations) ? feedback.filler_detection.recommendations[0] : undefined,
             recommendations: feedback.filler_detection?.recommendations,
             mostCommonFiller: feedback.filler_detection?.filler_analysis?.most_common_filler,
-            details: feedback.filler_detection?.filler_analysis ? {
+            details: feedback.filler_detection?.filler_analysis ? addDetailDescriptions({
                 ...feedback.filler_detection.filler_analysis,
                 pause_percentage: feedback.filler_detection?.pause_analysis?.pause_percentage,
                 total_pauses: feedback.filler_detection?.pause_analysis?.total_pauses,
                 average_pause_duration: feedback.filler_detection?.pause_analysis?.average_pause_duration,
-            } : undefined,
+            }, {
+                total_fillers: "The total number of filler words you used",
+                filler_rate_percentage: "The percentage of your speech that consisted of filler words",
+                most_common_filler: "The filler word you used most frequently",
+                pause_percentage: "The percentage of time you spent pausing",
+                total_pauses: "The total number of pauses you made",
+                average_pause_duration: "The average length of each pause"
+            }) : undefined,
             description: `${feedback.filler_detection?.filler_analysis?.filler_rate_percentage?.toFixed(1) || 0}% of speech`
         },
         {
@@ -396,13 +443,19 @@ const Feedback = () => {
             detected: feedback.stutter_detection?.stutter_detected,
             recommendation: Array.isArray(feedback.stutter_detection?.recommendations) ? feedback.stutter_detection.recommendations[0] : undefined,
             recommendations: feedback.stutter_detection?.recommendations,
-            details: {
+            details: addDetailDescriptions({
                 stutter_percentage: feedback.stutter_detection?.stutter_percentage,
                 stutter_frequency_per_minute: feedback.stutter_detection?.stutter_frequency_per_minute,
                 stutter_segments_count: feedback.stutter_detection?.stutter_segments_count,
                 total_segments: feedback.stutter_detection?.total_segments,
                 stutter_timeline: feedback.stutter_detection?.stutter_timeline?.map((seg: any) => `Segment ${seg.segment_id}: ${seg.stutter_probability ? (seg.stutter_probability * 100).toFixed(1) : ''}%`),
-            },
+            }, {
+                stutter_percentage: "The percentage of speech segments that contained stuttering",
+                stutter_frequency_per_minute: "How many stuttering incidents occurred per minute",
+                stutter_segments_count: "The number of speech segments that contained stuttering",
+                total_segments: "The total number of speech segments analyzed",
+                stutter_timeline: "A timeline showing when stuttering occurred during your presentation"
+            }),
             description: `${feedback.stutter_detection?.stutter_percentage?.toFixed(1) || 0}% of segments affected`
         }
     ];
@@ -431,7 +484,7 @@ const Feedback = () => {
             score: modelScores.facial_emotion?.normalized_score ?? undefined,
             recommendation: Array.isArray(feedback.facial_emotion?.recommendations) ? feedback.facial_emotion.recommendations[0] : undefined,
             recommendations: feedback.facial_emotion?.recommendations,
-            details: feedback.facial_emotion?.emotion_statistics ? {
+            details: feedback.facial_emotion?.emotion_statistics ? addDetailDescriptions({
                 ...feedback.facial_emotion.emotion_statistics.emotion_averages,
                 dominant_emotion: feedback.facial_emotion?.emotion_statistics?.dominant_emotion?.emotion,
                 positivity_score: feedback.facial_emotion?.emotion_statistics?.positivity_score,
@@ -441,7 +494,23 @@ const Feedback = () => {
                 face_detection_rate: feedback.facial_emotion?.face_detection_rate,
                 engagement_score: feedback.facial_emotion?.engagement_metrics?.engagement_score,
                 visual_appeal: feedback.facial_emotion?.engagement_metrics?.visual_appeal,
-            } : undefined,
+            }, {
+                happy: "The percentage of time you showed happiness on your face",
+                sad: "The percentage of time you showed sadness on your face",
+                angry: "The percentage of time you showed anger on your face",
+                fearful: "The percentage of time you showed fear on your face",
+                disgusted: "The percentage of time you showed disgust on your face",
+                surprised: "The percentage of time you showed surprise on your face",
+                neutral: "The percentage of time you had a neutral facial expression",
+                dominant_emotion: "The emotion you displayed most frequently",
+                positivity_score: "How positive your facial expressions were overall",
+                negativity_score: "How negative your facial expressions were overall",
+                neutrality_score: "How neutral your facial expressions were overall",
+                emotional_variability: "How much your facial emotions changed throughout",
+                face_detection_rate: "The percentage of time your face was clearly visible",
+                engagement_score: "How engaging your facial expressions were to viewers",
+                visual_appeal: "How visually appealing your facial expressions were"
+            }) : undefined,
             description: `Detection rate: ${(feedback.facial_emotion?.face_detection_rate * 100).toFixed(1)}%`
         },
         {
@@ -451,13 +520,19 @@ const Feedback = () => {
             score: modelScores.eye_contact?.normalized_score ?? undefined,
             recommendation: undefined,
             recommendations: undefined,
-            details: feedback.eye_contact ? {
+            details: feedback.eye_contact ? addDetailDescriptions({
                 attention_score: feedback.eye_contact?.attention_score,
                 center_attention_ratio: feedback.eye_contact?.confidence_metrics?.center_attention_ratio,
                 face_detection_rate: feedback.eye_contact?.engagement_metrics?.face_detection_rate,
                 average_engagement_score: feedback.eye_contact?.engagement_metrics?.average_engagement_score,
                 total_frames_analyzed: feedback.eye_contact?.engagement_metrics?.total_frames_analyzed,
-            } : undefined,
+            }, {
+                attention_score: "How well you maintained eye contact with the camera/audience",
+                center_attention_ratio: "The percentage of time you looked at the center of the frame",
+                face_detection_rate: "The percentage of time your face was clearly visible",
+                average_engagement_score: "How engaging your eye contact was overall",
+                total_frames_analyzed: "The total number of video frames analyzed for eye contact"
+            }) : undefined,
             description: `Face detection: ${(feedback.eye_contact?.engagement_metrics?.face_detection_rate * 100).toFixed(1)}%`
         },
         {
@@ -467,7 +542,7 @@ const Feedback = () => {
             score: modelScores.hand_gesture?.normalized_score ?? undefined,
             recommendation: Array.isArray(feedback.hand_gesture?.recommendations) ? feedback.hand_gesture.recommendations[0] : undefined,
             recommendations: feedback.hand_gesture?.recommendations,
-            details: feedback.hand_gesture?.gesture_statistics ? {
+            details: feedback.hand_gesture?.gesture_statistics ? addDetailDescriptions({
                 ...feedback.hand_gesture.gesture_statistics,
                 gesture_variety: feedback.hand_gesture?.gesture_statistics?.gesture_variety,
                 hand_usage_distribution: feedback.hand_gesture?.gesture_statistics?.hand_usage_distribution,
@@ -475,7 +550,16 @@ const Feedback = () => {
                 average_effectiveness: feedback.hand_gesture?.gesture_statistics?.average_effectiveness,
                 engagement_level: feedback.hand_gesture?.engagement_metrics?.engagement_level,
                 hands_usage_rating: feedback.hand_gesture?.engagement_metrics?.hands_usage_rating,
-            } : undefined,
+            }, {
+                most_common_gesture: "The hand gesture you used most frequently",
+                gesture_variety: "How many different types of hand gestures you used",
+                hand_usage_distribution: "How you used your left and right hands",
+                zone_distribution: "Which areas of your body you gestured towards",
+                average_effectiveness: "How effective your hand gestures were overall",
+                engagement_level: "How engaging your hand gestures were to viewers",
+                hands_usage_rating: "How well you utilized your hands during the presentation",
+                hands_visible_percentage: "The percentage of time your hands were clearly visible"
+            }) : undefined,
             description: `${feedback.hand_gesture?.gesture_statistics?.hands_visible_percentage || 0}% visibility`
         },
         {
@@ -485,13 +569,20 @@ const Feedback = () => {
             score: modelScores.posture_analysis?.normalized_score ?? undefined,
             recommendation: Array.isArray(feedback.posture_analysis?.recommendations) ? feedback.posture_analysis.recommendations[0] : undefined,
             recommendations: feedback.posture_analysis?.recommendations,
-            details: feedback.posture_analysis?.posture_metrics ? {
+            details: feedback.posture_analysis?.posture_metrics ? addDetailDescriptions({
                 ...feedback.posture_analysis.posture_metrics,
                 most_problematic: feedback.posture_analysis?.posture_metrics?.most_problematic,
                 main_issues: feedback.posture_analysis?.posture_metrics?.main_issues,
                 pose_counts: feedback.posture_analysis?.bad_posture_summary?.pose_counts,
                 pose_percentages: feedback.posture_analysis?.bad_posture_summary?.pose_percentages,
-            } : undefined,
+            }, {
+                posture_quality: "The overall quality of your posture during the presentation",
+                total_penalty_points: "Points deducted for poor posture throughout the presentation",
+                most_problematic: "The most problematic aspect of your posture",
+                main_issues: "The main posture issues identified during your presentation",
+                pose_counts: "How many times each type of posture was detected",
+                pose_percentages: "The percentage of time you maintained each posture type"
+            }) : undefined,
             description: `${feedback.posture_analysis?.posture_metrics?.total_penalty_points?.toFixed(1) || 0} penalty points`
         }
     ];
@@ -516,7 +607,7 @@ const Feedback = () => {
             score: modelScores.lexical_richness?.score ?? undefined,
             recommendation: Array.isArray(feedback.lexical_richness?.recommendations) ? feedback.lexical_richness.recommendations[0] : undefined,
             recommendations: feedback.lexical_richness?.recommendations,
-            details: feedback.lexical_richness?.richness_metrics ? {
+            details: feedback.lexical_richness?.richness_metrics ? addDetailDescriptions({
                 ...feedback.lexical_richness.richness_metrics,
                 vocabulary_size: feedback.lexical_richness?.vocabulary_statistics?.vocabulary_size,
                 unique_words: feedback.lexical_richness?.vocabulary_statistics?.unique_words,
@@ -525,7 +616,16 @@ const Feedback = () => {
                 average_word_length: feedback.lexical_richness?.vocabulary_statistics?.average_word_length,
                 average_words_per_sentence: feedback.lexical_richness?.complexity_analysis?.average_words_per_sentence,
                 complex_word_ratio: feedback.lexical_richness?.complexity_analysis?.complex_word_ratio,
-            } : undefined,
+            }, {
+                type_token_ratio: "The ratio of unique words to total words, indicating vocabulary diversity",
+                vocabulary_size: "The total number of different words you used",
+                unique_words: "The number of words you used only once",
+                content_word_ratio: "The percentage of meaningful words versus function words",
+                hapax_legomena: "Words that appeared only once in your presentation",
+                average_word_length: "The average number of letters per word you used",
+                average_words_per_sentence: "The average number of words per sentence",
+                complex_word_ratio: "The percentage of complex words in your vocabulary"
+            }) : undefined,
             description: `TTR: ${(feedback.lexical_richness?.richness_metrics?.type_token_ratio * 100).toFixed(1)}%`
         },
         {
@@ -535,14 +635,22 @@ const Feedback = () => {
             score: modelScores.keyword_relevance?.normalized_score ?? undefined,
             recommendation: Array.isArray(feedback.keyword_relevance?.recommendations) ? feedback.keyword_relevance.recommendations[0] : undefined,
             recommendations: feedback.keyword_relevance?.recommendations,
-            details: feedback.keyword_relevance?.topic_coherence ? {
+            details: feedback.keyword_relevance?.topic_coherence ? addDetailDescriptions({
                 ...feedback.keyword_relevance.topic_coherence,
                 keyword_coverage_percentage: feedback.keyword_relevance?.topic_coherence?.keyword_coverage_percentage,
                 semantic_coherence: feedback.keyword_relevance?.topic_coherence?.semantic_coherence,
                 diversity_score: feedback.keyword_relevance?.keyword_diversity?.diversity_score,
                 total_unique_keywords: feedback.keyword_relevance?.keyword_diversity?.total_unique_keywords,
                 extracted_keywords: feedback.keyword_relevance?.extracted_keywords?.keybert?.map((k: any) => `${k.keyword} (${k.score})`).join(', '),
-            } : undefined,
+            }, {
+                coherence_score: "How well your content stayed focused on the main topic",
+                topic_focus: "How focused your presentation was on the intended subject",
+                keyword_coverage_percentage: "The percentage of important keywords you covered",
+                semantic_coherence: "How semantically related your content was to the topic",
+                diversity_score: "How diverse your keyword usage was throughout the presentation",
+                total_unique_keywords: "The total number of unique keywords you used",
+                extracted_keywords: "The most important keywords automatically extracted from your speech"
+            }) : undefined,
             description: `Coherence: ${(feedback.keyword_relevance?.topic_coherence?.coherence_score * 100).toFixed(1)}%`
         }
     ];
