@@ -221,7 +221,12 @@ class PitchAnalyzer:
             mean_pitch = float(np.mean(pitch_values))
             std_pitch = float(np.std(pitch_values))
             cv = (std_pitch / mean_pitch) * 100 if mean_pitch > 0 else 0
-            variation_metrics = {"coefficient_of_variation": cv, "semitone_range": 0}
+            # Calculate semitone range for fallback
+            if len(pitch_values) > 1:
+                semitone_range = 12 * np.log2(np.max(pitch_values) / np.min(pitch_values))
+            else:
+                semitone_range = 0.0
+            variation_metrics = {"coefficient_of_variation": cv, "semitone_range": semitone_range}
             speaking_style = {"speaking_style": "varied" if cv > 20 else "monotone", "engagement_score": 8 if cv > 20 else 3}
             pitch_stats = {"voiced_frames_percentage": 80}
             overall_score = self._calculate_overall_score(pitch_stats, variation_metrics, speaking_style)
@@ -238,30 +243,45 @@ class PitchAnalyzer:
 
     def _calculate_overall_score(self, pitch_stats: dict, variation_metrics: dict, speaking_style: dict) -> float:
         try:
-            score = 10.0
             cv = variation_metrics.get("coefficient_of_variation", 0)
             semitone_range = variation_metrics.get("semitone_range", 0)
             engagement_score = speaking_style.get("engagement_score", 5)
             voiced_percentage = pitch_stats.get("voiced_frames_percentage", 0)
 
-            # Penalize monotony
-            if cv < 10 or semitone_range < 3:
-                score -= 4.0  # strong penalty for monotone
-            elif cv < 15 or semitone_range < 5:
-                score -= 2.0  # moderate penalty
+            # Base score calculation based on coefficient of variation
+            # CV ranges: 0-5 (very monotone), 5-15 (monotone), 15-25 (good), 25-35 (excellent), 35+ (too much)
+            if cv < 5:
+                base_score = 2.0  # Very monotone
+            elif cv < 15:
+                base_score = 4.0  # Monotone
+            elif cv < 25:
+                base_score = 7.0  # Good variation
+            elif cv < 35:
+                base_score = 9.0  # Excellent variation
+            else:
+                base_score = 8.0  # Too much variation (can be distracting)
 
-            # Reward good variation
-            if cv >= 25 and semitone_range >= 8:
-                score += 1.0  # reward for highly dynamic
+            # Adjust for semitone range
+            # Semitone ranges: 0-2 (very limited), 2-6 (limited), 6-12 (good), 12+ (excellent)
+            if semitone_range < 2:
+                range_adjustment = -2.0
+            elif semitone_range < 6:
+                range_adjustment = -0.5
+            elif semitone_range < 12:
+                range_adjustment = 0.5
+            else:
+                range_adjustment = 1.0
 
-            # Engagement (scaled)
-            score += (engagement_score - 5) * 0.3  # smaller impact
-
-            # Voiced frames
+            # Voiced frames adjustment
             if voiced_percentage >= 80:
-                score += 0.5
-            elif voiced_percentage < 60:
-                score -= 1.0
+                voiced_adjustment = 0.5
+            elif voiced_percentage >= 60:
+                voiced_adjustment = 0.0
+            else:
+                voiced_adjustment = -1.0
+
+            # Calculate final score
+            score = base_score + range_adjustment + voiced_adjustment
 
             # Clamp between 0 and 10
             score = max(0.0, min(10.0, score))
