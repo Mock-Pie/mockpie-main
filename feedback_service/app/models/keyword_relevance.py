@@ -64,7 +64,8 @@ class KeywordRelevanceAnalyzer:
                 return {
                     "error": "No transcript available for keyword analysis",
                     "extracted_keywords": [],
-                    "relevance_analysis": {}
+                    "relevance_analysis": {},
+                    "overall_score": 5.0  # Default score when no transcript
                 }
 
             detected_language = self._detect_language(transcript)
@@ -89,14 +90,17 @@ class KeywordRelevanceAnalyzer:
                 "target_keyword_analysis": target_analysis,
                 "keyword_diversity": diversity_metrics,
                 "relevance_assessment": assessment,
-                "recommendations": self._generate_recommendations(coherence_analysis, target_analysis, assessment, detected_language)
+                "recommendations": self._generate_recommendations(coherence_analysis, target_analysis, assessment, detected_language),
+                "overall_score": assessment.get("overall_score", 5.0),  # Main score for the scoring system
+                "relevance_score": assessment.get("overall_score", 5.0)  # Keep for backward compatibility
             }
         except Exception as e:
             logger.error(f"Error in keyword relevance analysis: {e}")
             return {
                 "error": str(e),
                 "extracted_keywords": [],
-                "relevance_analysis": {}
+                "relevance_analysis": {},
+                "overall_score": 5.0  # Default score on error
             }
 
     def _detect_language(self, text: str) -> str:
@@ -280,33 +284,70 @@ class KeywordRelevanceAnalyzer:
 
     def _generate_relevance_assessment(self, coherence: Dict, target_analysis: Dict, diversity: Dict, language: str) -> Dict[str, Any]:
         try:
-            coherence_score = coherence.get("coherence_score", 0)
-            target_relevance = target_analysis.get("relevance_score", 0) / 100 if target_analysis else 0.5
-            diversity_score = diversity.get("diversity_score", 0)
-            if target_analysis:
-                overall_score = (coherence_score * 3 + target_relevance * 5 + diversity_score * 2)
-            else:
-                overall_score = (coherence_score * 6 + diversity_score * 4)
-            overall_score = min(10, overall_score)
-            if overall_score >= 6:
+            # Extract the three key scores
+            semantic_coherence = coherence.get("semantic_coherence", 0.5)  # 0-1 range
+            coherence_score = coherence.get("coherence_score", 0)  # 0-1 range
+            diversity_score = diversity.get("diversity_score", 0)  # 0-1 range
+            
+            # Calculate overall score using balanced mix of all three scores
+            # Weights: semantic_coherence (40%), coherence_score (35%), diversity_score (25%)
+            overall_score = (
+                semantic_coherence * 0.40 +  # Semantic similarity between text and keywords
+                coherence_score * 0.35 +     # Topic focus and keyword coverage
+                diversity_score * 0.25       # Keyword variety and distribution
+            )
+            
+            # Scale to 0-10 range
+            overall_score = overall_score * 10
+            overall_score = min(10, max(0, overall_score))
+            
+            # Assessment level based on overall score
+            if overall_score >= 8:
                 assessment_level = "excellent"
-            elif overall_score >= 4:
+            elif overall_score >= 6:
                 assessment_level = "good"
-            elif overall_score >= 2:
+            elif overall_score >= 4:
                 assessment_level = "fair"
             else:
                 assessment_level = "needs_improvement"
+            
             topic_focus = coherence.get("topic_focus", "unknown")
+            
             return {
-                "overall_relevance_score": float(overall_score),
+                "overall_score": float(overall_score),  # Main score for the scoring system
+                "overall_relevance_score": float(overall_score),  # Keep for backward compatibility
                 "assessment_level": assessment_level,
                 "topic_focus_quality": topic_focus,
                 "content_alignment": target_analysis.get("alignment", "not_specified") if target_analysis else "no_target",
-                "keyword_quality": "high" if diversity_score > 0.4 else "medium" if diversity_score > 0.2 else "low"
+                "keyword_quality": "high" if diversity_score > 0.4 else "medium" if diversity_score > 0.2 else "low",
+                "score_breakdown": {
+                    "semantic_coherence": float(semantic_coherence * 10),  # 0-10 range
+                    "coherence_score": float(coherence_score * 10),        # 0-10 range  
+                    "diversity_score": float(diversity_score * 10),        # 0-10 range
+                    "weights": {
+                        "semantic_coherence": 0.40,
+                        "coherence_score": 0.35,
+                        "diversity_score": 0.25
+                    }
+                }
             }
         except Exception as e:
             logger.error(f"Error generating relevance assessment: {e}")
-            return {"overall_relevance_score": 5.0, "assessment_level": "unknown"}
+            return {
+                "overall_score": 5.0,
+                "overall_relevance_score": 5.0,
+                "assessment_level": "unknown",
+                "score_breakdown": {
+                    "semantic_coherence": 5.0,
+                    "coherence_score": 5.0,
+                    "diversity_score": 5.0,
+                    "weights": {
+                        "semantic_coherence": 0.40,
+                        "coherence_score": 0.35,
+                        "diversity_score": 0.25
+                    }
+                }
+            }
 
     def _generate_recommendations(self, coherence: Dict, target_analysis: Dict, assessment: Dict, language: str) -> List[str]:
         recommendations = []
