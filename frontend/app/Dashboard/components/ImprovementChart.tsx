@@ -18,13 +18,13 @@ const mapScoreToY = (score: number, maxScore = 10, chartHeight = 160, yOffset = 
 
 const ImprovementChart: React.FC<ImprovementChartProps> = ({ scores, labels, year, availableYears, onYearChange }) => {
   // Chart dimensions
-  const width = 500;
+  const width = 600;
   const height = 200;
   const yOffset = 40;
   const chartHeight = 160;
   const maxScore = 10;
   const pointCount = scores.length;
-  const step = pointCount > 1 ? (width - 50) / (pointCount - 1) : 0;
+  const step = pointCount > 1 ? (width - 100) / (pointCount - 1) : 0;
 
   // Tooltip state
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
@@ -61,7 +61,7 @@ const ImprovementChart: React.FC<ImprovementChartProps> = ({ scores, labels, yea
       </div>
       <div className={styles.chartContainer}>
         <div style={{ width: '100%', height: '100%', position: 'relative' }}>
-          <svg width="100%" height="100%" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">
+          <svg width="100%" height="100%" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="xMidYMid slice">
             <defs>
               <linearGradient id="purpleGradient" x1="0%" y1="0%" x2="0%" y2="100%">
                 <stop offset="0%" stopColor="#9966FF" stopOpacity="0.8"/>
@@ -90,24 +90,32 @@ const ImprovementChart: React.FC<ImprovementChartProps> = ({ scores, labels, yea
             )}
             {/* Data points with hover handlers */}
             {points.map((pt, i) => (
-              <g key={i}>
+              <g 
+                key={i}
+                onMouseEnter={(e) => {
+                  e.stopPropagation();
+                  setHoveredIdx(i);
+                }}
+                onMouseLeave={(e) => {
+                  e.stopPropagation();
+                  setHoveredIdx(null);
+                }}
+                style={{ cursor: 'pointer' }}
+              >
                 <circle
                   cx={pt.x}
                   cy={pt.y}
                   r="4"
                   fill={i === points.length-1 ? '#FFD60A' : '#9966FF'}
-                  style={{ cursor: 'pointer' }}
-                  onMouseEnter={() => setHoveredIdx(i)}
-                  onMouseLeave={() => setHoveredIdx(null)}
                 />
                 {/* Tooltip as SVG text */}
                 {hoveredIdx === i && (
                   <g>
                     <rect
                       x={pt.x - 40}
-                      y={pt.y - 38}
+                      y={pt.y - 50}
                       width="80"
-                      height="40"
+                      height="50"
                       rx="8"
                       fill="rgba(30,30,30,0.95)"
                       stroke="#333"
@@ -115,7 +123,7 @@ const ImprovementChart: React.FC<ImprovementChartProps> = ({ scores, labels, yea
                     />
                     <text
                       x={pt.x}
-                      y={pt.y - 22}
+                      y={pt.y - 35}
                       textAnchor="middle"
                       fontSize="11"
                       fill="#fff"
@@ -125,7 +133,7 @@ const ImprovementChart: React.FC<ImprovementChartProps> = ({ scores, labels, yea
                     </text>
                     <text
                       x={pt.x}
-                      y={pt.y - 10}
+                      y={pt.y - 20}
                       textAnchor="middle"
                       fontSize="11"
                       fill="#fff"
