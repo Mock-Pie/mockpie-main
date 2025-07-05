@@ -41,10 +41,10 @@ class EnhancedFeedbackGenerator:
                 "weight": 0.10
             },
             "wpm_analysis": {
-                "score_field": "pace_consistency.score",
-                "fallback_fields": ["overall_wpm", "overall_score"],
+                "score_field": "overall_score",
+                "fallback_fields": ["pace_consistency.score", "overall_wpm"],
                 "description": "Speaking pace and consistency",
-                "max_score": 1.0,  # pace_consistency.score is 0-1
+                "max_score": 10.0,  # overall_score is 0-10
                 "weight": 0.08
             },
             "pitch_analysis": {
@@ -97,8 +97,8 @@ class EnhancedFeedbackGenerator:
                 "weight": 0.12
             },
             "hand_gesture": {
-                "score_field": "gesture_effectiveness",
-                "fallback_fields": ["gesture_frequency", "overall_score"],
+                "score_field": "overall_score",
+                "fallback_fields": ["gesture_effectiveness", "engagement_metrics.gesture_engagement_score"],
                 "description": "Non-verbal communication effectiveness",
                 "max_score": 10.0,
                 "weight": 0.06
