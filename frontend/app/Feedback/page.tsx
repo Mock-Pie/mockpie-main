@@ -334,7 +334,7 @@ const Feedback = () => {
         {
             key: "speech_emotion",
             label: "Speech Emotion",
-            value: feedback.speech_emotion?.dominant_emotion?.emotion || 'N/A',
+            value: "",
             score: modelScores.speech_emotion?.normalized_score ?? undefined,
             confidence: feedback.speech_emotion?.dominant_emotion?.confidence,
             recommendation: Array.isArray(feedback.speech_emotion?.recommendations) ? feedback.speech_emotion.recommendations[0] : undefined,
@@ -513,19 +513,14 @@ const Feedback = () => {
         {
             key: "hand_gesture",
             label: "Hand Gestures",
-            value: feedback.hand_gesture?.gesture_statistics?.most_common_gesture || 'N/A',
+            value: "",
             score: modelScores.hand_gesture?.normalized_score ?? undefined,
             recommendation: Array.isArray(feedback.hand_gesture?.recommendations) ? feedback.hand_gesture.recommendations[0] : undefined,
             recommendations: feedback.hand_gesture?.recommendations,
             details: feedback.hand_gesture?.gesture_statistics ? addDetailDescriptions({
-                ...feedback.hand_gesture.gesture_statistics,
-                gesture_variety: feedback.hand_gesture?.gesture_statistics?.gesture_variety,
                 hand_usage_distribution: feedback.hand_gesture?.gesture_statistics?.hand_usage_distribution,
-                zone_distribution: feedback.hand_gesture?.gesture_statistics?.zone_distribution,
             }, {
-                gesture_variety: "The number of different gestures you used",
-                hand_usage_distribution: "How you used your left and right hands during your talk",
-                zone_distribution: "The areas in which you used your hands most frequently"
+                hand_usage_distribution: "How you used your left and right hands during your talk"
             }) : undefined,
             description: "Using hand gestures can emphasize your points and make your delivery more dynamic. Aim for natural, purposeful movements that support your message."
         },
