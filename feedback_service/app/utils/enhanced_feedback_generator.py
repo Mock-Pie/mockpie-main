@@ -1,6 +1,7 @@
 import logging
 from typing import Dict, Any, List, Tuple
 import asyncio
+import math
 
 logger = logging.getLogger(__name__)
 
@@ -14,122 +15,124 @@ class EnhancedFeedbackGenerator:
         # Enhanced model categories with improved analysis
         self.model_categories = {
             "speech": {
-                "models": ["speech_emotion", "wpm_analysis", "pitch_analysis", "volume_consistency", 
-                          "filler_detection", "stutter_detection", "lexical_richness"],
-                "description": "Speech and vocal delivery analysis",
-                "weight": 0.40
+                "models": ["speech_emotion", "wpm_analysis", "pitch_analysis", "volume_consistency", "filler_detection", "stutter_detection", "lexical_richness"],
+                "weight": 0.45,
+                "description": "Speech quality and delivery"
             },
             "visual": {
                 "models": ["facial_emotion", "eye_contact", "hand_gesture", "posture_analysis"],
-                "description": "Visual presentation and body language",
-                "weight": 0.35
+                "weight": 0.35,
+                "description": "Visual presentation and body language"
             },
             "content": {
-                "models": ["keyword_relevance"],
-                "description": "Content relevance and focus",
-                "weight": 0.15
-            },
-            "confidence": {
-                "models": ["confidence_detector"],
-                "description": "Overall presenter confidence assessment",
-                "weight": 0.10
+                "models": ["keyword_relevance", "confidence_detector"],
+                "weight": 0.20,
+                "description": "Content relevance and overall confidence"
             }
         }
         
-        # Model-specific scoring configurations
+        # Model-specific scoring configurations - Fixed weights to sum to 1.0
         self.model_scoring = {
             "speech_emotion": {
                 "score_field": "emotional_intensity",
-                "fallback_fields": ["neutrality_score"],
+                "fallback_fields": ["neutrality_score", "overall_score"],
                 "description": "Emotional expression and engagement",
                 "max_score": 1.0,
-                "weight": 0.12
+                "weight": 0.10
             },
             "wpm_analysis": {
                 "score_field": "pace_consistency.score",
-                "fallback_fields": ["overall_wpm"],
+                "fallback_fields": ["overall_wpm", "overall_score"],
                 "description": "Speaking pace and consistency",
                 "max_score": 1.0,  # pace_consistency.score is 0-1
-                "weight": 0.10
+                "weight": 0.08
             },
             "pitch_analysis": {
                 "score_field": "pitch_variety",
-                "fallback_fields": ["pitch_consistency"],
+                "fallback_fields": ["pitch_consistency", "overall_score"],
                 "description": "Vocal variety and emphasis",
                 "max_score": 10.0,
-                "weight": 0.09
+                "weight": 0.08
             },
             "volume_consistency": {
                 "score_field": "consistency_score",
-                "fallback_fields": ["volume_stability"],
+                "fallback_fields": ["volume_stability", "overall_score"],
                 "description": "Volume control and projection",
                 "max_score": 10.0,
-                "weight": 0.08
+                "weight": 0.07
             },
             "filler_detection": {
                 "score_field": "filler_frequency_score",
                 "fallback_fields": ["overall_score"],
                 "description": "Speech clarity and professionalism",
                 "max_score": 10.0,
-                "weight": 0.08
+                "weight": 0.07
             },
             "stutter_detection": {
                 "score_field": "fluency_score",
                 "fallback_fields": ["overall_score"],
                 "description": "Speech fluency and confidence",
                 "max_score": 10.0,
-                "weight": 0.12
+                "weight": 0.10
             },
             "lexical_richness": {
                 "score_field": "lexical_diversity",
-                "fallback_fields": ["vocabulary_score"],
+                "fallback_fields": ["vocabulary_score", "overall_score"],
                 "description": "Vocabulary sophistication",
                 "max_score": 1.0,
-                "weight": 0.08
+                "weight": 0.07
             },
             "facial_emotion": {
-                "score_field": "engagement_score",
-                "fallback_fields": ["confidence_score"],
+                "score_field": "engagement_metrics.engagement_score",
+                "fallback_fields": ["engagement_metrics.confidence_score", "overall_score"],
                 "description": "Facial expression and emotional connection",
                 "max_score": 10.0,
                 "weight": 0.10
             },
             "eye_contact": {
                 "score_field": "attention_score",
-                "fallback_fields": ["eye_contact_percentage"],
+                "fallback_fields": ["eye_contact_percentage", "overall_score"],
                 "description": "Audience engagement through eye contact",
                 "max_score": 10.0,
                 "weight": 0.12
             },
             "hand_gesture": {
                 "score_field": "gesture_effectiveness",
-                "fallback_fields": ["gesture_frequency"],
+                "fallback_fields": ["gesture_frequency", "overall_score"],
                 "description": "Non-verbal communication effectiveness",
                 "max_score": 10.0,
                 "weight": 0.06
             },
             "posture_analysis": {
                 "score_field": "posture_score",
-                "fallback_fields": ["confidence_score"],
+                "fallback_fields": ["confidence_score", "overall_score"],
                 "description": "Professional appearance and confidence",
                 "max_score": 10.0,
                 "weight": 0.12
             },
             "keyword_relevance": {
                 "score_field": "relevance_score",
-                "fallback_fields": ["keyword_coverage"],
+                "fallback_fields": ["keyword_coverage", "overall_score"],
                 "description": "Content relevance and focus",
                 "max_score": 10.0,
                 "weight": 0.05
             },
             "confidence_detector": {
                 "score_field": "overall_confidence_score",
-                "fallback_fields": ["confidence_breakdown"],
+                "fallback_fields": ["confidence_breakdown", "overall_score"],
                 "description": "Overall presenter confidence",
                 "max_score": 10.0,
-                "weight": 0.10
+                "weight": 0.15
             }
         }
+        
+        # Validate that weights sum to 1.0
+        total_weight = sum(config["weight"] for config in self.model_scoring.values())
+        if abs(total_weight - 1.0) > 0.001:
+            logger.warning(f"Model weights sum to {total_weight}, not 1.0. Normalizing...")
+            # Normalize weights to sum to 1.0
+            for config in self.model_scoring.values():
+                config["weight"] /= total_weight
     
     async def generate_comprehensive_feedback(self, analysis_results: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -189,19 +192,20 @@ class EnhancedFeedbackGenerator:
                     # Try to extract score
                     score = self._extract_score_from_model(model_result, config)
                     
-                    if score is not None:
+                    if score is not None and score != -1.0:
                         individual_scores[model_name] = {
                             "score": score,
                             "normalized_score": self._normalize_score(score, config["max_score"]),
                             "description": config["description"],
                             "weight": config["weight"],
                             "category": self._get_model_category(model_name),
-                            "details": self._extract_model_details(model_result, model_name)
+                            "details": self._extract_model_details(model_result, model_name),
+                            "status": "valid"
                         }
                     else:
                         individual_scores[model_name] = {
-                            "score": None,
-                            "normalized_score": 5.0,  # Default neutral score
+                            "score": -1.0,
+                            "normalized_score": -1.0,
                             "description": config["description"],
                             "weight": config["weight"],
                             "category": self._get_model_category(model_name),
@@ -210,8 +214,8 @@ class EnhancedFeedbackGenerator:
                         }
                 else:
                     individual_scores[model_name] = {
-                        "score": None,
-                        "normalized_score": 5.0,
+                        "score": -1.0,
+                        "normalized_score": -1.0,
                         "description": config["description"],
                         "weight": config["weight"],
                         "category": self._get_model_category(model_name),
@@ -226,7 +230,13 @@ class EnhancedFeedbackGenerator:
         # Try primary score field (handle nested paths)
         if config["score_field"] in model_result:
             try:
-                score = float(model_result[config["score_field"]])
+                score_value = model_result[config["score_field"]]
+                if score_value is None:
+                    return -1.0
+                score = float(score_value)
+                # Validate score is not NaN or infinite
+                if math.isnan(score) or math.isinf(score):
+                    return -1.0
                 return score
             except (ValueError, TypeError):
                 pass
@@ -242,7 +252,12 @@ class EnhancedFeedbackGenerator:
                         current_value = None
                         break
                 if current_value is not None:
+                    if current_value is None:
+                        return -1.0
                     score = float(current_value)
+                    # Validate score is not NaN or infinite
+                    if math.isnan(score) or math.isinf(score):
+                        return -1.0
                     return score
             except (ValueError, TypeError, KeyError):
                 pass
@@ -251,7 +266,13 @@ class EnhancedFeedbackGenerator:
         for fallback_field in config["fallback_fields"]:
             if fallback_field in model_result:
                 try:
-                    score = float(model_result[fallback_field])
+                    score_value = model_result[fallback_field]
+                    if score_value is None:
+                        continue
+                    score = float(score_value)
+                    # Validate score is not NaN or infinite
+                    if math.isnan(score) or math.isinf(score):
+                        continue
                     return score
                 except (ValueError, TypeError):
                     continue
@@ -263,27 +284,46 @@ class EnhancedFeedbackGenerator:
         for field in common_score_fields:
             if field in model_result:
                 try:
-                    score = float(model_result[field])
+                    score_value = model_result[field]
+                    if score_value is None:
+                        continue
+                    score = float(score_value)
+                    # Validate score is not NaN or infinite
+                    if math.isnan(score) or math.isinf(score):
+                        continue
                     return score
                 except (ValueError, TypeError):
                     continue
         
-        return None
+        return -1.0
     
     def _normalize_score(self, score: float, max_score: float) -> float:
         """Normalize score to 0-10 range."""
-        if score is None:
-            return 5.0
+        if score is None or score == -1.0:
+            return -1.0
         
-        if max_score <= 1.0:
-            # Score is already in 0-1 range, scale to 0-10
-            return score * 10
-        elif max_score <= 10.0:
-            # Score is already in 0-10 range
-            return max(0, min(10, score))
-        else:
-            # Score is in larger range, normalize to 0-10
-            return (score / max_score) * 10
+        # Validate inputs
+        if math.isnan(score) or math.isinf(score):
+            return -1.0
+        
+        if max_score <= 0:
+            return -1.0
+        
+        try:
+            if max_score <= 1.0:
+                # Score is already in 0-1 range, scale to 0-10
+                normalized = score * 10
+            elif max_score <= 10.0:
+                # Score is already in 0-10 range
+                normalized = score
+            else:
+                # Score is in larger range, normalize to 0-10
+                normalized = (score / max_score) * 10
+            
+            # Ensure result is within 0-10 range
+            return max(0.0, min(10.0, normalized))
+        except (ValueError, TypeError, ZeroDivisionError):
+            return -1.0
     
     def _get_model_category(self, model_name: str) -> str:
         """Get the category for a given model."""
@@ -363,7 +403,8 @@ class EnhancedFeedbackGenerator:
             for model_name in category_models:
                 if model_name in individual_scores:
                     score_info = individual_scores[model_name]
-                    if score_info["normalized_score"] is not None:
+                    # Only include valid scores (not -1.0)
+                    if score_info["normalized_score"] is not None and score_info["normalized_score"] != -1.0:
                         scores.append(score_info["normalized_score"])
                         weights.append(score_info["weight"])
             
@@ -380,7 +421,9 @@ class EnhancedFeedbackGenerator:
                 "description": config["description"],
                 "weight": config["weight"],
                 "models_used": len(scores),
-                "total_models": len(category_models)
+                "total_models": len(category_models),
+                "valid_models": len([m for m in category_models if m in individual_scores and 
+                                   individual_scores[m]["normalized_score"] != -1.0])
             }
         
         return category_scores
@@ -434,13 +477,15 @@ class EnhancedFeedbackGenerator:
         for component in speech_components:
             if component in individual_scores:
                 score_info = individual_scores[component]
-                speech_scores.append(score_info["normalized_score"])
-                speech_weights.append(score_info["weight"])
-                
-                # Generate specific feedback for each component
-                speech_feedback["specific_feedback"][component] = self._generate_component_feedback(
-                    component, score_info
-                )
+                # Only include valid scores (not -1.0)
+                if score_info["normalized_score"] is not None and score_info["normalized_score"] != -1.0:
+                    speech_scores.append(score_info["normalized_score"])
+                    speech_weights.append(score_info["weight"])
+                    
+                    # Generate specific feedback for each component
+                    speech_feedback["specific_feedback"][component] = self._generate_component_feedback(
+                        component, score_info
+                    )
         
         if speech_scores and speech_weights:
             # Calculate weighted average instead of simple average
@@ -451,6 +496,15 @@ class EnhancedFeedbackGenerator:
             speech_feedback["key_metrics"] = {
                 "average_score": round(avg_speech_score, 2),
                 "components_analyzed": len(speech_scores),
+                "total_components": len(speech_components),
+                "weighted_average": True
+            }
+        else:
+            speech_feedback["overall_assessment"] = "Insufficient speech data for analysis"
+            speech_feedback["key_metrics"] = {
+                "average_score": 5.0,
+                "components_analyzed": 0,
+                "total_components": len(speech_components),
                 "weighted_average": True
             }
         
@@ -472,13 +526,15 @@ class EnhancedFeedbackGenerator:
         for component in visual_components:
             if component in individual_scores:
                 score_info = individual_scores[component]
-                visual_scores.append(score_info["normalized_score"])
-                visual_weights.append(score_info["weight"])
-                
-                # Generate specific feedback for each component
-                visual_feedback["specific_feedback"][component] = self._generate_component_feedback(
-                    component, score_info
-                )
+                # Only include valid scores (not -1.0)
+                if score_info["normalized_score"] is not None and score_info["normalized_score"] != -1.0:
+                    visual_scores.append(score_info["normalized_score"])
+                    visual_weights.append(score_info["weight"])
+                    
+                    # Generate specific feedback for each component
+                    visual_feedback["specific_feedback"][component] = self._generate_component_feedback(
+                        component, score_info
+                    )
         
         if visual_scores and visual_weights:
             # Calculate weighted average instead of simple average
@@ -489,6 +545,15 @@ class EnhancedFeedbackGenerator:
             visual_feedback["key_metrics"] = {
                 "average_score": round(avg_visual_score, 2),
                 "components_analyzed": len(visual_scores),
+                "total_components": len(visual_components),
+                "weighted_average": True
+            }
+        else:
+            visual_feedback["overall_assessment"] = "Insufficient visual data for analysis"
+            visual_feedback["key_metrics"] = {
+                "average_score": 5.0,
+                "components_analyzed": 0,
+                "total_components": len(visual_components),
                 "weighted_average": True
             }
         

@@ -2,6 +2,7 @@ import numpy as np
 import asyncio
 import logging
 from typing import Dict, Any
+import math
 
 logger = logging.getLogger(__name__)
 
@@ -11,30 +12,23 @@ class CompositeScorer:
     def __init__(self):
         # Enhanced weights for presentation analysis with improved models
         # Weights optimized for comprehensive presentation evaluation
+        
+        # Individual model weights - Fixed to sum to 1.0
         self.model_weights = {
-            # Core Speech Analysis (35% total - most important for presentations)
-            "speech_emotion": 0.12,      # Enhanced emotional analysis with confidence detection
-            "wpm_analysis": 0.08,        # Speaking pace and rhythm 
-            "pitch_analysis": 0.08,      # Vocal variety and control
-            "volume_consistency": 0.07,  # Audio stability and projection
-            
-            # Speech Quality & Fluency (20% total)
-            "filler_detection": 0.08,    # Professional speech quality
-            "stutter_detection": 0.07,   # Speech fluency
-            "lexical_richness": 0.05,    # Vocabulary sophistication
-            
-            # Visual Presence & Engagement (35% total)
-            "eye_contact": 0.13,         # Enhanced audience engagement analysis
-            "hand_gesture": 0.08,        # Enhanced gesture effectiveness analysis
-            "posture_analysis": 0.09,    # Professional posture and body language
-            "facial_emotion": 0.05,      # Facial expression analysis
-            
-            # Content & Context (10% total)
-            "keyword_relevance": 0.05,   # Content relevance and focus
-            "confidence_detector": 0.05, # Overall confidence assessment
-            
-            # Legacy/fallback weights
-            "default": 0.03
+            "speech_emotion": 0.10,
+            "wpm_analysis": 0.08,
+            "pitch_analysis": 0.08,
+            "volume_consistency": 0.07,
+            "filler_detection": 0.07,
+            "stutter_detection": 0.10,
+            "lexical_richness": 0.07,
+            "facial_emotion": 0.10,
+            "eye_contact": 0.12,
+            "hand_gesture": 0.06,
+            "posture_analysis": 0.12,
+            "keyword_relevance": 0.05,
+            "confidence_detector": 0.15,
+            "default": 0.05
         }
         
         # Enhanced scoring categories with presentation-specific focus
@@ -63,55 +57,32 @@ class CompositeScorer:
         
         # Validate weights sum to approximately 1.0
         total_weight = sum(self.model_weights.values())
-        if abs(total_weight - 1.0) > 0.01:
+        if abs(total_weight - 1.0) > 0.001:
             logger.warning(f"Model weights sum to {total_weight}, not 1.0. Normalizing...")
             # Normalize weights
             for key in self.model_weights:
                 self.model_weights[key] /= total_weight
     
     async def calculate_score(self, analysis_results: Dict[str, Any]) -> Dict[str, Any]:
-        """Calculate weighted composite score with maximum safety"""
+        """Calculate comprehensive weighted score from all available models."""
         try:
-            logger.info(f"Composite scorer received: {type(analysis_results)}")
+            logger.info("Starting composite score calculation...")
             
-            if not isinstance(analysis_results, dict):
-                logger.error(f"Invalid input type: {type(analysis_results)}")
-                return self._get_default_score("Invalid input")
-            
-            logger.info(f"Analysis results keys: {list(analysis_results.keys())}")
-            
-            # Extract scores with weights
             weighted_scores = []
-            component_info = {}
             total_weight_used = 0.0
+            component_info = {}
             
-            for key, value in analysis_results.items():
+            for key, result in analysis_results.items():
                 try:
-                    logger.info(f"Processing component: {key}, type: {type(value)}")
-                    
-                    if not isinstance(value, dict):
-                        logger.warning(f"Skipping {key}: not a dictionary")
-                        continue
-                    
-                    if "error" in value:
-                        logger.warning(f"Skipping {key}: contains error")
+                    if not isinstance(result, dict) or "error" in result:
+                        logger.warning(f"Skipping {key} due to error or invalid format")
                         component_info[key] = {"status": "error", "weight": 0.0}
                         continue
                     
-                    # Look for common score fields
-                    score = None
-                    score_fields = ["overall_score", "score", "confidence_score", "attention_score", 
-                                  "engagement_score", "fluency_score", "consistency_score"]
+                    # Extract score using enhanced logic
+                    score = self._extract_score_enhanced(key, result)
                     
-                    for field in score_fields:
-                        if field in value:
-                            try:
-                                score = float(value[field])
-                                break
-                            except (ValueError, TypeError):
-                                continue
-                    
-                    if score is not None:
+                    if score is not None and score != -1.0:
                         # Normalize to 0-10 range
                         if score > 1.0:  # Already in 0-10 range
                             normalized_score = max(0, min(10, score))
@@ -131,11 +102,11 @@ class CompositeScorer:
                         logger.info(f"Extracted score {normalized_score} with weight {weight} from {key}")
                     else:
                         logger.warning(f"No valid score found in {key}")
-                        component_info[key] = {"status": "no_score", "weight": 0.0}
+                        component_info[key] = {"status": "no_score", "weight": 0.0, "score": -1.0}
                         
                 except Exception as e:
                     logger.error(f"Error processing {key}: {e}")
-                    component_info[key] = {"status": f"error: {str(e)}", "weight": 0.0}
+                    component_info[key] = {"status": f"error: {str(e)}", "weight": 0.0, "score": -1.0}
             
             # Calculate weighted overall score
             if weighted_scores and total_weight_used > 0:
@@ -146,45 +117,91 @@ class CompositeScorer:
                 overall_score = 5.0
                 logger.warning("No scores extracted, using default")
             
-            # Calculate category-specific scores
-            speech_models = ["speech_emotion", "wpm_analysis", "pitch_analysis", "volume_consistency", 
-                           "filler_detection", "stutter_detection", "lexical_richness"]
-            visual_models = ["facial_emotion", "eye_contact", "hand_gesture", "posture_analysis"]
-            content_models = ["keyword_relevance"]
+            # Calculate category scores
+            category_scores = {}
+            for category_name, category_config in self.scoring_categories.items():
+                category_score = self._calculate_category_score(component_info, category_config["models"])
+                category_scores[category_name] = {
+                    "score": category_score,
+                    "description": category_config["description"],
+                    "weight": category_config["weight"]
+                }
             
-            speech_score = self._calculate_category_score(component_info, speech_models)
-            visual_score = self._calculate_category_score(component_info, visual_models)
-            content_score = self._calculate_category_score(component_info, content_models)
-            
-            result = {
-                "composite_score": {
-                    "engagement": float(visual_score),      # Visual engagement
-                    "confidence": float(speech_score),      # Speech confidence
-                    "professionalism": float(overall_score), # Overall professionalism
-                    "overall": float(overall_score)
-                },
-                "engagement_score": float(visual_score),
-                "confidence_score": float(speech_score),
-                "professionalism_score": float(overall_score),
-                "component_info": component_info,
-                "scores_used": len(weighted_scores),
-                "total_weight_used": total_weight_used,
-                "category_scores": {
-                    "speech": speech_score,
-                    "visual": visual_score,
-                    "content": content_score
-                },
-                "overall_assessment": self._generate_assessment(overall_score)
+            return {
+                "overall_score": round(overall_score, 2),
+                "category_scores": category_scores,
+                "component_breakdown": component_info,
+                "total_components": len(analysis_results),
+                "valid_components": len(weighted_scores),
+                "total_weight_used": round(total_weight_used, 3)
             }
-            
-            logger.info("Composite score calculation completed successfully")
-            return result
             
         except Exception as e:
             logger.error(f"Error in composite scorer: {e}")
             import traceback
             logger.error(f"Composite scorer traceback: {traceback.format_exc()}")
             return self._get_default_score(f"Calculation error: {str(e)}")
+    
+    def _extract_score_enhanced(self, model_name: str, result: Dict[str, Any]) -> float:
+        """Enhanced score extraction with better field mapping."""
+        try:
+            # Model-specific score field mappings
+            score_mappings = {
+                "speech_emotion": ["emotional_intensity", "overall_score"],
+                "wpm_analysis": ["pace_consistency.score", "overall_score"],
+                "pitch_analysis": ["pitch_variety", "overall_score"],
+                "volume_consistency": ["consistency_score", "overall_score"],
+                "filler_detection": ["filler_frequency_score", "overall_score"],
+                "stutter_detection": ["fluency_score", "overall_score"],
+                "lexical_richness": ["lexical_diversity", "overall_score"],
+                "facial_emotion": ["engagement_metrics.engagement_score", "overall_score"],
+                "eye_contact": ["attention_score", "overall_score"],
+                "hand_gesture": ["gesture_effectiveness", "overall_score"],
+                "posture_analysis": ["posture_score", "overall_score"],
+                "keyword_relevance": ["relevance_score", "overall_score"],
+                "confidence_detector": ["overall_confidence_score", "overall_score"]
+            }
+            
+            fields_to_try = score_mappings.get(model_name, ["overall_score", "score"])
+            
+            for field in fields_to_try:
+                score = self._extract_nested_field(result, field)
+                if score is not None and score != -1.0:
+                    return score
+            
+            return -1.0
+            
+        except Exception as e:
+            logger.error(f"Error extracting score from {model_name}: {e}")
+            return -1.0
+    
+    def _extract_nested_field(self, data: Dict[str, Any], field_path: str) -> float:
+        """Extract value from nested field path like 'engagement_metrics.engagement_score'."""
+        try:
+            if "." in field_path:
+                parts = field_path.split(".")
+                current = data
+                for part in parts:
+                    if isinstance(current, dict) and part in current:
+                        current = current[part]
+                    else:
+                        return -1.0
+                value = current
+            else:
+                value = data.get(field_path)
+            
+            if value is None:
+                return -1.0
+            
+            score = float(value)
+            # Validate score is not NaN or infinite
+            if math.isnan(score) or math.isinf(score):
+                return -1.0
+            
+            return score
+            
+        except (ValueError, TypeError, KeyError):
+            return -1.0
     
     def _calculate_category_score(self, component_info: Dict[str, Any], model_names: list) -> float:
         """Calculate weighted score for a specific category of models"""
@@ -196,8 +213,10 @@ class CompositeScorer:
                 if model_name in component_info:
                     info = component_info[model_name]
                     if isinstance(info, dict) and "score" in info and "weight" in info:
-                        category_scores.append(info["score"])
-                        category_weights.append(info["weight"])
+                        # Only include valid scores (not -1.0)
+                        if info["score"] != -1.0:
+                            category_scores.append(info["score"])
+                            category_weights.append(info["weight"])
             
             if category_scores and sum(category_weights) > 0:
                 weighted_sum = sum(score * weight for score, weight in zip(category_scores, category_weights))
