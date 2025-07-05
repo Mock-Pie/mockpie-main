@@ -97,6 +97,10 @@ const Uploading = () => {
             setUploadStatus("Video is too short. Minimum duration is 30 seconds.");
             return;
         }
+        if (duration > 3600) {
+            setUploadStatus("Video is too long. Maximum duration is 1 hour.");
+            return;
+        }
 
         // Validate required fields
         if (!presentationTopic.trim()) {

@@ -253,6 +253,12 @@ const Recording = () => {
             return;
         }
 
+        // Reject if video duration is greater than 1 hour
+        if (videoDuration > 3600) {
+            setUploadStatus("Video is too long. Maximum duration is 1 hour.");
+            return;
+        }
+
         // Validate required fields
         if (!presentationTopic.trim()) {
             setUploadStatus("Please enter a presentation topic.");
