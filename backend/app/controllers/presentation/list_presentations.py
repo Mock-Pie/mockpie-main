@@ -41,7 +41,8 @@ class ListPresentations:
                     "title": p.title,
                     "url": p.url,
                     "is_public": p.is_public,
-                    "uploaded_at": p.uploaded_at.isoformat()
+                    "uploaded_at": p.uploaded_at.isoformat(),
+                    "topic": p.topic,
                 }
                 for p in presentations
             ],

@@ -20,6 +20,9 @@ export interface Presentation {
     file_exists?: boolean;
   };
   type?: 'past' | 'upcoming';
+  topic?: string;
+  overall_score?: number;
+  is_public?: boolean;
 }
 
 export interface UpcomingPresentation {

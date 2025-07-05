@@ -79,69 +79,8 @@ const PresentationTable: React.FC<PresentationTableProps> = ({
     fetchRecent();
   }, []);
 
-  // Combine and transform data
-  const combineData = (): PresentationData[] => {
-    const combined: PresentationData[] = [];
-
-    // Add submitted trials (completed presentations)
-    // submittedTrials.forEach((trial, index) => {
-    //   combined.push({
-    //     id: trial.id || `trial_${index}`,
-    //     title: trial.title,
-    //     company: trial.title || `Presentation ${trial.id || index + 1}`,
-    //     date: new Date(trial.uploaded_at).toLocaleDateString('en-GB'),
-    //     status: 'presented',
-    //     type: 'submitted'
-    //   });
-    // });
-
-    // Add upcoming presentations
-    // upcomingPresentations.forEach((presentation, index) => {
-    //   combined.push({
-    //     id: presentation.id || `upcoming_${index}`,
-    //     topic: presentation.topic,
-    //     company: presentation.topic || `Upcoming ${index + 1}`,
-    //     date: new Date(presentation.date).toLocaleDateString('en-GB'),
-    //     status: 'upcoming',
-    //     type: 'upcoming',
-    //     time: presentation.time
-    //   });
-    // });
-
-    // Sort by date (newest first for submitted, upcoming first for future)
-    // return combined.sort((a, b) => {
-    //   if (a.type === 'upcoming' && b.type === 'submitted') return -1;
-    //   if (a.type === 'submitted' && b.type === 'upcoming') return 1;
-    //   
-    //   const dateA = new Date(a.date.split('/').reverse().join('-'));
-    //   const dateB = new Date(b.date.split('/').reverse().join('-'));
-    //   
-    //   if (a.type === 'upcoming') {
-    //     return dateA.getTime() - dateB.getTime(); // Upcoming: earliest first
-    //   } else {
-    //     return dateB.getTime() - dateA.getTime(); // Submitted: newest first
-    //   }
-    // });
-  };
-
   // Only show the 4 most recent presentations
   const displayedData = recentPresentations;
-
-  const getCompanyInitial = (company: string): string => {
-    return company.charAt(0).toUpperCase();
-  };
-
-  const getCompanyColor = (index: number): string => {
-    const colors = [
-      'linear-gradient(135deg, #FF6B35, #F7931E)',
-      'linear-gradient(135deg, #66CCFF, #3399CC)',
-      'linear-gradient(135deg, #99FF66, #66CC33)',
-      'linear-gradient(135deg, #FF66B2, #CC3399)',
-      'linear-gradient(135deg, #FFCC66, #FF9933)',
-      'linear-gradient(135deg, #66FFCC, #33CC99)'
-    ];
-    return colors[index % colors.length];
-  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -168,11 +107,6 @@ const PresentationTable: React.FC<PresentationTableProps> = ({
 
   const handleAddNew = () => {
     router.push('/Calendar');
-  };
-
-  const handleFilter = () => {
-    // Implement filter functionality
-    console.log('Filter clicked');
   };
 
   // Add delete handler
@@ -219,12 +153,6 @@ const PresentationTable: React.FC<PresentationTableProps> = ({
           <h3 className={styles.sectionTitle}>📋 Recent Presentations</h3>
         </div>
         <div style={{ display: 'flex', gap: '12px' }}>
-          <button className={styles.filterButton} onClick={handleFilter}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" fill="currentColor"/>
-            </svg>
-            <span>Filter</span>
-          </button>
           <button className={styles.filterButton} onClick={handleAddNew}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -305,27 +233,10 @@ const PresentationTable: React.FC<PresentationTableProps> = ({
                 </td>
                 <td className={styles.tableCell}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <div style={{
-                      width: 32,
-                      height: 32,
-                      borderRadius: '8px',
-                      background: getCompanyColor(index),
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontWeight: 700,
-                      fontSize: 18,
-                      color: '#fff',
-                    }}>
-                      {getCompanyInitial(item.title || 'P')}
-                    </div>
                     <div>
                       <div style={{ fontWeight: 600, color: 'var(--white)' }}>
                         {item.title || 'Untitled'}
                       </div>
-                      {item.time && (
-                        <span style={{ fontSize: 12, color: 'var(--light-grey)' }}>{item.time}</span>
-                      )}
                     </div>
                   </div>
                 </td>

@@ -19,12 +19,13 @@ import styles from "./page.module.css";
 import styles1 from "../UploadRecordVideos/page.module.css";
 import uploadStyles from "../UploadRecordVideos/uploadrecord.module.css";
 import SideBar from "../UploadRecordVideos/components/SideBar";
-import PresentationService, { Presentation } from '../services/presentationService';
+import PresentationService from '../services/presentationService';
+import { Presentation as PresentationType } from '../types';
 
 const SubmittedTrials = () => {
   const router = useRouter();
-  const [presentations, setPresentations] = useState<Presentation[]>([]);
-  const [filteredPresentations, setFilteredPresentations] = useState<Presentation[]>([]);
+  const [presentations, setPresentations] = useState<PresentationType[]>([]);
+  const [filteredPresentations, setFilteredPresentations] = useState<PresentationType[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [dateFilter, setDateFilter] = useState<string>('all');
   const [expandedFeedback, setExpandedFeedback] = useState<string | null>(null);
@@ -83,13 +84,13 @@ const SubmittedTrials = () => {
       setError(null);
       
       const response = await PresentationService.getUserPresentations();
-      
+      console.log(response);
       if (response.success && response.data) {
         const presentationsData = (response.data as any).videos || [];
         
         // Fetch feedback data for each presentation to get overall scores
         const presentationsWithScores = await Promise.all(
-          presentationsData.map(async (presentation: Presentation) => {
+          presentationsData.map(async (presentation: PresentationType) => {
             try {
               const feedbackResponse = await fetch(`http://localhost:8081/feedback/presentation/${presentation.id}/feedback`, {
                 headers: {
@@ -115,7 +116,7 @@ const SubmittedTrials = () => {
           })
         );
         
-        console.log('Presentations with scores:', presentationsWithScores.map((p: Presentation) => ({ id: p.id, title: p.title, overall_score: p.overall_score })));
+        console.log('Presentations with scores:', presentationsWithScores.map((p: PresentationType) => ({ id: p.id, title: p.title, overall_score: p.overall_score })));
         setPresentations(presentationsWithScores);
         setFilteredPresentations(presentationsWithScores);
       } else {
@@ -267,7 +268,7 @@ const SubmittedTrials = () => {
     setItemToDelete(null);
   };
 
-  const handleDownloadPresentation = async (presentation: Presentation) => {
+  const handleDownloadPresentation = async (presentation: PresentationType) => {
     try {
       // Get authentication token
       const accessToken = localStorage.getItem('access_token');
@@ -345,7 +346,7 @@ const SubmittedTrials = () => {
     return styles.poorScore;
   };
 
-  const getFeedbackText = (presentation: Presentation): string => {
+  const getFeedbackText = (presentation: PresentationType): string => {
     // Generate feedback based on presentation properties
     const feedbacks = [
       "Presentation uploaded successfully. Ready for analysis.",
@@ -467,23 +468,9 @@ const SubmittedTrials = () => {
               <table className={styles.trialsTable}>
                 <thead className={styles.tableHeader}>
                   <tr>
-                    <th className={styles.checkboxHeader}>
-                      <input
-                        type="checkbox"
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setSelectedPresentations(currentPresentations.map(p => p.id));
-                          } else {
-                            setSelectedPresentations([]);
-                          }
-                        }}
-                        checked={selectedPresentations.length === currentPresentations.length && currentPresentations.length > 0}
-                        className={styles.checkbox}
-                      />
-                    </th>
                     <th className={styles.tableHeaderCell}>Presentation</th>
                     <th className={styles.tableHeaderCell}>Date</th>
-                    <th className={styles.tableHeaderCell}>Size</th>
+                    <th className={styles.tableHeaderCell}>Topic</th>
                     <th className={styles.tableHeaderCell}>Overall Score</th>
                     <th className={styles.tableHeaderCell}>Feedback</th>
                     <th className={styles.tableHeaderCell}>Actions</th>
@@ -492,14 +479,6 @@ const SubmittedTrials = () => {
                 <tbody className={styles.tableBody}>
                   {currentPresentations.map((presentation) => (
                     <tr key={presentation.id} className={styles.tableRow}>
-                      <td className={styles.checkboxCell}>
-                        <input
-                          type="checkbox"
-                          checked={selectedPresentations.includes(presentation.id)}
-                          onChange={() => togglePresentationSelection(presentation.id)}
-                          className={styles.checkbox}
-                        />
-                      </td>
                       <td className={styles.trialCell}>
                         <div className={styles.trialInfo}>
                           <div className={styles.videoThumbnail}>
@@ -519,11 +498,8 @@ const SubmittedTrials = () => {
                       <td className={styles.dateCell}>
                         {new Date(presentation.uploaded_at).toLocaleDateString()}
                       </td>
-                      <td className={styles.durationCell}>
-                        {presentation.file_info?.file_size ? 
-                          PresentationService.formatFileSize(presentation.file_info.file_size) : 
-                          'Unknown'
-                        }
+                      <td className={styles.topicCell}>
+                        {presentation.topic || 'Unknown'}
                       </td>
                       <td className={styles.scoreCell}>
                         {presentation.overall_score !== undefined ? (
