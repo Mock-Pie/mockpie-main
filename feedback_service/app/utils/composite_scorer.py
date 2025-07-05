@@ -148,7 +148,7 @@ class CompositeScorer:
             # Model-specific score field mappings
             score_mappings = {
                 "speech_emotion": ["emotional_intensity", "overall_score"],
-                "wpm_analysis": ["pace_consistency.score", "overall_score"],
+                "wpm_analysis": ["overall_score", "pace_consistency.score"],
                 "pitch_analysis": ["pitch_variety", "overall_score"],
                 "volume_consistency": ["consistency_score", "overall_score"],
                 "filler_detection": ["filler_frequency_score", "overall_score"],
@@ -156,7 +156,7 @@ class CompositeScorer:
                 "lexical_richness": ["lexical_diversity", "overall_score"],
                 "facial_emotion": ["engagement_metrics.engagement_score", "overall_score"],
                 "eye_contact": ["attention_score", "overall_score"],
-                "hand_gesture": ["gesture_effectiveness", "overall_score"],
+                "hand_gesture": ["overall_score", "gesture_effectiveness"],
                 "posture_analysis": ["posture_score", "overall_score"],
                 "keyword_relevance": ["overall_score", "relevance_score"],
                 "confidence_detector": ["overall_confidence_score", "overall_score"]

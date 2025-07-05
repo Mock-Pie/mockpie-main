@@ -35,7 +35,7 @@ class FacialEmotionAnalyzer:
             logger.warning(f"Could not load emotion model: {e}")
             self.transformer_available = False
 
-    def analyze(self, video_path: str) -> Dict[str, Any]:
+    def analyze(self, video_path: str, face_detection_threshold: float = 0.3, min_duration_threshold: float = 5.0) -> Dict[str, Any]:
         logger.info(f"Starting Facial Emotion Analysis for {video_path}")
         if not self.transformer_available:
             logger.warning("Transformer-based emotion classifier not available, using heuristics.")
@@ -70,17 +70,37 @@ class FacialEmotionAnalyzer:
         if not emotions_over_time:
             return self._get_fallback_result("No faces detected in video")
 
+        # Calculate face detection rate and total duration
+        face_detection_rate = len(emotions_over_time) / len(frames_to_analyze) if frames_to_analyze else 0.0
+        total_duration = max(timestamps) - min(timestamps) if timestamps else 0.0
+        
+        # Check thresholds
+        if face_detection_rate < face_detection_threshold:
+            logger.warning(f"Face detection rate ({face_detection_rate:.2f}) below threshold ({face_detection_threshold}). Setting score to -1.")
+            return self._get_insufficient_data_result(face_detection_rate, total_duration, "insufficient_face_detection")
+        
+        if total_duration < min_duration_threshold:
+            logger.warning(f"Total duration ({total_duration:.2f}s) below threshold ({min_duration_threshold}s). Setting score to -1.")
+            return self._get_insufficient_data_result(face_detection_rate, total_duration, "insufficient_duration")
+
         # Analyze results
         emotion_stats = self._calculate_emotion_statistics(emotions_over_time)
         temporal_analysis = self._analyze_temporal_patterns(emotions_over_time)
-        face_detection_rate = len(emotions_over_time) / len(frames_to_analyze)
+        engagement_score = self._calculate_engagement_score(emotion_stats, temporal_analysis)
 
         return {
             "face_detection_rate": float(face_detection_rate),
             "total_analyzed_frames": len(emotions_over_time),
+            "total_duration": float(total_duration),
             "emotion_statistics": emotion_stats,
             "temporal_analysis": temporal_analysis,
-            "analysis_method": "transformer" if self.transformer_available else "heuristic"
+            "analysis_method": "transformer" if self.transformer_available else "heuristic",
+            "engagement_metrics": {
+                "engagement_score": float(engagement_score),
+                "confidence_score": float(emotion_stats.get("positivity_score", 0.0) * 10.0),
+                "insufficient_face_detection": False,
+                "insufficient_duration": False
+            }
         }
 
     def _analyze_frame_worker(self, args):
@@ -225,5 +245,60 @@ class FacialEmotionAnalyzer:
             "total_analyzed_frames": 0,
             "emotion_statistics": {},
             "temporal_analysis": {},
-            "analysis_method": "error"
+            "analysis_method": "error",
+            "engagement_metrics": {
+                "engagement_score": -1.0,
+                "confidence_score": 0.0,
+                "insufficient_face_detection": True,
+                "insufficient_duration": True
+            }
         }
+
+    def _get_insufficient_data_result(self, face_detection_rate: float, total_duration: float, reason: str) -> Dict[str, Any]:
+        """Return result when face detection rate or duration is insufficient."""
+        logger.warning(f"Insufficient data: {reason}")
+        return {
+            "face_detection_rate": float(face_detection_rate),
+            "total_analyzed_frames": 0,
+            "total_duration": float(total_duration),
+            "emotion_statistics": {},
+            "temporal_analysis": {},
+            "analysis_method": "insufficient_data",
+            "engagement_metrics": {
+                "engagement_score": -1.0,
+                "confidence_score": 0.0,
+                "insufficient_face_detection": reason == "insufficient_face_detection",
+                "insufficient_duration": reason == "insufficient_duration"
+            }
+        }
+
+    def _calculate_engagement_score(self, emotion_stats: Dict[str, Any], temporal_analysis: Dict[str, Any]) -> float:
+        """Calculate engagement score based on emotion statistics and temporal patterns."""
+        try:
+            # Base score from positivity
+            positivity_score = emotion_stats.get("positivity_score", 0.0) * 10.0  # Scale to 0-10
+            
+            # Bonus for emotional variability (shows engagement)
+            emotional_variability = emotion_stats.get("emotional_variability", 0.0)
+            variability_bonus = min(emotional_variability * 2.0, 2.0)  # Max 2 point bonus
+            
+            # Penalty for high negativity
+            negativity_score = emotion_stats.get("negativity_score", 0.0)
+            negativity_penalty = min(negativity_score * 3.0, 3.0)  # Max 3 point penalty
+            
+            # Bonus for good temporal patterns
+            temporal_bonus = 0.0
+            if temporal_analysis.get("emotional_consistency") == "high":
+                temporal_bonus = 1.0
+            elif temporal_analysis.get("emotional_consistency") == "medium":
+                temporal_bonus = 0.5
+            
+            # Calculate final score
+            engagement_score = positivity_score + variability_bonus - negativity_penalty + temporal_bonus
+            
+            # Ensure score is in 0-10 range
+            return max(0.0, min(10.0, engagement_score))
+            
+        except Exception as e:
+            logger.error(f"Error calculating engagement score: {e}")
+            return 5.0  # Default neutral score

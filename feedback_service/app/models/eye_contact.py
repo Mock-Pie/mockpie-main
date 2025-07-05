@@ -21,7 +21,7 @@ class EyeContactAnalyzer:
             'unknown': {'weight': 0.5}
         }
 
-    def analyze_eye_contact(self, video_path: str, sample_rate: float = 1.0):
+    def analyze_eye_contact(self, video_path: str, sample_rate: float = 1.0, face_detection_threshold: float = 0.3):
         try:
             cap = cv2.VideoCapture(video_path)
             if not cap.isOpened():
@@ -50,7 +50,7 @@ class EyeContactAnalyzer:
                 frame_number += 1
 
             cap.release()
-            return self._process_eye_contact_results(results, fps, total_frames)
+            return self._process_eye_contact_results(results, fps, total_frames, face_detection_threshold)
         except Exception as e:
             logger.error(f"Error in eye contact analysis: {e}")
             return {
@@ -110,14 +110,37 @@ class EyeContactAnalyzer:
             logger.error(f"MediaPipe frame analysis error at {timestamp:.2f}s: {e}")
             return None
 
-    def _process_eye_contact_results(self, results, fps, total_frames):
+    def _process_eye_contact_results(self, results, fps, total_frames, face_detection_threshold: float = 0.3):
         if not results:
             return {
                 "error": "No eye contact data could be analyzed",
-                "attention_score": 0.0,
+                "attention_score": -1.0,
                 "confidence_metrics": {"average_confidence": 0.0},
                 "presentation_patterns": {"pattern_quality_score": 0.0}
             }
+        
+        # Calculate face detection rate
+        frames_with_face = len([r for r in results if r.get("pupils_detected", False)])
+        face_detection_rate = frames_with_face / len(results) if results else 0.0
+        
+        # Check if face detection rate is below threshold
+        if face_detection_rate < face_detection_threshold:
+            logger.warning(f"Face detection rate ({face_detection_rate:.2f}) below threshold ({face_detection_threshold}). Setting score to -1.")
+            return {
+                "attention_score": -1.0,
+                "confidence_metrics": {"average_confidence": 0.0},
+                "presentation_patterns": {"pattern_quality_score": 0.0},
+                "engagement_metrics": {
+                    "total_frames_analyzed": len(results),
+                    "frames_with_face": frames_with_face,
+                    "face_detection_rate": float(face_detection_rate),
+                    "average_engagement_score": 0.0,
+                    "zone_distribution": {},
+                    "insufficient_face_detection": True
+                },
+                "raw_data": results[:10]
+            }
+        
         valid_scores = [r["engagement_score"] for r in results if r.get("pupils_detected", False)]
         attention_score = np.mean(valid_scores) if valid_scores else 0.0
         center_attention = [r for r in results if r.get("attention_zone") == "center"]
@@ -130,10 +153,11 @@ class EyeContactAnalyzer:
         pattern_quality_score = (zone_counts.get("center", 0) / len(results)) * 10.0 if results else 0.0
         engagement_metrics = {
             "total_frames_analyzed": len(results),
-            "frames_with_face": len([r for r in results if r.get("pupils_detected", False)]),
-            "face_detection_rate": len([r for r in results if r.get("pupils_detected", False)]) / len(results) if results else 0.0,
+            "frames_with_face": frames_with_face,
+            "face_detection_rate": float(face_detection_rate),
             "average_engagement_score": attention_score,
-            "zone_distribution": zone_counts
+            "zone_distribution": zone_counts,
+            "insufficient_face_detection": False
         }
         return {
             "attention_score": float(attention_score),
@@ -148,3 +172,21 @@ class EyeContactAnalyzer:
             "engagement_metrics": engagement_metrics,
             "raw_data": results[:10]
         }
+
+    def analyze(self, video_path: str, **kwargs) -> dict:
+        """
+        Standard analyze method for eye contact analysis.
+        
+        Args:
+            video_path: Path to the video file
+            **kwargs: Additional parameters including:
+                - sample_rate: Frame sampling rate (default: 1.0)
+                - face_detection_threshold: Minimum face detection rate (default: 0.3)
+        
+        Returns:
+            Dictionary containing eye contact analysis results
+        """
+        sample_rate = kwargs.get('sample_rate', 1.0)
+        face_detection_threshold = kwargs.get('face_detection_threshold', 0.3)
+        
+        return self.analyze_eye_contact(video_path, sample_rate, face_detection_threshold)
