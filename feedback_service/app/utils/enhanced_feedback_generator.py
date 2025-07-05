@@ -310,14 +310,14 @@ class EnhancedFeedbackGenerator:
             return -1.0
         
         try:
-        if max_score <= 1.0:
-            # Score is already in 0-1 range, scale to 0-10
+            if max_score <= 1.0:
+                # Score is already in 0-1 range, scale to 0-10
                 normalized = score * 10
-        elif max_score <= 10.0:
-            # Score is already in 0-10 range
+            elif max_score <= 10.0:
+                # Score is already in 0-10 range
                 normalized = score
-        else:
-            # Score is in larger range, normalize to 0-10
+            else:
+                # Score is in larger range, normalize to 0-10
                 normalized = (score / max_score) * 10
             
             # Ensure result is within 0-10 range
@@ -483,13 +483,13 @@ class EnhancedFeedbackGenerator:
                 score_info = individual_scores[component]
                 # Only include valid scores (not -1.0)
                 if score_info["normalized_score"] is not None and score_info["normalized_score"] != -1.0:
-                speech_scores.append(score_info["normalized_score"])
-                speech_weights.append(score_info["weight"])
-                
-                # Generate specific feedback for each component
-                speech_feedback["specific_feedback"][component] = self._generate_component_feedback(
-                    component, score_info
-                )
+                    speech_scores.append(score_info["normalized_score"])
+                    speech_weights.append(score_info["weight"])
+                    
+                    # Generate specific feedback for each component
+                    speech_feedback["specific_feedback"][component] = self._generate_component_feedback(
+                        component, score_info
+                    )
         
         if speech_scores and speech_weights:
             # Calculate weighted average instead of simple average
@@ -532,13 +532,13 @@ class EnhancedFeedbackGenerator:
                 score_info = individual_scores[component]
                 # Only include valid scores (not -1.0)
                 if score_info["normalized_score"] is not None and score_info["normalized_score"] != -1.0:
-                visual_scores.append(score_info["normalized_score"])
-                visual_weights.append(score_info["weight"])
-                
-                # Generate specific feedback for each component
-                visual_feedback["specific_feedback"][component] = self._generate_component_feedback(
-                    component, score_info
-                )
+                    visual_scores.append(score_info["normalized_score"])
+                    visual_weights.append(score_info["weight"])
+                    
+                    # Generate specific feedback for each component
+                    visual_feedback["specific_feedback"][component] = self._generate_component_feedback(
+                        component, score_info
+                    )
         
         if visual_scores and visual_weights:
             # Calculate weighted average instead of simple average

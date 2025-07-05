@@ -1,7 +1,7 @@
 import React from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { ROUTES } from '../../constants';
-import { FiHome, FiVideo, FiUpload, FiList, FiCalendar, FiUser, FiLogOut } from 'react-icons/fi';
+import { FiBarChart3, FiVideo, FiUpload, FiFileText, FiCalendar, FiUser, FiLogOut, FiTarget } from 'react-icons/fi';
 
 interface SidebarProps {
   className?: string;
@@ -15,7 +15,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
     {
       label: 'Dashboard',
       path: ROUTES.DASHBOARD,
-      icon: <FiHome className="w-5 h-5" />,
+      icon: <FiBarChart3 className="w-5 h-5" />,
     },
     {
       label: 'Record',
@@ -30,7 +30,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
     {
       label: 'Submitted Trials',
       path: ROUTES.SUBMITTED_TRIALS,
-      icon: <FiList className="w-5 h-5" />,
+      icon: <FiFileText className="w-5 h-5" />,
     },
     {
       label: 'Calendar',

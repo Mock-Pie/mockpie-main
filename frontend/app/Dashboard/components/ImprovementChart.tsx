@@ -86,7 +86,7 @@ const ImprovementChart: React.FC<ImprovementChartProps> = ({ scores, labels, yea
             )}
             {/* Main improvement line */}
             {linePath && (
-              <path d={linePath} fill="none" stroke="url(#lineGradient)" strokeWidth="4" strokeLinecap="round"/>
+              <path d={linePath} fill="none" stroke="url(#lineGradient)" strokeWidth="2" strokeLinecap="round"/>
             )}
             {/* Data points with hover handlers */}
             {points.map((pt, i) => (
@@ -94,7 +94,7 @@ const ImprovementChart: React.FC<ImprovementChartProps> = ({ scores, labels, yea
                 <circle
                   cx={pt.x}
                   cy={pt.y}
-                  r="6"
+                  r="4"
                   fill={i === points.length-1 ? '#FFD60A' : '#9966FF'}
                   style={{ cursor: 'pointer' }}
                   onMouseEnter={() => setHoveredIdx(i)}

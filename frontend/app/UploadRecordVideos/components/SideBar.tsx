@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from "react";
 import { FiFileText, FiUser } from "react-icons/fi";
 import { AiOutlineAppstore, AiOutlineHome } from "react-icons/ai";
-import { IoSettingsOutline } from "react-icons/io5";
 import { TbLogout } from "react-icons/tb";
 import Link from "next/link";
 import styles from "../page.module.css";
@@ -19,7 +18,6 @@ const SideBar = () => {
         { href: "/Dashboard", icon: AiOutlineHome, label: "Dashboard" },
         { href: "/UploadRecordVideos", icon: AiOutlineAppstore, label: "Upload or Record" },
         { href: "/SubmittedTrials", icon: FiFileText, label: "Submitted Trials" },
-        { href: "/Feedback", icon: IoSettingsOutline, label: "Feedback" },
         { href: "/Calendar", icon: VscCalendar, label: "Calendar" },
         { href: "/ProfileInfo", icon: FiUser, label: "Profile" },
     ];
