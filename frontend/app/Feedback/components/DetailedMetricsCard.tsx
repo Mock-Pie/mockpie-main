@@ -124,170 +124,172 @@ const DetailedMetricsCard: React.FC<DetailedMetricsCardProps> = ({
                     <div key={index} className={styles.metricItem}>
                         <div className={styles.metricLabelRow}>
                             <span className={styles.metricLabel}>{metric.label}</span>
-                            {metric.score !== undefined && (
+                            {metric.score === -1 ? (
+                                <span style={{ color: 'red', fontWeight: 600, marginLeft: 8 }}>
+                                    Error: Could not compute score for this model
+                                </span>
+                            ) : metric.score !== undefined && (
                                 <span className={`${styles.scoreBadge} ${getScoreColor(metric.score)}`}>
                                     {metric.score.toFixed(1)}/10 {getScoreIcon(metric.score)}
                                 </span>
                             )}
                         </div>
-                        <div className={styles.metricValueRow}>
-                            <span className={styles.metricValue}>
-                                {typeof metric.value === 'number' ? metric.value : <b>{metric.value}</b>}
-                            </span>
-                            {/* Status badge */}
-                            {metric.status && (
-                                <span className={styles.statusBadge}>
-                                    {metric.status.charAt(0).toUpperCase() + metric.status.slice(1)}
-                                </span>
-                            )}
-                            {/* Confidence badge */}
-                            {metric.confidence !== undefined && (
-                                <span className={styles.confidenceBadge}>
-                                    Confidence: {(metric.confidence * 100).toFixed(1)}%
-                                </span>
-                            )}
-                            {/* Detected badge for stutter/filler */}
-                            {metric.detected === true && (
-                                <span className={styles.detectedBadge}>Detected</span>
-                            )}
-                            {metric.detected === false && (
-                                <span className={styles.notDetectedBadge}>Not Detected</span>
-                            )}
-                        </div>
-                        
-                        {/* Most common filler */}
-                        {metric.mostCommonFiller && (
-                            <div className={styles.metricDescription}>
-                                Most common filler: <b>{metric.mostCommonFiller}</b>
-                            </div>
-                        )}
-                        
-                        {/* Description */}
-                        {metric.description && (
-                            <p className={styles.metricDescription}>{metric.description}</p>
-                        )}
-                        
-                        {/* Primary Recommendation */}
-                        {metric.recommendation && (
-                            <div className={styles.recommendation}>
-                                <FiInfo className={styles.recommendationIcon} />
-                                {metric.recommendation}
-                            </div>
-                        )}
-                        
-                        {/* Show More: details and all recommendations */}
-                        {(metric.details || (metric.recommendations && metric.recommendations.length > 1)) && (
-                            <div style={{ marginTop: '1rem' }}>
-                                <button
-                                    className={styles.showMoreButton}
-                                    onClick={() => toggleOpen(index)}
-                                    type="button"
-                                    aria-expanded={openIndexes[index]}
-                                    aria-controls={`metric-details-${index}`}
-                                >
-                                    {openIndexes[index] ? (
-                                        <>
-                                            <FiChevronUp />
-                                            Show Less
-                                        </>
-                                    ) : (
-                                        <>
-                                            <FiChevronDown />
-                                            Show More Details
-                                        </>
+                        {metric.score === -1 ? null : (
+                            <>
+                                <div className={styles.metricValueRow}>
+                                    <span className={styles.metricValue}>
+                                        {typeof metric.value === 'number' ? metric.value : <b>{metric.value}</b>}
+                                    </span>
+                                    {/* Status badge */}
+                                    {metric.status && (
+                                        <span className={styles.statusBadge}>
+                                            {metric.status.charAt(0).toUpperCase() + metric.status.slice(1)}
+                                        </span>
                                     )}
-                                </button>
-                                
-                                {openIndexes[index] && (
-                                    <div 
-                                        className={styles.expandableContent}
-                                        id={`metric-details-${index}`}
-                                        role="region"
-                                        aria-labelledby={`metric-${index}`}
-                                    >
-                                        {/* All recommendations as a list */}
-                                        {metric.recommendations && metric.recommendations.length > 1 && (
-                                            <div style={{ marginBottom: '1.5rem' }}>
-                                                <h4 className={styles.sectionHeader}>
-                                                    <FiInfo style={{ color: '#3b82f6' }} />
-                                                    All Recommendations
-                                                </h4>
-                                                <ul className={styles.recommendationsList}>
-                                                    {metric.recommendations.map((rec, i) => (
-                                                        <li key={i}>{rec}</li>
-                                                    ))}
-                                                </ul>
-                                            </div>
-                                        )}
-                                        
-                                        {/* Details as key-value pairs */}
-                                        {metric.details && (
-                                            <div>
-                                                <h4 className={styles.sectionHeader}>
-                                                    <FiInfo style={{ color: '#10b981' }} />
-                                                    Detailed Statistics
-                                                </h4>
-                                                <div className={styles.detailsGrid}>
-                                                    {Object.entries(metric.details).map(([k, v], i) => {
-                                                        const description = getDetailDescription(k);
-                                                        return (
-                                                            <div
-                                                                key={i}
-                                                                className={styles.detailCard}
-                                                                onMouseEnter={description ? (e) => {
-                                                                    const rect = e.currentTarget.getBoundingClientRect();
-                                                                    setTooltip({
-                                                                        text: description,
-                                                                        x: rect.right + 8,
-                                                                        y: rect.top,
-                                                                    });
-                                                                } : undefined}
-                                                                onMouseLeave={description ? () => setTooltip(null) : undefined}
-                                                            >
-                                                                <div style={{
-                                                                    display: 'flex',
-                                                                    alignItems: 'center',
-                                                                    gap: '0.5rem',
-                                                                    marginBottom: '0.25rem',
-                                                                }}>
-                                                                    <div style={{
-                                                                        fontWeight: '600',
-                                                                        color: 'var(--white)',
-                                                                        fontSize: '0.9rem',
-                                                                        textTransform: 'capitalize',
-                                                                    }}>
-                                                                        {k.replace(/_/g, ' ')}
-                                                                    </div>
-                                                                    {description && (
-                                                                        <div
-                                                                            style={{
-                                                                                cursor: 'help',
-                                                                                color: 'var(--light-grey)',
-                                                                                fontSize: '0.8rem',
-                                                                                display: 'inline-flex',
-                                                                                alignItems: 'center',
-                                                                            }}
-                                                                        >
-                                                                            <FiHelpCircle />
+                                    {/* Confidence badge */}
+                                    {metric.confidence !== undefined && (
+                                        <span className={styles.confidenceBadge}>
+                                            Confidence: {(metric.confidence * 100).toFixed(1)}%
+                                        </span>
+                                    )}
+                                    {/* Detected badge for stutter/filler */}
+                                    {metric.detected === true && (
+                                        <span className={styles.detectedBadge}>Detected</span>
+                                    )}
+                                    {metric.detected === false && (
+                                        <span className={styles.notDetectedBadge}>Not Detected</span>
+                                    )}
+                                </div>
+                                {/* Most common filler */}
+                                {metric.mostCommonFiller && (
+                                    <div className={styles.metricDescription}>
+                                        Most common filler: <b>{metric.mostCommonFiller}</b>
+                                    </div>
+                                )}
+                                {/* Description */}
+                                {metric.description && (
+                                    <p className={styles.metricDescription}>{metric.description}</p>
+                                )}
+                                {/* Primary Recommendation */}
+                                {metric.recommendation && (
+                                    <div className={styles.recommendation}>
+                                        <FiInfo className={styles.recommendationIcon} />
+                                        {metric.recommendation}
+                                    </div>
+                                )}
+                                {/* Show More: details and all recommendations */}
+                                {(metric.details || (metric.recommendations && metric.recommendations.length > 1)) && (
+                                    <div style={{ marginTop: '1rem' }}>
+                                        <button
+                                            className={styles.showMoreButton}
+                                            onClick={() => toggleOpen(index)}
+                                            type="button"
+                                            aria-expanded={openIndexes[index]}
+                                            aria-controls={`metric-details-${index}`}
+                                        >
+                                            {openIndexes[index] ? (
+                                                <>
+                                                    <FiChevronUp />
+                                                    Show Less
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <FiChevronDown />
+                                                    Show More Details
+                                                </>
+                                            )}
+                                        </button>
+                                        {openIndexes[index] && (
+                                            <div 
+                                                className={styles.expandableContent}
+                                                id={`metric-details-${index}`}
+                                                role="region"
+                                                aria-labelledby={`metric-${index}`}
+                                            >
+                                                {/* All recommendations as a list */}
+                                                {metric.recommendations && metric.recommendations.length > 1 && (
+                                                    <div style={{ marginBottom: '1.5rem' }}>
+                                                        <h4 className={styles.sectionHeader}>
+                                                            <FiInfo style={{ color: '#3b82f6' }} />
+                                                            All Recommendations
+                                                        </h4>
+                                                        <ul className={styles.recommendationsList}>
+                                                            {metric.recommendations.map((rec, i) => (
+                                                                <li key={i}>{rec}</li>
+                                                            ))}
+                                                        </ul>
+                                                    </div>
+                                                )}
+                                                {/* Details as key-value pairs */}
+                                                {metric.details && (
+                                                    <div>
+                                                        <h4 className={styles.sectionHeader}>
+                                                            <FiInfo style={{ color: '#10b981' }} />
+                                                            Detailed Statistics
+                                                        </h4>
+                                                        <div className={styles.detailsGrid}>
+                                                            {Object.entries(metric.details).map(([k, v], i) => {
+                                                                const description = getDetailDescription(k);
+                                                                return (
+                                                                    <div
+                                                                        key={i}
+                                                                        className={styles.detailCard}
+                                                                        onMouseEnter={description ? (e) => {
+                                                                            const rect = e.currentTarget.getBoundingClientRect();
+                                                                            setTooltip({
+                                                                                text: description,
+                                                                                x: rect.right + 8,
+                                                                                y: rect.top,
+                                                                            });
+                                                                        } : undefined}
+                                                                        onMouseLeave={description ? () => setTooltip(null) : undefined}
+                                                                    >
+                                                                        <div style={{
+                                                                            display: 'flex',
+                                                                            alignItems: 'center',
+                                                                            gap: '0.5rem',
+                                                                            marginBottom: '0.25rem',
+                                                                        }}>
+                                                                            <div style={{
+                                                                                fontWeight: '600',
+                                                                                color: 'var(--white)',
+                                                                                fontSize: '0.9rem',
+                                                                                textTransform: 'capitalize',
+                                                                            }}>
+                                                                                {k.replace(/_/g, ' ')}
+                                                                            </div>
+                                                                            {description && (
+                                                                                <div
+                                                                                    style={{
+                                                                                        cursor: 'help',
+                                                                                        color: 'var(--light-grey)',
+                                                                                        fontSize: '0.8rem',
+                                                                                        display: 'inline-flex',
+                                                                                        alignItems: 'center',
+                                                                                    }}
+                                                                                >
+                                                                                    <FiHelpCircle />
+                                                                                </div>
+                                                                            )}
                                                                         </div>
-                                                                    )}
-                                                                </div>
-                                                                <div style={{
-                                                                    color: 'var(--light-grey)',
-                                                                    fontSize: '0.95rem',
-                                                                    fontWeight: '500',
-                                                                }}>
-                                                                    {typeof v === 'number' ? v.toFixed(2) : String(v)}
-                                                                </div>
-                                                            </div>
-                                                        );
-                                                    })}
-                                                </div>
+                                                                        <div style={{
+                                                                            color: 'var(--light-grey)',
+                                                                            fontSize: '0.95rem',
+                                                                            fontWeight: '500',
+                                                                        }}>
+                                                                            {typeof v === 'number' ? v.toFixed(2) : String(v)}
+                                                                        </div>
+                                                                    </div>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    </div>
+                                                )}
                                             </div>
                                         )}
                                     </div>
                                 )}
-                            </div>
+                            </>
                         )}
                     </div>
                 ))}
