@@ -212,4 +212,158 @@ export const throttle = <T extends (...args: any[]) => any>(
       setTimeout(() => (inThrottle = false), limit);
     }
   };
+};
+
+// Error message generator for model-specific issues
+export const getModelErrorInfo = (modelName: string): { message: string; tips: string[] } => {
+  const errorInfo: { [key: string]: { message: string; tips: string[] } } = {
+    'eye_contact': {
+      message: "Eye contact analysis could not be completed due to insufficient face detection",
+      tips: [
+        "Ensure your face is clearly visible and well-lit",
+        "Position yourself closer to the camera (within 2-3 feet)",
+        "Avoid wearing glasses that reflect light or sunglasses",
+        "Make sure your face is centered in the frame",
+        "Record in a well-lit environment with even lighting"
+      ]
+    },
+    'facial_emotion': {
+      message: "Facial emotion analysis could not be completed due to insufficient face detection",
+      tips: [
+        "Ensure your face is clearly visible and well-lit",
+        "Position yourself closer to the camera (within 2-3 feet)",
+        "Avoid wearing face coverings or large accessories",
+        "Make sure your face is centered and not cut off",
+        "Record in a well-lit environment with natural lighting"
+      ]
+    },
+    'hand_gesture': {
+      message: "Hand gesture analysis could not be completed due to insufficient hand detection",
+      tips: [
+        "Ensure your hands are visible in the frame",
+        "Use natural hand movements during your presentation",
+        "Avoid keeping hands in pockets or behind your back",
+        "Position camera to capture your upper body and arms",
+        "Use gestures to emphasize key points in your speech"
+      ]
+    },
+    'posture_analysis': {
+      message: "Posture analysis could not be completed due to insufficient body detection",
+      tips: [
+        "Ensure your full upper body is visible in the frame",
+        "Sit or stand straight with shoulders back",
+        "Position camera to capture from waist up",
+        "Avoid slouching or leaning too far forward",
+        "Maintain good posture throughout the presentation"
+      ]
+    },
+    'speech_emotion': {
+      message: "Speech emotion analysis could not be completed due to insufficient audio quality",
+      tips: [
+        "Speak clearly and at a moderate pace",
+        "Use a good quality microphone if available",
+        "Record in a quiet environment with minimal background noise",
+        "Ensure your voice is clearly audible",
+        "Avoid speaking too softly or too loudly"
+      ]
+    },
+    'pitch_analysis': {
+      message: "Pitch analysis could not be completed due to insufficient audio quality",
+      tips: [
+        "Speak clearly and at a moderate pace",
+        "Use a good quality microphone if available",
+        "Record in a quiet environment with minimal background noise",
+        "Vary your pitch naturally during speech",
+        "Avoid speaking in a monotone voice"
+      ]
+    },
+    'volume_consistency': {
+      message: "Volume consistency analysis could not be completed due to insufficient audio quality",
+      tips: [
+        "Maintain consistent volume throughout your presentation",
+        "Use a good quality microphone if available",
+        "Record in a quiet environment with minimal background noise",
+        "Practice speaking at a steady, audible level",
+        "Avoid sudden volume changes or whispering"
+      ]
+    },
+    'wpm_analysis': {
+      message: "Speaking rate analysis could not be completed due to insufficient audio quality",
+      tips: [
+        "Speak clearly and at a moderate pace",
+        "Use a good quality microphone if available",
+        "Record in a quiet environment with minimal background noise",
+        "Practice speaking at 150-160 words per minute",
+        "Include natural pauses between sentences"
+      ]
+    },
+    'filler_detection': {
+      message: "Filler word analysis could not be completed due to insufficient audio quality",
+      tips: [
+        "Speak clearly and at a moderate pace",
+        "Use a good quality microphone if available",
+        "Record in a quiet environment with minimal background noise",
+        "Practice avoiding filler words like 'um', 'uh', 'like'",
+        "Take brief pauses instead of using filler words"
+      ]
+    },
+    'stutter_detection': {
+      message: "Fluency analysis could not be completed due to insufficient audio quality",
+      tips: [
+        "Speak clearly and at a moderate pace",
+        "Use a good quality microphone if available",
+        "Record in a quiet environment with minimal background noise",
+        "Practice speaking slowly and deliberately",
+        "Take deep breaths and pause when needed"
+      ]
+    },
+    'lexical_richness': {
+      message: "Vocabulary analysis could not be completed due to insufficient transcription",
+      tips: [
+        "Speak clearly and enunciate your words",
+        "Use a good quality microphone if available",
+        "Record in a quiet environment with minimal background noise",
+        "Use varied and appropriate vocabulary for your topic",
+        "Ensure your speech is long enough for analysis (at least 30 seconds)"
+      ]
+    },
+    'keyword_relevance': {
+      message: "Content relevance analysis could not be completed due to insufficient transcription",
+      tips: [
+        "Speak clearly and enunciate your words",
+        "Use a good quality microphone if available",
+        "Record in a quiet environment with minimal background noise",
+        "Stay focused on your main topic and key points",
+        "Use relevant keywords and terminology for your subject"
+      ]
+    },
+    'confidence_detector': {
+      message: "Confidence analysis could not be completed due to insufficient data",
+      tips: [
+        "Speak clearly and with conviction",
+        "Use a good quality microphone if available",
+        "Record in a quiet environment with minimal background noise",
+        "Maintain good posture and eye contact",
+        "Practice your presentation to build confidence"
+      ]
+    }
+  };
+
+  // Get specific error info or return default
+  const specificInfo = errorInfo[modelName.toLowerCase()];
+  if (specificInfo) {
+    return specificInfo;
+  }
+
+  // Default error message for unknown models
+  return {
+    message: "Analysis could not be completed due to insufficient data",
+    tips: [
+      "Ensure good audio and video quality",
+      "Speak clearly and at a moderate pace",
+      "Position yourself properly in the frame",
+      "Record in a well-lit, quiet environment",
+      "Use appropriate equipment (microphone, camera)"
+    ]
+  };
 }; 

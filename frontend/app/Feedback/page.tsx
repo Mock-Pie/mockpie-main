@@ -597,22 +597,44 @@ const Feedback = () => {
             recommendation: Array.isArray(feedback.keyword_relevance?.recommendations) ? feedback.keyword_relevance.recommendations[0] : undefined,
             recommendations: feedback.keyword_relevance?.recommendations,
             details: feedback.keyword_relevance?.topic_coherence ? addDetailDescriptions({
-                ...feedback.keyword_relevance.topic_coherence,
+                coherence_score: feedback.keyword_relevance?.topic_coherence?.coherence_score,
+                topic_focus: feedback.keyword_relevance?.topic_coherence?.topic_focus,
                 keyword_coverage_percentage: feedback.keyword_relevance?.topic_coherence?.keyword_coverage_percentage,
                 semantic_coherence: feedback.keyword_relevance?.topic_coherence?.semantic_coherence,
-                diversity_score: feedback.keyword_relevance?.keyword_diversity?.diversity_score,
                 total_unique_keywords: feedback.keyword_relevance?.keyword_diversity?.total_unique_keywords,
-                extracted_keywords: feedback.keyword_relevance?.extracted_keywords?.keybert?.map((k: any) => `${k.keyword} (${k.score})`).join(', '),
+                diversity_score: feedback.keyword_relevance?.keyword_diversity?.diversity_score,
+                // Target keyword analysis
+                target_keywords: feedback.keyword_relevance?.target_keyword_analysis?.target_keywords?.join(', ') || 'None specified',
+                target_relevance_score: feedback.keyword_relevance?.target_keyword_analysis?.relevance_score,
+                content_alignment: feedback.keyword_relevance?.target_keyword_analysis?.alignment,
+                // Score breakdown
+                semantic_coherence_score: feedback.keyword_relevance?.relevance_assessment?.score_breakdown?.semantic_coherence,
+                coherence_score_breakdown: feedback.keyword_relevance?.relevance_assessment?.score_breakdown?.coherence_score,
+                diversity_score_breakdown: feedback.keyword_relevance?.relevance_assessment?.score_breakdown?.diversity_score,
             }, {
                 coherence_score: "How well your content stayed focused on the main topic",
                 topic_focus: "How focused your presentation was on the intended subject",
                 keyword_coverage_percentage: "The percentage of important keywords you covered",
                 semantic_coherence: "How semantically related your content was to the topic",
-                diversity_score: "How diverse your keyword usage was throughout the presentation",
                 total_unique_keywords: "The total number of unique keywords you used",
-                extracted_keywords: "The most important keywords automatically extracted from your speech"
+                diversity_score: "How diverse your keyword usage was throughout the presentation",
+                // Target keyword descriptions
+                target_keywords: "The specific keywords you were asked to address in your presentation",
+                target_relevance_score: "How well your speech addressed the target keywords (0-100 scale)",
+                content_alignment: "Overall alignment between your content and the target keywords",
+                // Score breakdown descriptions
+                semantic_coherence_score: "Score for semantic similarity between your content and extracted keywords",
+                coherence_score_breakdown: "Score for topic focus and keyword coverage",
+                diversity_score_breakdown: "Score for keyword variety and distribution"
             }) : undefined,
-            description: `Coherence: ${(feedback.keyword_relevance?.topic_coherence?.coherence_score * 100).toFixed(1)}%`
+            description: (() => {
+                const coherence = (feedback.keyword_relevance?.topic_coherence?.coherence_score * 100).toFixed(1);
+                const targetKeywords = feedback.keyword_relevance?.target_keyword_analysis?.target_keywords;
+                if (targetKeywords && targetKeywords.length > 0) {
+                    return `Coherence: ${coherence}% | Target Keywords: ${targetKeywords.join(', ')}`;
+                }
+                return `Coherence: ${coherence}%`;
+            })()
         }
     ];
     

@@ -2,8 +2,9 @@
 
 import React, { useState } from 'react';
 import styles from './DetailedMetricsCard.module.css';
-import { FiTrendingUp, FiTrendingDown, FiMinus, FiInfo, FiChevronDown, FiChevronUp, FiHelpCircle } from 'react-icons/fi';
+import { FiTrendingUp, FiTrendingDown, FiMinus, FiInfo, FiChevronDown, FiChevronUp, FiHelpCircle, FiAlertTriangle } from 'react-icons/fi';
 import Tooltip from "./Tooltip";
+import { getModelErrorInfo } from '../../utils';
 
 interface MetricItem {
     label: string;
@@ -17,6 +18,7 @@ interface MetricItem {
     detected?: boolean;
     mostCommonFiller?: string;
     details?: Record<string, any>;
+    key?: string; // Model key for error messages
 }
 
 interface DetailedMetricsCardProps {
@@ -148,16 +150,70 @@ const DetailedMetricsCard: React.FC<DetailedMetricsCardProps> = ({
                         <div className={styles.metricLabelRow}>
                             <span className={styles.metricLabel}>{metric.label}</span>
                             {metric.score === -1 ? (
-                                <span style={{ color: 'red', fontWeight: 600, marginLeft: 8 }}>
-                                    Error: Could not compute score for this model, needs more data
-                                </span>
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.5rem' }}>
+                                    <span style={{ color: '#ef4444', fontWeight: 600, fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                        <FiAlertTriangle />
+                                        Analysis Unavailable
+                                    </span>
+                                </div>
                             ) : metric.score !== undefined && (
                                 <span className={`${styles.scoreBadge} ${getScoreColor(metric.score)}`}>
                                     {metric.score.toFixed(1)}/10 {getScoreIcon(metric.score)}
                                 </span>
                             )}
                         </div>
-                        {metric.score === -1 ? null : (
+                        {metric.score === -1 ? (
+                            <div style={{ marginTop: '1rem' }}>
+                                {(() => {
+                                    const errorInfo = getModelErrorInfo(metric.key || 'unknown');
+                                    return (
+                                        <div style={{ 
+                                            background: 'rgba(239, 68, 68, 0.1)', 
+                                            border: '1px solid rgba(239, 68, 68, 0.3)', 
+                                            borderRadius: '8px', 
+                                            padding: '1rem',
+                                            marginTop: '0.5rem'
+                                        }}>
+                                            <div style={{ 
+                                                color: '#ef4444', 
+                                                fontWeight: 600, 
+                                                marginBottom: '0.75rem',
+                                                fontSize: '0.95rem'
+                                            }}>
+                                                {errorInfo.message}
+                                            </div>
+                                            <div style={{ marginBottom: '0.75rem' }}>
+                                                <div style={{ 
+                                                    color: '#fbbf24', 
+                                                    fontWeight: 600, 
+                                                    marginBottom: '0.5rem',
+                                                    fontSize: '0.9rem',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '0.5rem'
+                                                }}>
+                                                    <FiInfo />
+                                                    Tips for better analysis:
+                                                </div>
+                                                <ul style={{ 
+                                                    margin: 0, 
+                                                    paddingLeft: '1.5rem',
+                                                    color: '#d1d5db',
+                                                    fontSize: '0.85rem',
+                                                    lineHeight: '1.5'
+                                                }}>
+                                                    {errorInfo.tips.map((tip, index) => (
+                                                        <li key={index} style={{ marginBottom: '0.25rem' }}>
+                                                            {tip}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    );
+                                })()}
+                            </div>
+                        ) : (
                             <>
                                 <div className={styles.metricValueRow}>
                                     <span className={styles.metricValue}>
