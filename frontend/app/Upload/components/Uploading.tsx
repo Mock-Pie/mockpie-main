@@ -82,6 +82,22 @@ const Uploading = () => {
             return;
         }
 
+        // Check video duration before upload
+        const duration = await new Promise<number>((resolve, reject) => {
+            const video = document.createElement('video');
+            video.preload = 'metadata';
+            video.onloadedmetadata = () => {
+                window.URL.revokeObjectURL(video.src);
+                resolve(video.duration);
+            };
+            video.onerror = () => reject('Failed to load video metadata');
+            video.src = URL.createObjectURL(selectedFile);
+        });
+        if (duration < 30) {
+            setUploadStatus("Video is too short. Minimum duration is 30 seconds.");
+            return;
+        }
+
         // Validate required fields
         if (!presentationTopic.trim()) {
             setUploadStatus("Please enter a presentation topic.");

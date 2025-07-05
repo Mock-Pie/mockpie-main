@@ -247,6 +247,12 @@ const Recording = () => {
             return;
         }
 
+        // Reject if video duration is less than 30 seconds
+        if (videoDuration < 30) {
+            setUploadStatus("Video is too short. Minimum duration is 30 seconds.");
+            return;
+        }
+
         // Validate required fields
         if (!presentationTopic.trim()) {
             setUploadStatus("Please enter a presentation topic.");
@@ -287,7 +293,6 @@ const Recording = () => {
             formData.append("topic", presentationTopic.trim());
             formData.append("language", selectedLanguage);
             formData.append("focus_areas", JSON.stringify(selectedFocus));
-            
 
             try {
                 setIsUploading(true);

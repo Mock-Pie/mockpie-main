@@ -3,7 +3,6 @@ import React, { useState, useCallback, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FiEye, FiEyeOff } from "react-icons/fi";
-import { FcGoogle } from "react-icons/fc";
 import { FaExclamationCircle, FaExclamationTriangle, FaCheckCircle } from "react-icons/fa";
 import { signIn } from "next-auth/react";
 import styles from "../page.module.css";
@@ -22,7 +21,6 @@ const LoginForm = () => {
     });
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [googleLoading, setGoogleLoading] = useState(false);
     const [apiError, setApiError] = useState("");
     const [successMessage, setSuccessMessage] = useState("");
 
@@ -202,30 +200,6 @@ const LoginForm = () => {
         }
     }, [formData, validateForm, router]);
 
-    const handleGoogleSignIn = useCallback(async () => {
-        setGoogleLoading(true);
-        setApiError("");
-        setSuccessMessage("");
-        
-        try {
-            const result = await signIn("google", {
-                callbackUrl: "/Dashboard",
-                redirect: false,
-            });
-            
-            if (result?.error) {
-                setApiError("Google sign-in failed. Please try again.");
-            } else if (result?.url) {
-                router.push(result.url);
-            }
-        } catch (error) {
-            console.error("Google sign-in error:", error);
-            setApiError("Google sign-in failed. Please try again.");
-        } finally {
-            setGoogleLoading(false);
-        }
-    }, [router]);
-
     const handlePasswordToggle = useCallback(() => {
         setShowPassword((prev) => !prev);
     }, []);
@@ -268,7 +242,7 @@ const LoginForm = () => {
                                 onFocus={handleFocus}
                                 onBlur={handleBlur}
                                 required
-                                disabled={loading || googleLoading}
+                                disabled={loading}
                                 autoComplete="email"
                             />
                         </div>
@@ -294,14 +268,14 @@ const LoginForm = () => {
                                 onFocus={handleFocus}
                                 onBlur={handleBlur}
                                 required
-                                disabled={loading || googleLoading}
+                                disabled={loading}
                                 autoComplete="current-password"
                             />
                             <button 
                                 type="button" 
                                 className={styles['password-toggle']} 
                                 onClick={handlePasswordToggle}
-                                disabled={loading || googleLoading}
+                                disabled={loading}
                                 aria-label={showPassword ? "Hide password" : "Show password"}
                             >
                                 {showPassword ? <FiEyeOff /> : <FiEye />}
@@ -344,7 +318,7 @@ const LoginForm = () => {
                     <button 
                         type="submit" 
                         className={styles['submit-btn']} 
-                        disabled={loading || googleLoading}
+                        disabled={loading}
                     >
                         {loading ? (
                             <>
@@ -365,25 +339,6 @@ const LoginForm = () => {
                     <div className={styles.divider}>
                         <span>or</span>
                     </div>
-
-                    <button 
-                        type="button" 
-                        className={styles['google-btn']} 
-                        onClick={handleGoogleSignIn}
-                        disabled={loading || googleLoading}
-                    >
-                        {googleLoading ? (
-                            <>
-                                <div className={styles.loading}></div>
-                                Connecting...
-                            </>
-                        ) : (
-                            <>
-                                <FcGoogle />
-                                Sign in with Google
-                            </>
-                        )}
-                    </button>
 
                     <div className={styles['footer-links']}>
                         Don't have an account? <Link href="/SignUp">Sign up</Link>
