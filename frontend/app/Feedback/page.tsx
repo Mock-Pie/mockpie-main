@@ -158,17 +158,62 @@ const Feedback = () => {
         return score > 10 ? Math.round((score / 10) * 10) / 10 : Math.round(score * 10) / 10;
     };
 
+    // Get the used criteria from feedback response
+    const usedCriteria = feedback.used_criteria || [];
+    console.log('Used criteria:', usedCriteria);
+    
+    // Helper function to check if a metric should be shown based on used criteria
+    const shouldShowMetric = (metricKey: string) => {
+        return usedCriteria.includes(metricKey);
+    };
+
+    // Helper function to check if a value is valid (not undefined, null, or empty)
+    const isValidValue = (value: any): boolean => {
+        if (value === undefined || value === null) return false;
+        if (typeof value === 'string' && value.trim() === '') return false;
+        if (typeof value === 'number' && isNaN(value)) return false;
+        return true;
+    };
+
+    // Helper function to filter out undefined properties from an object
+    const filterUndefinedProps = (obj: any): any => {
+        if (!obj || typeof obj !== 'object') return obj;
+        const filtered: any = {};
+        Object.keys(obj).forEach(key => {
+            if (isValidValue(obj[key])) {
+                filtered[key] = obj[key];
+            }
+        });
+        return Object.keys(filtered).length > 0 ? filtered : undefined;
+    };
+
+    // Helper function to check if a metric has valid data to display
+    const hasValidData = (metric: any): boolean => {
+        return isValidValue(metric.value) || 
+               isValidValue(metric.score) || 
+               isValidValue(metric.recommendation) ||
+               isValidValue(metric.details) ||
+               isValidValue(metric.description);
+    };
+
     // --- Analysis Overview ---
     const enhanced = feedback.enhanced_feedback || {};
     const overviewProps = {
-        overallScore: normalizeScore(enhanced.overall_score),
+        overallScore: isValidValue(enhanced.overall_score) ? normalizeScore(enhanced.overall_score) : 0,
         analysisDate: new Date().toLocaleDateString(),
-        videoDuration: feedback.pitch_analysis?.pitch_statistics?.total_duration
-            ? `${Math.round(feedback.pitch_analysis.pitch_statistics.total_duration)}s`
-            : (feedback.facial_emotion?.temporal_analysis?.total_duration ? `${Math.round(feedback.facial_emotion.temporal_analysis.total_duration)}s` : '-'),
-        focusAreas: Array.isArray(enhanced.summary?.primary_focus_areas)
-            ? enhanced.summary.primary_focus_areas
-            : [],
+        videoDuration: (() => {
+            const pitchDuration = feedback.pitch_analysis?.pitch_statistics?.total_duration;
+            const facialDuration = feedback.facial_emotion?.temporal_analysis?.total_duration;
+            if (isValidValue(pitchDuration)) {
+                return `${Math.round(pitchDuration)}s`;
+            } else if (isValidValue(facialDuration)) {
+                return `${Math.round(facialDuration)}s`;
+            }
+            return '-';
+        })(),
+        focusAreas: usedCriteria
+            .filter((criteria: string) => isValidValue(criteria))
+            .map((criteria: string) => criteria.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())),
     };
 
     // --- Speech Analysis ---
@@ -255,23 +300,31 @@ const Feedback = () => {
     // --- Insights ---
     const insightsProps = {
         insights: Array.isArray(enhanced.detailed_feedback?.areas_for_improvement)
-            ? enhanced.detailed_feedback.areas_for_improvement.map((area: string) => ({
-                type: 'improvement',
-                title: area,
-                description: area,
-                priority: 'high',
-            })) : [],
-        keyTakeaways: Array.isArray(enhanced.summary?.key_highlights) ? enhanced.summary.key_highlights : [],
-        nextSteps: Array.isArray(enhanced.recommendations) ? enhanced.recommendations : [],
+            ? enhanced.detailed_feedback.areas_for_improvement
+                .filter((area: string) => isValidValue(area) && area.trim() !== '')
+                .map((area: string) => ({
+                    type: 'improvement',
+                    title: area,
+                    description: area,
+                    priority: 'high',
+                })) : [],
+        keyTakeaways: Array.isArray(enhanced.summary?.key_highlights) 
+            ? enhanced.summary.key_highlights.filter((highlight: string) => isValidValue(highlight) && highlight.trim() !== '')
+            : [],
+        nextSteps: Array.isArray(enhanced.recommendations) 
+            ? enhanced.recommendations.filter((rec: string) => isValidValue(rec) && rec.trim() !== '')
+            : [],
     };
 
     // --- Prepare metrics for new components using enhanced_feedback.individual_model_scores ---
     const modelScores = enhanced.individual_model_scores || {};
-    const speechMetrics = [
+    
+    const allSpeechMetrics = [
         {
+            key: "speech_emotion",
             label: "Speech Emotion",
             value: feedback.speech_emotion?.dominant_emotion?.emotion || 'N/A',
-            score: modelScores.speech_emotion?.score ?? undefined,
+            score: modelScores.speech_emotion?.normalized_score ?? undefined,
             confidence: feedback.speech_emotion?.dominant_emotion?.confidence,
             recommendation: Array.isArray(feedback.speech_emotion?.recommendations) ? feedback.speech_emotion.recommendations[0] : undefined,
             recommendations: feedback.speech_emotion?.recommendations,
@@ -285,9 +338,10 @@ const Feedback = () => {
             description: `Confidence: ${(feedback.speech_emotion?.dominant_emotion?.confidence * 100).toFixed(1)}%`
         },
         {
+            key: "wpm_analysis",
             label: "Speaking Rate (WPM)",
             value: feedback.wpm_analysis?.overall_wpm || 'N/A',
-            score: modelScores.wpm_analysis?.score ?? undefined,
+            score: modelScores.wpm_analysis?.normalized_score ?? undefined,
             status: feedback.wpm_analysis?.assessment?.status,
             recommendation: Array.isArray(feedback.wpm_analysis?.recommendations) ? feedback.wpm_analysis.recommendations[0] : undefined,
             recommendations: feedback.wpm_analysis?.recommendations,
@@ -304,9 +358,10 @@ const Feedback = () => {
             description: feedback.wpm_analysis?.assessment?.message
         },
         {
+            key: "pitch_analysis",
             label: "Pitch Analysis",
             value: `${feedback.pitch_analysis?.pitch_statistics?.mean_pitch?.toFixed(1) || 'N/A'} Hz`,
-            score: modelScores.pitch_analysis?.score ?? undefined,
+            score: modelScores.pitch_analysis?.normalized_score ?? undefined,
             recommendation: Array.isArray(feedback.pitch_analysis?.recommendations) ? feedback.pitch_analysis.recommendations[0] : undefined,
             recommendations: feedback.pitch_analysis?.recommendations,
             details: feedback.pitch_analysis?.pitch_statistics ? {
@@ -318,9 +373,10 @@ const Feedback = () => {
             description: `Range: ${feedback.pitch_analysis?.pitch_statistics?.pitch_range?.toFixed(1) || 'N/A'} Hz`
         },
         {
+            key: "filler_detection",
             label: "Filler Words",
             value: `${feedback.filler_detection?.filler_analysis?.total_fillers || 0} words`,
-            score: modelScores.filler_detection?.score ?? undefined,
+            score: modelScores.filler_detection?.normalized_score ?? undefined,
             recommendation: Array.isArray(feedback.filler_detection?.recommendations) ? feedback.filler_detection.recommendations[0] : undefined,
             recommendations: feedback.filler_detection?.recommendations,
             mostCommonFiller: feedback.filler_detection?.filler_analysis?.most_common_filler,
@@ -333,9 +389,10 @@ const Feedback = () => {
             description: `${feedback.filler_detection?.filler_analysis?.filler_rate_percentage?.toFixed(1) || 0}% of speech`
         },
         {
+            key: "stutter_detection",
             label: "Stutter Detection",
             value: feedback.stutter_detection?.stutter_detected ? 'Detected' : 'Not Detected',
-            score: modelScores.stutter_detection?.score ?? undefined,
+            score: modelScores.stutter_detection?.normalized_score ?? undefined,
             detected: feedback.stutter_detection?.stutter_detected,
             recommendation: Array.isArray(feedback.stutter_detection?.recommendations) ? feedback.stutter_detection.recommendations[0] : undefined,
             recommendations: feedback.stutter_detection?.recommendations,
@@ -349,12 +406,29 @@ const Feedback = () => {
             description: `${feedback.stutter_detection?.stutter_percentage?.toFixed(1) || 0}% of segments affected`
         }
     ];
+    
+    // Filter speech metrics based on used criteria and valid data
+    const speechMetrics = allSpeechMetrics
+        .filter(metric => shouldShowMetric(metric.key))
+        .map(metric => ({
+            ...metric,
+            details: filterUndefinedProps(metric.details),
+            recommendation: isValidValue(metric.recommendation) ? metric.recommendation : undefined,
+            recommendations: Array.isArray(metric.recommendations) && metric.recommendations.length > 0 ? metric.recommendations : undefined,
+            confidence: isValidValue(metric.confidence) ? metric.confidence : undefined,
+            status: isValidValue(metric.status) ? metric.status : undefined,
+            detected: isValidValue(metric.detected) ? metric.detected : undefined,
+            mostCommonFiller: isValidValue(metric.mostCommonFiller) ? metric.mostCommonFiller : undefined,
+            description: isValidValue(metric.description) ? metric.description : undefined
+        }))
+        .filter(hasValidData);
 
-    const visualMetrics = [
+    const allVisualMetrics = [
         {
+            key: "facial_emotion",
             label: "Facial Emotion",
             value: feedback.facial_emotion?.emotion_statistics?.dominant_emotion?.emotion || 'N/A',
-            score: modelScores.facial_emotion?.score ?? undefined,
+            score: modelScores.facial_emotion?.normalized_score ?? undefined,
             recommendation: Array.isArray(feedback.facial_emotion?.recommendations) ? feedback.facial_emotion.recommendations[0] : undefined,
             recommendations: feedback.facial_emotion?.recommendations,
             details: feedback.facial_emotion?.emotion_statistics ? {
@@ -371,9 +445,10 @@ const Feedback = () => {
             description: `Detection rate: ${(feedback.facial_emotion?.face_detection_rate * 100).toFixed(1)}%`
         },
         {
+            key: "eye_contact",
             label: "Eye Contact",
             value: `${feedback.eye_contact?.attention_score || 0}/10`,
-            score: modelScores.eye_contact?.score ?? modelScores.eye_contact ?? undefined,
+            score: modelScores.eye_contact?.normalized_score ?? undefined,
             recommendation: undefined,
             recommendations: undefined,
             details: feedback.eye_contact ? {
@@ -386,9 +461,10 @@ const Feedback = () => {
             description: `Face detection: ${(feedback.eye_contact?.engagement_metrics?.face_detection_rate * 100).toFixed(1)}%`
         },
         {
+            key: "hand_gesture",
             label: "Hand Gestures",
             value: feedback.hand_gesture?.gesture_statistics?.most_common_gesture || 'N/A',
-            score: modelScores.hand_gesture?.score ?? undefined,
+            score: modelScores.hand_gesture?.normalized_score ?? undefined,
             recommendation: Array.isArray(feedback.hand_gesture?.recommendations) ? feedback.hand_gesture.recommendations[0] : undefined,
             recommendations: feedback.hand_gesture?.recommendations,
             details: feedback.hand_gesture?.gesture_statistics ? {
@@ -403,9 +479,10 @@ const Feedback = () => {
             description: `${feedback.hand_gesture?.gesture_statistics?.hands_visible_percentage || 0}% visibility`
         },
         {
+            key: "posture_analysis",
             label: "Posture Quality",
             value: feedback.posture_analysis?.posture_metrics?.posture_quality || 'N/A',
-            score: modelScores.posture_analysis?.score ?? undefined,
+            score: modelScores.posture_analysis?.normalized_score ?? undefined,
             recommendation: Array.isArray(feedback.posture_analysis?.recommendations) ? feedback.posture_analysis.recommendations[0] : undefined,
             recommendations: feedback.posture_analysis?.recommendations,
             details: feedback.posture_analysis?.posture_metrics ? {
@@ -418,9 +495,22 @@ const Feedback = () => {
             description: `${feedback.posture_analysis?.posture_metrics?.total_penalty_points?.toFixed(1) || 0} penalty points`
         }
     ];
+    
+    // Filter visual metrics based on used criteria and valid data
+    const visualMetrics = allVisualMetrics
+        .filter(metric => shouldShowMetric(metric.key))
+        .map(metric => ({
+            ...metric,
+            details: filterUndefinedProps(metric.details),
+            recommendation: isValidValue(metric.recommendation) ? metric.recommendation : undefined,
+            recommendations: Array.isArray(metric.recommendations) && metric.recommendations.length > 0 ? metric.recommendations : undefined,
+            description: isValidValue(metric.description) ? metric.description : undefined
+        }))
+        .filter(hasValidData);
 
-    const contentMetrics = [
+    const allContentMetrics = [
         {
+            key: "lexical_richness",
             label: "Lexical Richness",
             value: feedback.lexical_richness?.assessment?.richness_level || 'N/A',
             score: modelScores.lexical_richness?.score ?? undefined,
@@ -439,9 +529,10 @@ const Feedback = () => {
             description: `TTR: ${(feedback.lexical_richness?.richness_metrics?.type_token_ratio * 100).toFixed(1)}%`
         },
         {
+            key: "keyword_relevance",
             label: "Keyword Relevance",
             value: feedback.keyword_relevance?.relevance_assessment?.assessment_level || 'N/A',
-            score: modelScores.keyword_relevance?.score ?? undefined,
+            score: modelScores.keyword_relevance?.normalized_score ?? undefined,
             recommendation: Array.isArray(feedback.keyword_relevance?.recommendations) ? feedback.keyword_relevance.recommendations[0] : undefined,
             recommendations: feedback.keyword_relevance?.recommendations,
             details: feedback.keyword_relevance?.topic_coherence ? {
@@ -455,21 +546,35 @@ const Feedback = () => {
             description: `Coherence: ${(feedback.keyword_relevance?.topic_coherence?.coherence_score * 100).toFixed(1)}%`
         }
     ];
+    
+    // Filter content metrics based on used criteria and valid data
+    const contentMetrics = allContentMetrics
+        .filter(metric => shouldShowMetric(metric.key))
+        .map(metric => ({
+            ...metric,
+            details: filterUndefinedProps(metric.details),
+            recommendation: isValidValue(metric.recommendation) ? metric.recommendation : undefined,
+            recommendations: Array.isArray(metric.recommendations) && metric.recommendations.length > 0 ? metric.recommendations : undefined,
+            description: isValidValue(metric.description) ? metric.description : undefined
+        }))
+        .filter(hasValidData);
 
-    // Prepare recommendations
+    // Prepare recommendations - only from used criteria and valid data
     const allRecommendations = [
-        ...(feedback.speech_emotion?.recommendations || []),
-        ...(feedback.wpm_analysis?.recommendations || []),
-        ...(feedback.pitch_analysis?.recommendations || []),
-        ...(feedback.filler_detection?.recommendations || []),
-        ...(feedback.stutter_detection?.recommendations || []),
-        ...(feedback.facial_emotion?.recommendations || []),
-        ...(feedback.hand_gesture?.recommendations || []),
-        ...(feedback.posture_analysis?.recommendations || []),
-        ...(feedback.lexical_richness?.recommendations || []),
-        ...(feedback.keyword_relevance?.recommendations || []),
+        ...(shouldShowMetric('speech_emotion') ? (feedback.speech_emotion?.recommendations || []) : []),
+        ...(shouldShowMetric('wpm_analysis') ? (feedback.wpm_analysis?.recommendations || []) : []),
+        ...(shouldShowMetric('pitch_analysis') ? (feedback.pitch_analysis?.recommendations || []) : []),
+        ...(shouldShowMetric('filler_detection') ? (feedback.filler_detection?.recommendations || []) : []),
+        ...(shouldShowMetric('stutter_detection') ? (feedback.stutter_detection?.recommendations || []) : []),
+        ...(shouldShowMetric('facial_emotion') ? (feedback.facial_emotion?.recommendations || []) : []),
+        ...(shouldShowMetric('hand_gesture') ? (feedback.hand_gesture?.recommendations || []) : []),
+        ...(shouldShowMetric('posture_analysis') ? (feedback.posture_analysis?.recommendations || []) : []),
+        ...(shouldShowMetric('lexical_richness') ? (feedback.lexical_richness?.recommendations || []) : []),
+        ...(shouldShowMetric('keyword_relevance') ? (feedback.keyword_relevance?.recommendations || []) : []),
         ...(enhanced.recommendations || [])
-    ].map(rec => ({ text: rec, priority: 'medium' as const }));
+    ]
+    .filter(rec => isValidValue(rec) && typeof rec === 'string' && rec.trim() !== '')
+    .map(rec => ({ text: rec, priority: 'medium' as const }));
 
     return (
         <div className={styles.container}>
@@ -496,10 +601,10 @@ const Feedback = () => {
                             <FiPlay className={feedbackStyles.frameIcon} />
                             <h3 className={feedbackStyles.frameTitle}>Video Preview</h3>
                         </div>
-                        {presentation && presentation.file_info?.file_exists && (
+                        {presentation && presentation.file_info?.file_exists && isValidValue(presentation.url) && (
                             <VideoPlayer 
                                 videoUrl={`http://localhost:8081${presentation.url}`}
-                                title={presentation.title}
+                                title={presentation.title || 'Video'}
                             />
                         )}
                     </div>
@@ -514,12 +619,14 @@ const Feedback = () => {
                             <button 
                                 onClick={async () => {
                                     const transcription = feedback?.transcription_info?.transcription_full || feedback?.transcription_info?.transcription_preview || "";
-                                    try {
-                                        await navigator.clipboard.writeText(transcription);
-                                        setCopied(true);
-                                        setTimeout(() => setCopied(false), 2000);
-                                    } catch (err) {
-                                        console.error('Failed to copy text: ', err);
+                                    if (isValidValue(transcription) && transcription.trim() !== '') {
+                                        try {
+                                            await navigator.clipboard.writeText(transcription);
+                                            setCopied(true);
+                                            setTimeout(() => setCopied(false), 2000);
+                                        } catch (err) {
+                                            console.error('Failed to copy text: ', err);
+                                        }
                                     }
                                 }}
                                 className={feedbackStyles.copyButton}
@@ -539,7 +646,8 @@ const Feedback = () => {
                             </button>
                         </div>
 
-                        {feedback && feedback.transcription_info && (feedback.transcription_info.transcription_full || feedback.transcription_info.transcription_preview) && (
+                        {feedback && feedback.transcription_info && 
+                         (isValidValue(feedback.transcription_info.transcription_full) || isValidValue(feedback.transcription_info.transcription_preview)) && (
                             <TranscriptionDisplay 
                                 transcription={feedback.transcription_info.transcription_full || feedback.transcription_info.transcription_preview || ""}
                                 title=""
@@ -553,25 +661,40 @@ const Feedback = () => {
                 
                 {/* Detailed Metrics Grid */}
                 <div className={feedbackStyles.detailedMetricsGrid}>
-                    <DetailedMetricsCard 
-                        title="Speech Analysis"
-                        metrics={speechMetrics}
-                        icon={<FiMic />}
-                        color="#3B82F6"
-                    />
-                    <DetailedMetricsCard 
-                        title="Visual Analysis"
-                        metrics={visualMetrics}
-                        icon={<FiEye />}
-                        color="#10B981"
-                    />
-                    <DetailedMetricsCard 
-                        title="Content Analysis"
-                        metrics={contentMetrics}
-                        icon={<FiMessageSquare />}
-                        color="#F59E0B"
-                    />
+                    {speechMetrics.length > 0 && (
+                        <DetailedMetricsCard 
+                            title="Speech Analysis"
+                            metrics={speechMetrics}
+                            icon={<FiMic />}
+                            color="#3B82F6"
+                        />
+                    )}
+                    {visualMetrics.length > 0 && (
+                        <DetailedMetricsCard 
+                            title="Visual Analysis"
+                            metrics={visualMetrics}
+                            icon={<FiEye />}
+                            color="#10B981"
+                        />
+                    )}
+                    {contentMetrics.length > 0 && (
+                        <DetailedMetricsCard 
+                            title="Content Analysis"
+                            metrics={contentMetrics}
+                            icon={<FiMessageSquare />}
+                            color="#F59E0B"
+                        />
+                    )}
                 </div>
+                
+                {/* Show message if no analysis cards are displayed */}
+                {speechMetrics.length === 0 && visualMetrics.length === 0 && contentMetrics.length === 0 && (
+                    <div className={feedbackStyles.noAnalysisMessage}>
+                        <FiTarget className={feedbackStyles.noAnalysisIcon} />
+                        <h3>No Analysis Available</h3>
+                        <p>No analysis models were selected for this presentation. Please upload a new video with analysis focus areas selected.</p>
+                    </div>
+                )}
                 
                 {/* Original Insights Panel */}
                 <InsightsPanel {...insightsProps} />
