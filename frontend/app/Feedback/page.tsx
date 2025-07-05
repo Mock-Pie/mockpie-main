@@ -300,12 +300,14 @@ const Feedback = () => {
             score: normalizeScore(contentFeedback.lexical_richness?.score),
             insight: contentFeedback.lexical_richness?.feedback || '-',
             recommendation: contentFeedback.lexical_richness?.assessment || undefined,
+            description: "A rich vocabulary makes your speech more interesting and persuasive. Try to use a variety of words and avoid repeating the same terms."
         },
         keywordRelevance: {
             value: feedback.keyword_relevance?.relevance_assessment?.assessment_level || '-',
             score: normalizeScore(contentFeedback.keyword_relevance?.score),
             insight: contentFeedback.keyword_relevance?.feedback || '-',
             recommendation: contentFeedback.keyword_relevance?.assessment || undefined,
+            description: "Using topic-relevant keywords shows you stayed focused and covered the main points. Review your topic and include important terms to strengthen your message."
         },
     };
 
@@ -359,7 +361,7 @@ const Feedback = () => {
                 engagement_score: "How engaging your emotional delivery was to listeners",
                 emotion_std: "The standard deviation of your emotional expression"
             }) : undefined,
-            description: `Confidence: ${(feedback.speech_emotion?.dominant_emotion?.confidence * 100).toFixed(1)}%`
+            description: "Your dominant speech emotion reflects the overall feeling you conveyed. Expressing positive emotions can help engage your audience and make your message more memorable."
         },
         {
             key: "wpm_analysis",
@@ -388,7 +390,7 @@ const Feedback = () => {
                 pause_count: "The total number of pauses you made during your presentation",
                 wpm_variance: "How much your speaking speed varied throughout the presentation"
             }),
-            description: feedback.wpm_analysis?.assessment?.message
+            description: "Your speaking rate shows how quickly you delivered your presentation. Aim for a pace that is clear and easy to follow—typically 120–160 words per minute."
         },
         {
             key: "pitch_analysis",
@@ -410,7 +412,7 @@ const Feedback = () => {
                 pitch_dynamism: "How dynamic and expressive your pitch changes were",
                 semitone_range: "The range of musical notes your voice covered"
             }) : undefined,
-            description: `Range: ${feedback.pitch_analysis?.pitch_statistics?.pitch_range?.toFixed(1) || 'N/A'} Hz`
+            description: "Pitch variation keeps your speech lively and interesting. A monotone delivery can lose your audience's attention, while expressive pitch helps emphasize key points."
         },
         {
             key: "filler_detection",
@@ -419,21 +421,17 @@ const Feedback = () => {
             score: modelScores.filler_detection?.normalized_score ?? undefined,
             recommendation: Array.isArray(feedback.filler_detection?.recommendations) ? feedback.filler_detection.recommendations[0] : undefined,
             recommendations: feedback.filler_detection?.recommendations,
-            mostCommonFiller: feedback.filler_detection?.filler_analysis?.most_common_filler,
-            details: feedback.filler_detection?.filler_analysis ? addDetailDescriptions({
-                ...feedback.filler_detection.filler_analysis,
+            mostCommonFiller: undefined,
+            details: feedback.filler_detection?.pause_analysis ? addDetailDescriptions({
                 pause_percentage: feedback.filler_detection?.pause_analysis?.pause_percentage,
                 total_pauses: feedback.filler_detection?.pause_analysis?.total_pauses,
                 average_pause_duration: feedback.filler_detection?.pause_analysis?.average_pause_duration,
             }, {
-                total_fillers: "The total number of filler words you used",
-                filler_rate_percentage: "The percentage of your speech that consisted of filler words",
-                most_common_filler: "The filler word you used most frequently",
                 pause_percentage: "The percentage of time you spent pausing",
                 total_pauses: "The total number of pauses you made",
                 average_pause_duration: "The average length of each pause"
             }) : undefined,
-            description: `${feedback.filler_detection?.filler_analysis?.filler_rate_percentage?.toFixed(1) || 0}% of speech`
+            description: "Filler words like 'um' and 'uh' can make you sound less confident. Reducing fillers will help your speech sound more polished and professional."
         },
         {
             key: "stutter_detection",
@@ -448,15 +446,13 @@ const Feedback = () => {
                 stutter_frequency_per_minute: feedback.stutter_detection?.stutter_frequency_per_minute,
                 stutter_segments_count: feedback.stutter_detection?.stutter_segments_count,
                 total_segments: feedback.stutter_detection?.total_segments,
-                stutter_timeline: feedback.stutter_detection?.stutter_timeline?.map((seg: any) => `Segment ${seg.segment_id}: ${seg.stutter_probability ? (seg.stutter_probability * 100).toFixed(1) : ''}%`),
             }, {
                 stutter_percentage: "The percentage of speech segments that contained stuttering",
                 stutter_frequency_per_minute: "How many stuttering incidents occurred per minute",
                 stutter_segments_count: "The number of speech segments that contained stuttering",
-                total_segments: "The total number of speech segments analyzed",
-                stutter_timeline: "A timeline showing when stuttering occurred during your presentation"
+                total_segments: "The total number of speech segments analyzed"
             }),
-            description: `${feedback.stutter_detection?.stutter_percentage?.toFixed(1) || 0}% of segments affected`
+            description: "Stuttering can interrupt the flow of your speech. Practicing your delivery and pausing for breath can help reduce stuttering and improve clarity."
         }
     ];
     
@@ -511,7 +507,7 @@ const Feedback = () => {
                 engagement_score: "How engaging your facial expressions were to viewers",
                 visual_appeal: "How visually appealing your facial expressions were"
             }) : undefined,
-            description: `Detection rate: ${(feedback.facial_emotion?.face_detection_rate * 100).toFixed(1)}%`
+            description: "Your facial expressions help convey your message and connect with your audience. Smiling and showing emotion can make your presentation more engaging."
         },
         {
             key: "eye_contact",
@@ -533,7 +529,7 @@ const Feedback = () => {
                 average_engagement_score: "How engaging your eye contact was overall",
                 total_frames_analyzed: "The total number of video frames analyzed for eye contact"
             }) : undefined,
-            description: `Face detection: ${(feedback.eye_contact?.engagement_metrics?.face_detection_rate * 100).toFixed(1)}%`
+            description: "Maintaining eye contact with the camera or audience builds trust and keeps listeners engaged. Try to look up regularly and avoid looking away for long periods."
         },
         {
             key: "hand_gesture",
@@ -547,43 +543,29 @@ const Feedback = () => {
                 gesture_variety: feedback.hand_gesture?.gesture_statistics?.gesture_variety,
                 hand_usage_distribution: feedback.hand_gesture?.gesture_statistics?.hand_usage_distribution,
                 zone_distribution: feedback.hand_gesture?.gesture_statistics?.zone_distribution,
-                average_effectiveness: feedback.hand_gesture?.gesture_statistics?.average_effectiveness,
-                engagement_level: feedback.hand_gesture?.engagement_metrics?.engagement_level,
-                hands_usage_rating: feedback.hand_gesture?.engagement_metrics?.hands_usage_rating,
             }, {
-                most_common_gesture: "The hand gesture you used most frequently",
-                gesture_variety: "How many different types of hand gestures you used",
-                hand_usage_distribution: "How you used your left and right hands",
-                zone_distribution: "Which areas of your body you gestured towards",
-                average_effectiveness: "How effective your hand gestures were overall",
-                engagement_level: "How engaging your hand gestures were to viewers",
-                hands_usage_rating: "How well you utilized your hands during the presentation",
-                hands_visible_percentage: "The percentage of time your hands were clearly visible"
+                gesture_variety: "The number of different gestures you used",
+                hand_usage_distribution: "How you used your left and right hands during your talk",
+                zone_distribution: "The areas in which you used your hands most frequently"
             }) : undefined,
-            description: `${feedback.hand_gesture?.gesture_statistics?.hands_visible_percentage || 0}% visibility`
+            description: "Using hand gestures can emphasize your points and make your delivery more dynamic. Aim for natural, purposeful movements that support your message."
         },
         {
             key: "posture_analysis",
-            label: "Posture Quality",
-            value: feedback.posture_analysis?.posture_metrics?.posture_quality || 'N/A',
+            label: "Posture Analysis",
+            value: feedback.posture_analysis?.posture_metrics?.posture_quality || '-',
             score: modelScores.posture_analysis?.normalized_score ?? undefined,
             recommendation: Array.isArray(feedback.posture_analysis?.recommendations) ? feedback.posture_analysis.recommendations[0] : undefined,
             recommendations: feedback.posture_analysis?.recommendations,
             details: feedback.posture_analysis?.posture_metrics ? addDetailDescriptions({
                 ...feedback.posture_analysis.posture_metrics,
-                most_problematic: feedback.posture_analysis?.posture_metrics?.most_problematic,
-                main_issues: feedback.posture_analysis?.posture_metrics?.main_issues,
-                pose_counts: feedback.posture_analysis?.bad_posture_summary?.pose_counts,
-                pose_percentages: feedback.posture_analysis?.bad_posture_summary?.pose_percentages,
+                posture_score: feedback.posture_analysis?.posture_metrics?.posture_score,
+                posture_confidence: feedback.posture_analysis?.posture_metrics?.posture_confidence,
             }, {
-                posture_quality: "The overall quality of your posture during the presentation",
-                total_penalty_points: "Points deducted for poor posture throughout the presentation",
-                most_problematic: "The most problematic aspect of your posture",
-                main_issues: "The main posture issues identified during your presentation",
-                pose_counts: "How many times each type of posture was detected",
-                pose_percentages: "The percentage of time you maintained each posture type"
+                posture_score: "Your overall posture quality score",
+                posture_confidence: "How confident the system is in your posture assessment"
             }) : undefined,
-            description: `${feedback.posture_analysis?.posture_metrics?.total_penalty_points?.toFixed(1) || 0} penalty points`
+            description: "Good posture projects confidence and helps you breathe and speak more clearly. Stand or sit up straight, and avoid slouching or fidgeting."
         }
     ];
     
