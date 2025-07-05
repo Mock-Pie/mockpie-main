@@ -214,12 +214,9 @@ const Feedback = () => {
         overallScore: isValidValue(enhanced.overall_score) ? normalizeScore(enhanced.overall_score) : 0,
         analysisDate: new Date().toLocaleDateString(),
         videoDuration: (() => {
-            const pitchDuration = feedback.pitch_analysis?.pitch_statistics?.total_duration;
-            const facialDuration = feedback.facial_emotion?.temporal_analysis?.total_duration;
-            if (isValidValue(pitchDuration)) {
-                return `${Math.round(pitchDuration)}s`;
-            } else if (isValidValue(facialDuration)) {
-                return `${Math.round(facialDuration)}s`;
+            const duration = feedback.duration;
+            if (isValidValue(duration) && duration > 0) {
+                return `${Math.round(duration)}s`;
             }
             return '-';
         })(),

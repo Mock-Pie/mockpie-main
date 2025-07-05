@@ -550,12 +550,25 @@ async def api_custom_feedback(
         except Exception as e:
             logger.error(f"Enhanced feedback generation error: {e}")
             results["enhanced_feedback"] = {"error": str(e)}
+        
+        # Get video duration
+        video_duration = 0.0
+        if has_video and video_path:
+            try:
+                video_duration = analyzers["file_processor"].get_video_duration(video_path)
+            except Exception as e:
+                logger.warning(f"Could not get video duration: {e}")
+        
         results["transcription_info"] = {
             "transcription_length": len(transcription) if transcription else 0,
             "transcription_preview": transcription[:200] + "..." if transcription and len(transcription) > 200 else transcription,
             "transcription_full": transcription,
             "transcription_success": transcription is not None
         }
+        
+        # Add duration as outer level field
+        results["duration"] = video_duration
+        
         return JSONResponse(content=results, status_code=200)
     except Exception as e:
         logger.error(f"Custom feedback API error: {e}")

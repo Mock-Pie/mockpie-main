@@ -238,38 +238,35 @@ class PitchAnalyzer:
 
     def _calculate_overall_score(self, pitch_stats: dict, variation_metrics: dict, speaking_style: dict) -> float:
         try:
-            score = 5.0
+            score = 10.0
             cv = variation_metrics.get("coefficient_of_variation", 0)
             semitone_range = variation_metrics.get("semitone_range", 0)
             engagement_score = speaking_style.get("engagement_score", 5)
             voiced_percentage = pitch_stats.get("voiced_frames_percentage", 0)
-            # Pitch variation (CV)
-            if cv >= 25:
-                score += 3.0
-            elif cv >= 15:
-                score += 2.0
-            elif cv >= 8:
-                score += 1.0
-            else:
-                score -= 1.0
-            # Semitone range
-            if semitone_range >= 8:
-                score += 2.0
-            elif semitone_range >= 4:
-                score += 1.0
-            else:
-                score -= 0.5
-            # Engagement
-            score += (engagement_score - 5) * 0.4
+
+            # Penalize monotony
+            if cv < 10 or semitone_range < 3:
+                score -= 4.0  # strong penalty for monotone
+            elif cv < 15 or semitone_range < 5:
+                score -= 2.0  # moderate penalty
+
+            # Reward good variation
+            if cv >= 25 and semitone_range >= 8:
+                score += 1.0  # reward for highly dynamic
+
+            # Engagement (scaled)
+            score += (engagement_score - 5) * 0.3  # smaller impact
+
             # Voiced frames
             if voiced_percentage >= 80:
-                score += 1.0
-            elif voiced_percentage >= 60:
                 score += 0.5
-            else:
-                score -= 0.5
+            elif voiced_percentage < 60:
+                score -= 1.0
+
+            # Clamp between 0 and 10
             score = max(0.0, min(10.0, score))
             return round(score, 1)
         except Exception as e:
             logger.error(f"Error calculating overall score: {e}")
             return 5.0
+

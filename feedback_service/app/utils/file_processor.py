@@ -201,3 +201,36 @@ class FileProcessor:
                 "is_video": False,
                 "is_audio": False
             }
+
+    def get_video_duration(self, video_path: str) -> float:
+        """
+        Get video duration using OpenCV
+        
+        Args:
+            video_path: Path to video file
+            
+        Returns:
+            Duration in seconds, or 0.0 if error
+        """
+        try:
+            import cv2
+            cap = cv2.VideoCapture(video_path)
+            if not cap.isOpened():
+                logger.error(f"Could not open video file: {video_path}")
+                return 0.0
+            
+            fps = cap.get(cv2.CAP_PROP_FPS)
+            total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+            cap.release()
+            
+            if fps > 0 and total_frames > 0:
+                duration = total_frames / fps
+                logger.info(f"Video duration: {duration:.2f} seconds")
+                return duration
+            else:
+                logger.warning(f"Invalid video properties - FPS: {fps}, Frames: {total_frames}")
+                return 0.0
+                
+        except Exception as e:
+            logger.error(f"Error getting video duration: {e}")
+            return 0.0
