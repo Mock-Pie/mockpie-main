@@ -111,8 +111,8 @@ class EnhancedFeedbackGenerator:
                 "weight": 0.12
             },
             "keyword_relevance": {
-                "score_field": "relevance_score",
-                "fallback_fields": ["keyword_coverage", "overall_score"],
+                "score_field": "overall_score",
+                "fallback_fields": ["relevance_score", "keyword_coverage"],
                 "description": "Content relevance and focus",
                 "max_score": 10.0,
                 "weight": 0.05
@@ -386,7 +386,11 @@ class EnhancedFeedbackGenerator:
         elif model_name == "keyword_relevance":
             details.update({
                 "relevance_score": model_result.get("relevance_score", 0),
-                "keyword_coverage": model_result.get("keyword_coverage", 0)
+                "keyword_coverage": model_result.get("keyword_coverage", 0),
+                "score_breakdown": model_result.get("relevance_assessment", {}).get("score_breakdown", {}),
+                "topic_focus": model_result.get("topic_coherence", {}).get("topic_focus", "unknown"),
+                "semantic_coherence": model_result.get("topic_coherence", {}).get("semantic_coherence", 0),
+                "diversity_score": model_result.get("keyword_diversity", {}).get("diversity_score", 0)
             })
         
         return details

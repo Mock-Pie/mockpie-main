@@ -158,7 +158,7 @@ class CompositeScorer:
                 "eye_contact": ["attention_score", "overall_score"],
                 "hand_gesture": ["gesture_effectiveness", "overall_score"],
                 "posture_analysis": ["posture_score", "overall_score"],
-                "keyword_relevance": ["relevance_score", "overall_score"],
+                "keyword_relevance": ["overall_score", "relevance_score"],
                 "confidence_detector": ["overall_confidence_score", "overall_score"]
             }
             
