@@ -483,7 +483,10 @@ async def api_custom_feedback(
             input_file_path = file_path
         elif file:
             logger.info(f"Custom feedback API called for uploaded file: {file.filename} with services: {services}")
-            input_file_path = await analyzers["file_processor"].save_uploaded_file(file)
+            file_processor = analyzers.get("file_processor")
+            if file_processor is None:
+                raise HTTPException(status_code=500, detail="File processor not available")
+            input_file_path = await file_processor.save_uploaded_file(file)
         else:
             return JSONResponse(content={"error": "Either file or file_path must be provided"}, status_code=400)
         
@@ -498,7 +501,7 @@ async def api_custom_feedback(
             "volume_consistency": ("volume_consistency", "audio", "analyze", {}),
             "filler_detection": ("filler_detection", "audio", "analyze", {"language": language, "transcript_result": transcript_result}),
             "stutter_detection": ("stutter_detection", "audio", "analyze", {}),
-            "lexical_richness": ("lexical_richness", "audio", "analyze", {"language": language, "transcript": transcription}),
+            "lexical_richness": ("lexical_richness", "audio", "analyze", {"transcript": transcription, "language": language}),
             "wpm_analysis": ("wpm_calculator", "audio", "analyze", {"language": language, "context": "presentation", "transcript": transcription}),
             "keyword_relevance": ("keyword_relevance", "audio", "analyze", {"language": language, "transcript": transcription, "target_keywords": topic}),
             "facial_emotion": ("facial_emotion", "video", "analyze", {}),
@@ -530,7 +533,10 @@ async def api_custom_feedback(
                 continue
             try:
                 analyze_method = getattr(analyzer, method)
-                if extra_kwargs:
+                if service == "lexical_richness":
+                    # lexical_richness.analyze() expects (transcript, language) not (audio_path, **kwargs)
+                    result = analyze_method(transcription, language=language)
+                elif extra_kwargs:
                     result = analyze_method(input_path, **extra_kwargs)
                 else:
                     result = analyze_method(input_path)
