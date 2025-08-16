@@ -1,8 +1,9 @@
 "use client";
 import React, { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { FiUploadCloud, FiFile, FiCheck, FiX } from "react-icons/fi";
+import { FiUploadCloud, FiFile, FiCheck, FiX, FiTarget } from "react-icons/fi";
 import styles from "../page.module.css";
+import FocusModal from "../../components/shared/FocusModal";
 
 const Uploading = () => {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -11,6 +12,10 @@ const Uploading = () => {
     const [uploadStatus, setUploadStatus] = useState<string | null>(null);
     const [isUploading, setIsUploading] = useState(false);
     const [videoTitle, setVideoTitle] = useState<string>("");
+    const [presentationTopic, setPresentationTopic] = useState<string>("");
+    const [selectedLanguage, setSelectedLanguage] = useState<string>("");
+    const [selectedFocus, setSelectedFocus] = useState<string[]>([]);
+    const [showFocusModal, setShowFocusModal] = useState(false);
     const [isDragOver, setIsDragOver] = useState(false);
     const fileInputRef = useRef<HTMLInputElement | null>(null);
     const router = useRouter();
@@ -77,6 +82,42 @@ const Uploading = () => {
             return;
         }
 
+        // Check video duration before upload
+        const duration = await new Promise<number>((resolve, reject) => {
+            const video = document.createElement('video');
+            video.preload = 'metadata';
+            video.onloadedmetadata = () => {
+                window.URL.revokeObjectURL(video.src);
+                resolve(video.duration);
+            };
+            video.onerror = () => reject('Failed to load video metadata');
+            video.src = URL.createObjectURL(selectedFile);
+        });
+        if (duration < 30) {
+            setUploadStatus("Video is too short. Minimum duration is 30 seconds.");
+            return;
+        }
+        if (duration > 3600) {
+            setUploadStatus("Video is too long. Maximum duration is 1 hour.");
+            return;
+        }
+
+        // Validate required fields
+        if (!presentationTopic.trim()) {
+            setUploadStatus("Please enter a presentation topic.");
+            return;
+        }
+
+        if (!selectedLanguage) {
+            setUploadStatus("Please select a language.");
+            return;
+        }
+
+        if (selectedFocus.length === 0) {
+            setUploadStatus("Please select at least one focus area for analysis.");
+            return;
+        }
+
         // Check if user is authenticated
         const accessToken = localStorage.getItem("access_token");
         if (!accessToken) {
@@ -107,11 +148,13 @@ const Uploading = () => {
         if (videoTitle.trim()) {
             formData.append("title", videoTitle.trim());
         }
-
+        formData.append("topic", presentationTopic.trim());
+        formData.append("language", selectedLanguage);
+        formData.append("focus_areas", JSON.stringify(selectedFocus));
+        
         try {
             setIsUploading(true);
             setUploadStatus("Uploading...");
-
             const response = await fetch("http://localhost:8081/presentations/upload", {
                 method: "POST",
                 headers: {
@@ -119,16 +162,35 @@ const Uploading = () => {
                 },
                 body: formData,
             });
-
             if (response.ok) {
                 const data = await response.json();
-                setUploadStatus("Upload successful!");
-                console.log("Upload response:", data);
-                
-                // Redirect to dashboard after successful upload
-                setTimeout(() => {
-                    router.push("/Dashboard");
-                }, 2000);
+                // Save presentationId to localStorage before anything else
+                if (data && data.presentation_id) {
+                    localStorage.setItem("presentationId", data.presentation_id);
+                }
+                setUploadStatus("Upload successful! Generating feedback...");
+                // POST to feedback API
+                const feedbackForm = new FormData();
+                feedbackForm.append("file", selectedFile);
+                feedbackForm.append("services", selectedFocus.join(","));
+                feedbackForm.append("presentation_id", data.presentation_id);
+                feedbackForm.append("language", selectedLanguage);
+                feedbackForm.append("topic", presentationTopic.trim());
+                const feedbackRes = await fetch("http://localhost:8081/feedback/custom-feedback", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${accessToken}`,
+                    },
+                    body: feedbackForm,
+                });
+                if (feedbackRes.ok) {
+                    const feedbackData = await feedbackRes.json();
+                    localStorage.setItem("feedbackData", JSON.stringify(feedbackData));
+                    console.log("Feedback data stored in localStorage:", feedbackData);
+                    router.push("/Feedback");
+                } else {
+                    setUploadStatus("Failed to generate feedback. Please try again later.");
+                }
             } else {
                 const errorData = await response.json();
                 
@@ -236,7 +298,7 @@ const Uploading = () => {
                 <button 
                     onClick={handleUpload} 
                     className={styles.UploadButton}
-                    disabled={isUploading || !selectedFile}
+                    disabled={isUploading || !selectedFile || !presentationTopic.trim() || !selectedLanguage || selectedFocus.length === 0}
                 >
                     {isUploading ? (
                         <>
@@ -252,6 +314,71 @@ const Uploading = () => {
                 </button>
             </div>
 
+            {/* Presentation Details Form */}
+            <div className={styles.PresentationDetailsForm}>
+                                    <div className={styles.FormGroup}>
+                        <label className={styles.FormLabel}>
+                            Presentation Topic *
+                        </label>
+                        <input
+                            type="text"
+                            value={presentationTopic}
+                            onChange={(e) => setPresentationTopic(e.target.value)}
+                            placeholder="for content relevance analysis"
+                            className={styles.FormInput}
+                            maxLength={255}
+                        />
+                        <div className={styles.CharacterCount}>
+                            {presentationTopic.length}/255 characters
+                        </div>
+                    </div>
+                <div className={styles.FormGroup}>
+                    <label className={styles.FormLabel}>
+                        Language *
+                    </label>
+                    <select
+                        value={selectedLanguage}
+                        onChange={(e) => setSelectedLanguage(e.target.value)}
+                        className={styles.FormSelect}
+                    >
+                        <option value="">Select Language</option>
+                        <option value="english">English</option>
+                        <option value="arabic">Arabic</option>
+                    </select>
+                </div>
+                
+                <div className={styles.FormGroup}>
+                    <label className={styles.FormLabel}>
+                        Focus Areas *
+                    </label>
+                    <button
+                        type="button"
+                        onClick={() => setShowFocusModal(true)}
+                        className={styles.FocusButton}
+                    >
+                        <FiTarget style={{ marginRight: '8px' }} />
+                        {selectedFocus.length > 0 
+                            ? `${selectedFocus.length} focus area${selectedFocus.length > 1 ? 's' : ''} selected`
+                            : "Choose a focus"
+                        }
+                    </button>
+                    {selectedFocus.length > 0 && (
+                        <div className={styles.SelectedFocusPreview}>
+                            {selectedFocus.slice(0, 2).map((focus, index) => (
+                                <span key={focus} className={styles.FocusTag}>
+                                    {focus.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                                </span>
+                            ))}
+                            {selectedFocus.length > 2 && (
+                                <span className={styles.FocusMore}>
+                                    +{selectedFocus.length - 2} more
+                                </span>
+                            )}
+                        </div>
+                    )}
+                </div>
+            </div>
+
             {uploadStatus && (
                 <div className={`${styles.UploadStatus} ${getStatusClass()}`}>
                     {uploadStatus.includes("successful") && <FiCheck style={{ marginRight: '8px' }} />}
@@ -259,6 +386,13 @@ const Uploading = () => {
                     {uploadStatus}
                 </div>
             )}
+
+            <FocusModal
+                isOpen={showFocusModal}
+                onClose={() => setShowFocusModal(false)}
+                onSave={(focus) => setSelectedFocus(focus)}
+                selectedFocus={selectedFocus}
+            />
         </div>
     );
 };

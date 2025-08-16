@@ -10,6 +10,8 @@ class Presentation(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
     title = Column(String, nullable=False)
     url = Column(String, nullable=False)
+    language = Column(String(length=50), nullable=True)
+    topic = Column(String(length=255), nullable=True)
     is_public = Column(Boolean, nullable=False, server_default=text('false'))  # Default value is false, indicating the presentation is private
     uploaded_at = Column(DateTime, server_default=func.now(), nullable=False)
     deleted_at = Column(DateTime, nullable=True)
@@ -17,6 +19,5 @@ class Presentation(Base):
     # Establish the relationship with the User model
     user = relationship("User", back_populates="presentations")
     
-    # Analysis relationships
-    voice_analysis = relationship("VoiceAnalysis", back_populates="presentation", uselist=False)
-    body_analysis = relationship("BodyAnalysis", back_populates="presentation", uselist=False)
+    # Feedback relationship
+    feedback = relationship("Feedback", back_populates="presentation", uselist=False)

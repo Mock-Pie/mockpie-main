@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import styles from "../page.module.css";
 import { TfiDownload } from "react-icons/tfi";
 import { AiOutlineDelete } from "react-icons/ai";
@@ -9,6 +9,7 @@ interface Trial {
     name: string;
     date: string;
     feedback: string;
+    url?: string;
 }
 
 interface TableRowProps {
@@ -16,6 +17,18 @@ interface TableRowProps {
 }
 
 const TableRow = ({ trial }: TableRowProps) => {
+    const [videoSize, setVideoSize] = useState<number | null>(null);
+
+    useEffect(() => {
+        if (trial.url) {
+            fetch(trial.url, { method: 'HEAD' })
+                .then(res => {
+                    const size = res.headers.get('content-length');
+                    if (size) setVideoSize(Number(size));
+                });
+        }
+    }, [trial.url]);
+
     return (
         <div className={styles.tableRow}>
             <div className={styles.videoCell}>
@@ -28,6 +41,11 @@ const TableRow = ({ trial }: TableRowProps) => {
                     <div className={styles.playIcon}></div>
                 </div>
                 {trial.id}
+                {videoSize !== null && (
+                    <span style={{ marginLeft: 8, fontSize: 12, color: '#aaa' }}>
+                        { (videoSize / (1024 * 1024)).toFixed(2) } MB
+                    </span>
+                )}
             </div>
             <div>{trial.name}</div>
             <div>{trial.date}</div>

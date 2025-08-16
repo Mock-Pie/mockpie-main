@@ -10,9 +10,11 @@ const EmailVerificationForm = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const emailFromParams = (searchParams && searchParams.get("email")) || "";
+  const fromLogin = searchParams && searchParams.get("from") === "login";
   
   const [email, setEmail] = useState("");
   const [isEmailChange, setIsEmailChange] = useState(false);
+  const [isLoginVerification, setIsLoginVerification] = useState(false);
   const [profileData, setProfileData] = useState<any>(null);
   const [otp, setOtp] = useState<string[]>(["", "", "", "", "", ""]);
   const [error, setError] = useState("");
@@ -22,6 +24,28 @@ const EmailVerificationForm = () => {
   const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
 
   useEffect(() => {
+    // Check if this is for login verification
+    if (fromLogin) {
+      console.log('Login verification flow - email from params:', emailFromParams);
+      
+      // Properly decode the email from URL parameters
+      const decodedEmail = emailFromParams ? decodeURIComponent(emailFromParams) : "";
+      console.log('Login verification flow - email from params (decoded):', decodedEmail);
+      
+      // Validate that the decoded email looks like a valid email
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (decodedEmail && !emailRegex.test(decodedEmail)) {
+        console.error('Invalid email format after decoding:', decodedEmail);
+        setError('Invalid email format. Please try logging in again.');
+        return;
+      }
+      
+      setEmail(decodedEmail);
+      setIsLoginVerification(true);
+      setIsEmailChange(false);
+      return;
+    }
+
     // Check if this is for email change verification
     const pendingEmailChange = localStorage.getItem('pendingEmailChange');
     if (pendingEmailChange) {
@@ -49,6 +73,7 @@ const EmailVerificationForm = () => {
         setEmail(data.newEmail);
         setProfileData(data.profileData);
         setIsEmailChange(true);
+        setIsLoginVerification(false);
         
         // For email change, we need to send OTP via forgot-password endpoint
         sendOTPForEmailChange(data.newEmail);
@@ -81,10 +106,11 @@ const EmailVerificationForm = () => {
       
       setEmail(decodedEmail);
       setIsEmailChange(false);
+      setIsLoginVerification(false);
       // For registration, OTP is already sent during registration process
       // No need to send it again here
     }
-  }, [emailFromParams]);
+  }, [emailFromParams, fromLogin]);
 
   const sendOTPForEmailChange = async (emailAddress: string) => {
     try {
@@ -94,13 +120,14 @@ const EmailVerificationForm = () => {
       const formData = new FormData();
       formData.append('email', emailAddress);
 
-      const response = await fetch("http://localhost:8081/auth/forgot-password", {
+      // Use the new verification endpoint for email change and login verification
+      const response = await fetch("http://localhost:8081/auth/send-verification-otp", {
         method: "POST",
         body: formData,
       });
 
       if (response.ok) {
-        console.log('OTP sent successfully via forgot-password');
+        console.log('OTP sent successfully via send-verification-otp');
         setError(''); // Clear any previous errors
       } else {
         const errorData = await response.json();
@@ -181,9 +208,10 @@ const EmailVerificationForm = () => {
     console.log('Verifying OTP for email:', email);
     console.log('OTP value:', otpValue);
     console.log('Is email change flow:', isEmailChange);
+    console.log('Is login verification flow:', isLoginVerification);
     
     try {
-      // Use the existing verify-otp endpoint for both flows
+      // Use the existing verify-otp endpoint for all flows
       const data = new FormData();
       data.append("email", email);
       data.append("otp", otpValue);
@@ -202,6 +230,9 @@ const EmailVerificationForm = () => {
         if (isEmailChange) {
           // Handle email change verification
           await handleEmailChangeVerification();
+        } else if (isLoginVerification) {
+          // Handle login verification - redirect to login with success message
+          router.push("/Login?message=Email verified successfully! Please login with your account.");
         } else {
           // Handle registration verification
           router.push("/Login?message=Email verified successfully! Please login with your account.");
@@ -275,9 +306,10 @@ const EmailVerificationForm = () => {
     console.log('Resending OTP for email:', email);
     
     try {
-      if (isEmailChange) {
-        // Resend OTP for email change
+      if (isEmailChange || isLoginVerification) {
+        // Resend OTP for email change or login verification
         await sendOTPForEmailChange(email);
+        setResendMessage("Verification code sent successfully!");
       }
     } catch (error) {
       setError("Failed to resend OTP. Please try again.");
@@ -291,11 +323,13 @@ const EmailVerificationForm = () => {
       setResendCooldown(seconds);
       if (seconds <= 0) clearInterval(interval);
     }, 1000);
-  }, [email, resendCooldown, isEmailChange]);
+  }, [email, resendCooldown, isEmailChange, isLoginVerification]);
 
   const getSubtitleText = () => {
     if (isEmailChange) {
       return `We sent a six digit code to ${email} to verify your new email address.`;
+    } else if (isLoginVerification) {
+      return `We sent a six digit code to ${email} to verify your email address before login.`;
     }
     return `We sent a six digit code to ${email} to verify your email address.`;
   };
@@ -310,7 +344,16 @@ const EmailVerificationForm = () => {
 
       <form onSubmit={handleVerifyOtp} noValidate>
         <div className={styles['form-group']}>
-          <label>Enter 6-digit code</label>
+          <label style={{ 
+            textAlign: 'center', 
+            display: 'block', 
+            width: '100%',
+            margin: '0 auto',
+            fontSize: '16px',
+            fontWeight: '500',
+            color: 'var(--naples-yellow)',
+            marginBottom: '12px'
+          }}>Enter 6-digit code</label>
           <div className={styles['otp-container']} style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '16px' }} onPaste={handlePaste}>
             {otp.map((digit, index) => (
               <input

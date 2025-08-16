@@ -16,3 +16,4 @@ watchfiles
 python-dotenv
 fastapi_mail
 alembic
+httpx

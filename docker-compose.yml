@@ -1,22 +1,4 @@
 services:
-  # db:
-  #   image: postgres:15
-  #   container_name: postgres_db_dev
-  #   environment:
-  #     POSTGRES_USER: postgres
-  #     POSTGRES_PASSWORD: postgres
-  #     POSTGRES_DB: postgres
-  #   restart: unless-stopped
-  #   env_file: backend/.env
-  #   ports:
-  #     - "5433:5432"
-  #   volumes:
-  #     - postgres_data_dev:/var/lib/postgresql/data
-  #   healthcheck:
-  #     test: ["CMD-SHELL", "pg_isready -U postgres"]
-  #     interval: 5s
-  #     timeout: 5s
-  #     retries: 5
   backend:
     build:
       context: ./backend
@@ -38,8 +20,10 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_DB=0
+      - AI_SERVICE_URL=http://presentation-analyzer:8000
     volumes:
       - ./:/app  # Mount entire project so backend module is available
+      - uploads_data:/app/backend/uploads  # Named volume for uploads
     restart: unless-stopped
     
   frontend:
@@ -70,6 +54,34 @@ services:
     tty: true
     restart: unless-stopped
 
+  presentation-analyzer:
+    build: 
+      context: ./feedback_service
+      dockerfile: Dockerfile.dev
+    container_name: presentation_analyzer_dev
+    ports:
+      - "8082:8082"
+    volumes:
+      - ./feedback_service/app:/app/app
+      - ./feedback_service/main.py:/app/main.py
+    environment:
+      - PYTHONPATH=/app
+      - LOG_LEVEL=INFO
+      - ENVIRONMENT=development
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_DB=0
+    depends_on:
+      redis:
+        condition: service_started
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8082/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
   redis:
     image: redis:alpine
     container_name: redis_cache_dev
@@ -88,3 +100,4 @@ volumes:
   # postgres_data_dev:
   redis_data_dev:
   frontend_node_modules_dev:
+  uploads_data:  # Named volume for uploads

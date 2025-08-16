@@ -23,24 +23,12 @@ try:
     from backend.database.database import Base
     from backend.app.models.user.user import User
     from backend.app.models.presentation.presentation import Presentation
-    from backend.app.models.analysis.voice_analysis import VoiceAnalysis
-    from backend.app.models.analysis.body_analysis import BodyAnalysis
-    from backend.app.models.analysis.base_analysis import BaseAnalysis
-    from backend.app.models.segments.voice_segment import VoiceSegment
-    from backend.app.models.segments.body_segment import BodySegment
-    from backend.app.models.segments.base_segment import BaseSegment
     # Import all other models to ensure they're included in migrations
 except ImportError:
     # Fallback to local import
     from database.database import Base
     from app.models.user.user import User
     from app.models.presentation.presentation import Presentation
-    from app.models.analysis.voice_analysis import VoiceAnalysis
-    from app.models.analysis.body_analysis import BodyAnalysis
-    from app.models.analysis.base_analysis import BaseAnalysis
-    from app.models.segments.voice_segment import VoiceSegment
-    from app.models.segments.body_segment import BodySegment
-    from app.models.segments.base_segment import BaseSegment
     # Import all other models to ensure they're included in migrations
 
 # this is the Alembic Config object, which provides

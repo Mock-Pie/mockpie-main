@@ -1,21 +1,18 @@
-from fastapi import FastAPI, HTTPException, status, Depends, Form, Request
+from fastapi import FastAPI, HTTPException, status, Depends, Form
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordBearer
-from datetime import datetime, timedelta, timezone
-from typing import Optional, Tuple
-import jwt
+from datetime import timedelta
 
 from backend.database.database import *
 from backend.app.schemas.user.user_schema import *
 from backend.app.models.user.user import *
-from backend.app.static.lang.error_messages.exception_responses import *
+from backend.app.static.lang.error_messages.exception_responses import ErrorMessage
 from backend.config import *
 from backend.app.schemas.user.user_schema import *
 from backend.app.utils.token_handler import TokenHandler
 from backend.app.utils.otp_handler import OTPHandler
 from backend.app.services.authentication.email_service import EmailService
-from backend.app.utils.encryption_handler import EncryptionHandler
 from backend.app.utils.redis_client import RedisClient
 from backend.app.crud.user import *
 from backend.app.utils.redis_dependency import get_redis_client
@@ -28,42 +25,6 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 # OAuth2 configuration
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
 
-def check_recently_deleted_user(user: Optional[User], error_message: str) -> Tuple[bool, Optional[HTTPException]]:
-    """
-    Check if a user was recently deleted (less than 30 days ago).
-    
-    Args:
-        user: The user object to check
-        error_message: The error message to raise if the user was recently deleted
-        
-    Returns:
-        Tuple containing:
-            - Boolean: True if the user exists and is not recently deleted, False otherwise
-            - Optional[HTTPException]: The exception to raise if the user was recently deleted
-    """
-    if not user:
-        return False, None
-    
-    if user.deleted_at is None:
-        # User exists and is not deleted
-        return True, None
-        
-    # User exists but is deleted - check if deletion was recent
-    deleted_at = user.deleted_at
-    if deleted_at.tzinfo is None:
-        deleted_at = deleted_at.replace(tzinfo=timezone.utc)
-    
-    thirty_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
-    
-    if deleted_at > thirty_days_ago:
-        # User was deleted within the last 30 days
-        return False, HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=error_message
-        )
-    
-    # User was deleted more than 30 days ago
-    return False, None
 
 class RegisterUser():
     @staticmethod
@@ -100,12 +61,15 @@ class RegisterUser():
         Raises:
             HTTPException: If registration fails        """
         # Check if user with this email already exists
-        db_user = db.query(User).filter(User.email == email).first()
+        db_user = get_user_by_email_no_deleted_at(db, email)
+        
         is_active_user, exception = check_recently_deleted_user(
             db_user, ErrorMessage.DELETED_USER_EXISTS_WITH_THIS_EMAIL.value
         )
+        
         if exception:
             raise exception
+        
         if is_active_user:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -113,12 +77,15 @@ class RegisterUser():
             )
         
         # Check if username is taken
-        db_user = db.query(User).filter(User.username == username).first()
+        db_user = get_user_by_username_no_deleted_at(db, username)
+        
         is_active_user, exception = check_recently_deleted_user(
             db_user, ErrorMessage.DELETED_USER_EXISTS_WITH_THIS_USERNAME.value
         )
+        
         if exception:
             raise exception
+        
         if is_active_user:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -126,12 +93,15 @@ class RegisterUser():
             )
         
         # Check if phone number is taken
-        db_user = db.query(User).filter(User.phone_number == phone_number).first()
+        db_user = get_user_by_phone_number_no_deleted_at(db, phone_number)
+        
         is_active_user, exception = check_recently_deleted_user(
             db_user, ErrorMessage.DELETED_USER_EXISTS_WITH_THIS_PHONE.value
         )
+        
         if exception:
             raise exception
+        
         if is_active_user:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -145,22 +115,7 @@ class RegisterUser():
             )
             
         # Create new user
-        new_user = User(
-            first_name=first_name,
-            last_name=last_name,
-            username=username,
-            email=email,
-            phone_number=phone_number,
-            gender=gender,
-            remember_token=""
-        )
-        new_user.password = password 
-        
-        # print(password, new_user._password)
-        
-        db.add(new_user)
-        db.commit()
-        db.refresh(new_user)
+        new_user = create_user(db, first_name, last_name, username, email, phone_number, gender, password)
         
          # Generate OTP
         otp = OTPHandler.generate_otp()
@@ -173,19 +128,15 @@ class RegisterUser():
         await EmailService.send_otp_email(email, otp, is_registration=True)
         
         # Generate token
-          # Generate token
         access_token_expires = timedelta(minutes=settings.access_token_expire_minutes)
         access_token = TokenHandler.create_access_token(
             data={"sub": new_user.email}, expires_delta=access_token_expires
         )
+        
         refresh_token_expires = timedelta(days=settings.refresh_token_expire_days)
-        refresh_token = TokenHandler.create_access_token(
+        refresh_token = TokenHandler.create_refresh_token(
             data={"sub": new_user.email}, expires_delta=refresh_token_expires
         )
-        # redis_client = RedisClient()
-        # # Store tokens in Redis
-        # redis_client.set_access_token(new_user.id, access_token, access_token_expires)
-        # redis_client.set_refresh_token(new_user.id, refresh_token, refresh_token_expires)
         
         try:
             # Store tokens in Redis using the dependency

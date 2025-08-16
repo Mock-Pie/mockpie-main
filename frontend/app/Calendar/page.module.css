@@ -1,0 +1,1235 @@
+/* Main Content */
+.mainContent {
+    flex: 1;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    min-height: 100vh;
+    gap: 30px;
+}
+
+/* Search Section */
+.searchSection {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 25px;
+    margin-bottom: 10px;
+}
+
+.searchBar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.searchInputContainer {
+    position: relative;
+    flex: 1;
+    min-width: 300px;
+    max-width: 500px;
+}
+
+.searchIcon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--light-grey);
+    font-size: 1.1rem;
+}
+
+.searchInput {
+    width: 100%;
+    padding: 12px 45px 12px 45px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 25px;
+    color: var(--white);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    font-family: inherit;
+}
+
+.searchInput:focus {
+    outline: none;
+    border-color: var(--naples-yellow);
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 0 0 3px rgba(255, 214, 10, 0.1);
+}
+
+.searchInput::placeholder {
+    color: var(--light-grey);
+}
+
+.clearSearchButton {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--light-grey);
+    transition: all 0.3s ease;
+}
+
+.clearSearchButton:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: var(--white);
+}
+
+.filterControls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.filterToggle {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 25px;
+    padding: 10px 20px;
+    color: var(--white);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+    position: relative;
+}
+
+.filterToggle:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 214, 10, 0.3);
+}
+
+.filterToggle.active {
+    background: rgba(255, 214, 10, 0.2);
+    border-color: var(--naples-yellow);
+    color: var(--naples-yellow);
+}
+
+.filterBadge {
+    background: var(--naples-yellow);
+    color: var(--raisin-black);
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-left: 5px;
+}
+
+.clearButton {
+    background: rgba(184, 63, 63, 0.2);
+    border: 1px solid var(--red);
+    border-radius: 25px;
+    padding: 10px 18px;
+    color: var(--red);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+}
+
+.clearButton:hover {
+    background: rgba(184, 63, 63, 0.3);
+    transform: scale(1.02);
+}
+
+.resultsCount {
+    color: var(--light-grey);
+    font-size: 0.9rem;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+/* Filters Panel */
+.filtersPanel {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    align-items: end;
+}
+
+.filterGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.filterLabel {
+    font-weight: 600;
+    color: var(--white);
+    font-size: 0.9rem;
+}
+
+.filterSelect {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    padding: 10px 12px;
+    color: var(--white);
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    font-family: inherit;
+    cursor: pointer;
+}
+
+.filterSelect:focus {
+    outline: none;
+    border-color: var(--naples-yellow);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.filterSelect option {
+    background: var(--raisin-black);
+    color: var(--white);
+    padding: 8px;
+}
+
+.customDateRange {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    grid-column: 1 / -1;
+}
+
+/* Search Results */
+.searchResults {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 30px;
+}
+
+.noResults {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--light-grey);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.noResultsIcon {
+    font-size: 3rem;
+    color: var(--light-grey);
+    opacity: 0.5;
+}
+
+.noResults p {
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+/* Calendar Container */
+.calendarContainer {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 30px;
+    transition: all 0.3s ease;
+}
+
+/* Calendar Header */
+.calendarHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.monthNavigation {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.navButton {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: var(--white);
+    font-size: 1.2rem;
+}
+
+.navButton:hover {
+    background: rgba(255, 214, 10, 0.2);
+    border-color: var(--naples-yellow);
+    transform: scale(1.05);
+}
+
+.monthTitle {
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--white);
+    background: linear-gradient(135deg, var(--white), var(--naples-yellow));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 0;
+    min-width: 250px;
+    text-align: center;
+}
+
+.addButton {
+    background: var(--naples-yellow);
+    color: var(--raisin-black);
+    border: none;
+    padding: 12px 24px;
+    border-radius: 25px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1rem;
+}
+
+.addButton:hover {
+    background: var(--dark-yellow);
+    transform: scale(1.05);
+}
+
+.headerActions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.refreshButton {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--white);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.refreshButton:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+}
+
+.refreshButton:disabled,
+.refreshButton.refreshing {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.refreshButton.refreshing svg {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Loading and Error States */
+.loadingState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    color: var(--light-grey);
+    font-size: 1.1rem;
+}
+
+.loadingSpinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(255, 255, 255, 0.1);
+    border-top: 3px solid var(--naples-yellow);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+}
+
+.errorMessage {
+    background: rgba(184, 63, 63, 0.1);
+    border: 1px solid var(--red);
+    border-radius: 10px;
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: var(--red);
+    font-weight: 500;
+}
+
+.closeErrorButton {
+    background: none;
+    border: none;
+    color: var(--red);
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.3s ease;
+}
+
+.closeErrorButton:hover {
+    background: rgba(184, 63, 63, 0.2);
+}
+
+/* Success Message */
+.successMessage {
+    background: rgba(72, 187, 120, 0.1);
+    border: 1px solid #48bb78;
+    border-radius: 10px;
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: #38a169;
+    font-weight: 500;
+    animation: slideIn 0.3s ease-out;
+}
+
+.closeSuccessButton {
+    background: none;
+    border: none;
+    color: #38a169;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.3s ease;
+}
+
+.closeSuccessButton:hover {
+    background: rgba(72, 187, 120, 0.2);
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-10px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Calendar Grid */
+.calendarGrid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 2px;
+}
+
+.weekHeader {
+    background: rgba(255, 214, 10, 0.1);
+    color: var(--naples-yellow);
+    padding: 15px 8px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 0.9rem;
+    border-radius: 8px;
+}
+
+.emptyDay {
+    height: 120px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 8px;
+}
+
+.calendarDay {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 12px 8px;
+    min-height: 120px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    border: 2px solid transparent;
+}
+
+.calendarDay:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 214, 10, 0.3);
+    transform: translateY(-2px);
+}
+
+.calendarDay.selected {
+    border-color: var(--naples-yellow);
+    background: rgba(255, 214, 10, 0.1);
+}
+
+.calendarDay.today {
+    background: rgba(115, 255, 204, 0.1);
+    border-color: var(--aqua);
+}
+
+.calendarDay.pastDay {
+    opacity: 0.7;
+}
+
+.dayNumber {
+    font-weight: 600;
+    color: var(--white);
+    font-size: 1rem;
+    align-self: flex-start;
+}
+
+.presentationsContainer {
+    flex: 1;
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.presentationDot {
+    background: rgba(255, 214, 10, 0.2);
+    border: 1px solid var(--naples-yellow);
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 0.7rem;
+    color: var(--white);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.presentationDot:hover {
+    background: rgba(255, 214, 10, 0.3);
+    transform: scale(1.02);
+}
+
+.presentationDot.past {
+    background: rgba(190, 188, 188, 0.2);
+    border-color: var(--light-grey);
+    color: var(--light-grey);
+}
+
+.presentationDot.upcoming {
+    background: rgba(115, 255, 204, 0.2);
+    border-color: var(--aqua);
+    color: var(--aqua);
+}
+
+.moreIndicator {
+    font-size: 0.6rem;
+    color: var(--light-grey);
+    text-align: center;
+    margin-top: 2px;
+}
+
+.quickAddButton {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    width: 20px;
+    height: 20px;
+    background: rgba(255, 214, 10, 0.8);
+    border: none;
+    border-radius: 50%;
+    color: var(--raisin-black);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: all 0.3s ease;
+    font-size: 0.8rem;
+}
+
+.calendarDay:hover .quickAddButton {
+    opacity: 1;
+}
+
+.quickAddButton:hover {
+    background: var(--naples-yellow);
+    transform: scale(1.1);
+}
+
+/* Presentations List */
+.presentationsList {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 30px;
+}
+
+.listTitle {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--white);
+    margin-bottom: 20px;
+    background: linear-gradient(135deg, var(--white), var(--naples-yellow));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.presentationsGrid {
+    display: grid;
+    gap: 15px;
+}
+
+.presentationCard {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 20px;
+    transition: all 0.3s ease;
+}
+
+.presentationCard:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateY(-2px);
+}
+
+.presentationCard.past {
+    border-left: 4px solid var(--light-grey);
+}
+
+.presentationCard.upcoming {
+    border-left: 4px solid var(--aqua);
+}
+
+.cardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 15px;
+}
+
+.cardTitle {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--white);
+    margin: 0;
+    flex: 1;
+}
+
+.cardActions {
+    display: flex;
+    gap: 8px;
+}
+
+.actionButton {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: var(--white);
+}
+
+.actionButton:hover {
+    background: rgba(255, 214, 10, 0.2);
+    border-color: var(--naples-yellow);
+}
+
+.actionButton.deleteButton:hover {
+    background: rgba(184, 63, 63, 0.2);
+    border-color: var(--red);
+    color: var(--red);
+}
+
+.cardContent {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.cardMeta {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    font-size: 0.9rem;
+    color: var(--light-grey);
+}
+
+.cardMeta span {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.cardDescription {
+    color: var(--light-grey);
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* Modal */
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(10px);
+}
+
+.modal {
+    background: var(--raisin-black);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    padding: 0;
+    max-width: 600px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.modalHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 25px 30px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modalTitle {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--white);
+    margin: 0;
+}
+
+.closeButton {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: var(--white);
+    font-size: 1.2rem;
+}
+
+.closeButton:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.modalForm {
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.formRow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.formLabel {
+    font-weight: 600;
+    color: var(--white);
+    font-size: 0.95rem;
+}
+
+.formInput, .formTextarea, .formSelect {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    padding: 12px 15px;
+    color: var(--white);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    font-family: inherit;
+}
+
+.formInput:focus, .formTextarea:focus, .formSelect:focus {
+    outline: none;
+    border-color: var(--naples-yellow);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.formInput::placeholder, .formTextarea::placeholder {
+    color: var(--light-grey);
+}
+
+.formSelect option {
+    background: var(--raisin-black);
+    color: var(--white);
+    padding: 8px;
+}
+
+.formTextarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.modalActions {
+    display: flex;
+    gap: 15px;
+    justify-content: flex-end;
+    margin-top: 10px;
+}
+
+.cancelButton {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 25px;
+    padding: 12px 24px;
+    color: var(--white);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.cancelButton:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.submitButton {
+    background: var(--naples-yellow);
+    color: var(--raisin-black);
+    border: none;
+    border-radius: 25px;
+    padding: 12px 24px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.submitButton:hover {
+    background: var(--dark-yellow);
+    transform: scale(1.05);
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .calendarGrid {
+        gap: 1px;
+    }
+    
+    .calendarDay {
+        min-height: 100px;
+        padding: 8px 6px;
+    }
+    
+    .presentationDot {
+        font-size: 0.65rem;
+        padding: 1px 4px;
+    }
+}
+
+@media (max-width: 992px) {
+    .mainContent {
+        padding: 20px;
+    }
+    
+    .searchSection {
+        padding: 20px;
+    }
+    
+    .searchBar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
+    }
+    
+    .searchInputContainer {
+        min-width: auto;
+        max-width: none;
+    }
+    
+    .filterControls {
+        justify-content: center;
+    }
+    
+    .filtersPanel {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 15px;
+    }
+    
+    .calendarHeader {
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
+    }
+    
+    .monthNavigation {
+        justify-content: center;
+    }
+    
+    .monthTitle {
+        font-size: 1.8rem;
+        min-width: auto;
+    }
+    
+    .calendarDay {
+        min-height: 80px;
+        padding: 6px 4px;
+    }
+    
+    .formRow {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+}
+
+@media (max-width: 768px) {
+    .mainContent {
+        padding: 15px;
+        gap: 20px;
+    }
+    
+    .searchSection {
+        padding: 15px;
+    }
+    
+    .searchInputContainer {
+        min-width: 250px;
+    }
+    
+    .filterToggle, .clearButton {
+        padding: 8px 15px;
+        font-size: 0.9rem;
+    }
+    
+    .resultsCount {
+        font-size: 0.8rem;
+        text-align: center;
+        width: 100%;
+    }
+    
+    .filtersPanel {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .customDateRange {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    
+    .calendarContainer, .presentationsList {
+        padding: 20px;
+    }
+    
+    .monthTitle {
+        font-size: 1.5rem;
+    }
+    
+    .calendarDay {
+        min-height: 60px;
+        padding: 4px 3px;
+    }
+    
+    .dayNumber {
+        font-size: 0.9rem;
+    }
+    
+    .presentationDot {
+        font-size: 0.6rem;
+        padding: 1px 3px;
+    }
+    
+    .quickAddButton {
+        width: 18px;
+        height: 18px;
+        font-size: 0.7rem;
+    }
+    
+    .modal {
+        width: 95%;
+        margin: 10px;
+    }
+    
+    .modalForm {
+        padding: 20px;
+    }
+    
+    .modalActions {
+        flex-direction: column;
+    }
+    
+    .cancelButton, .submitButton {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* Delete Confirmation Modal - Matches SubmittedTrials design */
+.deleteModal {
+    background: var(--chinese-black);
+    border-radius: 16px;
+    padding: 0;
+    max-width: 440px;
+    width: 90%;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.deleteModal .modalContent {
+    padding: 32px;
+}
+
+.deleteModal .modalTitle {
+    color: var(--white);
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+.deleteModal .modalMessage {
+    color: var(--light-grey);
+    font-size: 16px;
+    line-height: 1.5;
+    margin-bottom: 32px;
+    text-align: center;
+}
+
+.deleteModal .modalActions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.deleteModal .cancelButton {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--white);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 100px;
+}
+
+.deleteModal .cancelButton:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+}
+
+.deleteModal .deleteButton {
+    background: #dc3545;
+    color: var(--white);
+    border: 1px solid #dc3545;
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 100px;
+}
+
+.deleteModal .deleteButton:hover {
+    background: #c82333;
+    border-color: #c82333;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+@media (max-width: 576px) {
+    .searchSection {
+        padding: 12px;
+    }
+    
+    .searchInputContainer {
+        min-width: 200px;
+    }
+    
+    .searchInput {
+        padding: 10px 35px 10px 35px;
+        font-size: 0.9rem;
+    }
+    
+    .filterControls {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+    
+    .filterToggle {
+        justify-content: center;
+    }
+    
+    .calendarHeader {
+        gap: 15px;
+    }
+    
+    .monthNavigation {
+        gap: 15px;
+    }
+    
+    .navButton {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+    
+    .monthTitle {
+        font-size: 1.3rem;
+    }
+    
+    .addButton {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+    }
+    
+    .calendarDay {
+        min-height: 50px;
+        padding: 3px 2px;
+    }
+    
+    .dayNumber {
+        font-size: 0.8rem;
+    }
+    
+    .presentationDot {
+        display: none; /* Hide text on very small screens, only show dots */
+    }
+    
+    .presentationsContainer::after {
+        content: attr(data-count);
+        display: block;
+        width: 8px;
+        height: 8px;
+        background: var(--naples-yellow);
+        border-radius: 50%;
+        margin-top: 2px;
+    }
+    
+    .presentationCard {
+        padding: 15px;
+    }
+    
+    .cardHeader {
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+    }
+    
+    .cardActions {
+        align-self: flex-end;
+    }
+    
+    .cardMeta {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .deleteModal {
+        max-width: 320px;
+    }
+
+    .deleteModal .modalContent {
+        padding: 24px;
+    }
+
+    .deleteModal .modalTitle {
+        font-size: 20px;
+    }
+
+    .deleteModal .modalActions {
+        flex-direction: column;
+    }
+
+    .deleteModal .cancelButton,
+    .deleteModal .deleteButton {
+        width: 100%;
+    }
+}

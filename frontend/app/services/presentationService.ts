@@ -4,6 +4,7 @@ export interface Presentation {
   url: string;
   is_public: boolean;
   uploaded_at: string;
+  overall_score?: number;
   file_info?: {
     file_size?: number;
     file_exists?: boolean;
@@ -183,6 +184,91 @@ class PresentationService {
       };
     } catch (error) {
       console.error('Error toggling presentation visibility:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error occurred'
+      };
+    }
+  }
+
+  static async uploadPresentation(
+    file: File, 
+    title: string, 
+    language: string = 'english',
+    isPublic: boolean = false,
+    onProgress?: (progress: number) => void
+  ): Promise<PresentationApiResponse> {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('title', title);
+      formData.append('language', language);
+      formData.append('is_public', isPublic.toString());
+
+      const token = localStorage.getItem('access_token');
+      if (!token) {
+        return {
+          success: false,
+          error: 'No authentication token found'
+        };
+      }
+
+      // Create XMLHttpRequest for progress tracking
+      return new Promise((resolve) => {
+        const xhr = new XMLHttpRequest();
+
+        xhr.upload.addEventListener('progress', (event) => {
+          if (event.lengthComputable && onProgress) {
+            const progress = Math.round((event.loaded / event.total) * 100);
+            onProgress(progress);
+          }
+        });
+
+        xhr.addEventListener('load', () => {
+          if (xhr.status === 401) {
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+            resolve({
+              success: false,
+              error: 'Authentication expired. Please log in again.'
+            });
+            return;
+          }
+
+          if (xhr.status >= 200 && xhr.status < 300) {
+            try {
+              const data = JSON.parse(xhr.responseText);
+              resolve({
+                success: true,
+                data
+              });
+            } catch (error) {
+              resolve({
+                success: false,
+                error: 'Failed to parse server response'
+              });
+            }
+          } else {
+            resolve({
+              success: false,
+              error: `Upload failed: ${xhr.statusText}`
+            });
+          }
+        });
+
+        xhr.addEventListener('error', () => {
+          resolve({
+            success: false,
+            error: 'Network error during upload'
+          });
+        });
+
+        xhr.open('POST', `${this.BASE_URL}/presentations/upload`);
+        xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+        xhr.send(formData);
+      });
+    } catch (error) {
+      console.error('Error uploading presentation:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error occurred'

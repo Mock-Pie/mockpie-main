@@ -1,10 +1,10 @@
 from sqlalchemy.orm import Session
 from datetime import datetime
 
-from backend.app.models.user.user import User
-from backend.app.models.presentation.presentation import Presentation
-from backend.app.models.analysis.voice_analysis import VoiceAnalysis
-from backend.app.models.analysis.body_analysis import BodyAnalysis
+from backend.app.crud.user import *
+from backend.app.crud.presentation import *
+from backend.app.crud.feedback import *
+from backend.app.crud.upcoming_presentation import *
 
 
 class DeleteUser:
@@ -24,41 +24,38 @@ class DeleteUser:
         now = datetime.now()
         
         # First, mark all user's presentations as deleted
-        presentations = db.query(Presentation).filter(
-            Presentation.user_id == user_id,
-            Presentation.deleted_at.is_(None)
-        ).all()
+        presentations = get_presentations_by_user_id(user_id, db, 0, 9999)
         
         # Mark each presentation as deleted and also mark associated analyses
         for presentation in presentations:
+            # Soft delete feedback associated with the presentation
+            feedback = get_feedback_by_presentation_id(db, presentation.id)
+            if feedback:
+                feedback.deleted_at = now
             presentation.deleted_at = now
-            
-            # Mark voice analysis as deleted if it exists
-            voice_analysis = db.query(VoiceAnalysis).filter(
-                VoiceAnalysis.presentation_id == presentation.id,
-                VoiceAnalysis.deleted_at.is_(None)
-            ).first()
-            if voice_analysis:
-                voice_analysis.deleted_at = now
-            
-            # Mark body analysis as deleted if it exists
-            body_analysis = db.query(BodyAnalysis).filter(
-                BodyAnalysis.presentation_id == presentation.id,
-                BodyAnalysis.deleted_at.is_(None)
-            ).first()
-            if body_analysis:
-                body_analysis.deleted_at = now
+           
+        # Soft delete all user's upcoming presentations
+        upcoming_presentations = get_upcoming_presentations_by_user_id_ordered_asc(user_id, db)
+        
+        for upcoming_presentation in upcoming_presentations:
+            upcoming_presentation.deleted_at = now
         
         # Finally, mark the user as deleted
-        user = db.query(User).filter(
-            User.id == user_id,
-            User.deleted_at.is_(None)
-        ).first()
+        user = get_user_by_id(db, user_id)
         
         if not user:
-            return {"status": "error", "message": "User not found or already deleted"}
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=ErrorMessage.USER_NOT_FOUND.value
+            )
         
         user.deleted_at = now
-        db.commit()
+        
+        try:
+            db.commit()
+            
+        except Exception as e:
+            db.rollback()
+            return {"status": "error", "message": f"Error deleting user: {str(e)}"}
         
         return {"status": "success", "message": "User and associated data have been deleted"}

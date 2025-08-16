@@ -12,14 +12,27 @@ import StatsCard from "./components/StatsCard";
 import StatsSummary from "./components/StatsSummary";
 import PresentationTable from "./components/PresentationTable";
 import UserService, { User } from "../services/userService";
+import PresentationService from "../services/presentationService";
+import UpcomingPresentationService, { UpcomingPresentation } from "../services/upcomingPresentationService";
 
 const Dashboard = () => {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [submittedTrialsCount, setSubmittedTrialsCount] = useState<number>(0);
+  const [presentationsLoading, setPresentationsLoading] = useState(true);
+  const [submittedTrialsData, setSubmittedTrialsData] = useState<any[]>([]);
+  const [upcomingPresentations, setUpcomingPresentations] = useState<UpcomingPresentation[]>([]);
+  const [upcomingLoading, setUpcomingLoading] = useState(true);
+  const [improvementScores, setImprovementScores] = useState<number[]>([]);
+  const [improvementLabels, setImprovementLabels] = useState<string[]>([]);
+  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
+  const [availableYears, setAvailableYears] = useState<number[]>([new Date().getFullYear()]);
 
   useEffect(() => {
     fetchUserData();
+    fetchPresentationsData();
+    fetchUpcomingPresentations();
   }, []);
 
   const fetchUserData = async () => {
@@ -42,6 +55,98 @@ const Dashboard = () => {
     }
   };
 
+  const fetchPresentationsData = async () => {
+    try {
+      setPresentationsLoading(true);
+      const result = await PresentationService.getUserPresentations();
+      
+      if (result.success && result.data) {
+        const presentations = (result.data as any).videos || [];
+        setSubmittedTrialsCount(presentations.length);
+        setSubmittedTrialsData(presentations);
+        // Extract years from presentations
+        const years = Array.from(
+          new Set(
+            presentations.map((p: any): number => new Date(p.uploaded_at).getFullYear() as number)
+          )
+        ) as number[];
+        years.sort((a: number, b: number) => b - a); // Descending order
+        setAvailableYears(years.length ? years : [new Date().getFullYear()]);
+        // Filter presentations by selected year
+        let filteredPresentations = presentations.filter((p: any) => new Date(p.uploaded_at).getFullYear() === selectedYear);
+        // Sort by date ascending
+        filteredPresentations = filteredPresentations.sort((a: any, b: any) => new Date(a.uploaded_at).getTime() - new Date(b.uploaded_at).getTime());
+        // Prepare date labels for the chart
+        const dateLabels = filteredPresentations.map((p: any) => new Date(p.uploaded_at).toLocaleDateString());
+        // Fetch feedback for each presentation to get overall_score
+        const scores = await Promise.all(
+          filteredPresentations.map(async (presentation: any) => {
+            try {
+              const feedbackResponse = await fetch(`http://localhost:8081/feedback/presentation/${presentation.id}/feedback`, {
+                headers: {
+                  'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+                  'Content-Type': 'application/json',
+                },
+              });
+              if (feedbackResponse.ok) {
+                const feedbackData = await feedbackResponse.json();
+                const enhanced = feedbackData.enhanced_feedback || {};
+                const overallScore = enhanced.overall_score || feedbackData.overall_score || feedbackData.score || null;
+                return typeof overallScore === 'number' ? overallScore : null;
+              } else {
+                return null;
+              }
+            } catch (error) {
+              return null;
+            }
+          })
+        );
+        setImprovementScores(scores.filter((s): s is number => s !== null));
+        setImprovementLabels(dateLabels);
+      } else {
+        console.error('Failed to fetch presentations data:', result.error);
+        if (result.error?.includes('Authentication expired')) {
+          router.push('/Login');
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching presentations data:', err);
+    } finally {
+      setPresentationsLoading(false);
+    }
+  };
+
+  // Refetch scores when year changes
+  useEffect(() => {
+    fetchPresentationsData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedYear]);
+
+  const fetchUpcomingPresentations = async () => {
+    try {
+      setUpcomingLoading(true);
+      
+      // Initialize sample data if needed (only on first run)
+      // await UpcomingPresentationService.initializeSampleData();
+      
+      // Fetch upcoming presentations from service
+      const result = await UpcomingPresentationService.getUpcomingPresentations();
+      
+      if (result.success && result.data) {
+        setUpcomingPresentations(result.data as UpcomingPresentation[]);
+      } else {
+        console.error('Failed to fetch upcoming presentations:', result.error);
+        if (result.error?.includes('Authentication expired')) {
+          router.push('/Login');
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching upcoming presentations:', err);
+    } finally {
+      setUpcomingLoading(false);
+    }
+  };
+
   const getDisplayName = () => {
     if (!user) return 'Loading...';
     
@@ -51,6 +156,30 @@ const Dashboard = () => {
 
   const handleProfileClick = () => {
     router.push('/ProfileInfo');
+  };
+
+  const handleSubmittedTrialsClick = () => {
+    router.push('/SubmittedTrials');
+  };
+
+  const handleCalendarClick = () => {
+    router.push('/Calendar');
+  };
+
+  const handlePresentationClick = (presentation: any) => {
+    if (presentation.type === 'past') {
+      router.push('/SubmittedTrials');
+    } else {
+      router.push('/Calendar');
+    }
+  };
+
+  const refreshAllData = async () => {
+    await Promise.all([
+      fetchUserData(),
+      fetchPresentationsData(),
+      fetchUpcomingPresentations()
+    ]);
   };
 
   // SVG icons for stats cards
@@ -78,15 +207,9 @@ const Dashboard = () => {
         {/* Enhanced Header with search and profile */}
         <div className={styles.enhancedHeader}>
           <div className={styles.searchSection}>
-            <div className={styles.searchContainer}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={styles.searchIcon}>
-                <path d="M21 21L16.514 16.506L21 21ZM19 10.5C19 15.194 15.194 19 10.5 19C5.806 19 2 15.194 2 10.5C2 5.806 5.806 2 10.5 2C15.194 2 19 5.806 19 10.5Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-              <input 
-                type="text" 
-                placeholder="Search presentations, analytics..." 
-                className={styles.searchInput}
-              />
+            <div className={styles.mockPieBranding}>
+              <span className={styles.mockPieTitle}>MockPie</span>
+              <span className={styles.mockPieSubtitle}>AI-powered Presentation Analytics</span>
             </div>
           </div>
           
@@ -114,32 +237,51 @@ const Dashboard = () => {
           {/* Left Column - Main Content */}
           <div className={styles.leftColumn}>
           {/* Improvement Chart Section */}
-          <ImprovementChart />
+          <ImprovementChart
+            scores={improvementScores}
+            labels={improvementLabels}
+            year={selectedYear}
+            availableYears={availableYears}
+            onYearChange={setSelectedYear}
+          />
 
             {/* Stats Cards Row */}
             <div className={styles.statsCardsRow}>
           <StatsCard 
-            value={150} 
+            value={submittedTrialsCount} 
             title="Submitted Trials" 
             color="purple" 
             icon={purpleIcon} 
+            onClick={handleSubmittedTrialsClick}
+            loading={presentationsLoading}
           />
           <StatsCard 
-            value={20} 
+            value={upcomingPresentations.length} 
             title="Presentations In Line" 
             color="yellow" 
             icon={yellowIcon} 
+            onClick={handleCalendarClick}
+            loading={upcomingLoading}
           />
             </div>
 
           {/* Presentation Details Table */}
-          <PresentationTable />
+          <PresentationTable 
+            submittedTrials={submittedTrialsData}
+            upcomingPresentations={upcomingPresentations}
+            loading={presentationsLoading || upcomingLoading}
+            onRefresh={refreshAllData}
+          />
           </div>
 
           {/* Right Column - Sidebar Content */}
           <div className={styles.rightColumn}>
             {/* Calendar Section */}
-            <CalendarWidget />
+            <CalendarWidget 
+              submittedTrials={submittedTrialsData}
+              upcomingPresentations={upcomingPresentations}
+              onPresentationClick={handlePresentationClick}
+            />
 
             {/* Pie Chart Section */}
             <PieChart />
@@ -147,10 +289,7 @@ const Dashboard = () => {
             {/* Stats Summary */}
             <div className={styles.statsSummaryCard}>
               <div className={styles.statsSummaryHeader}>
-                <span className={styles.dateRange}>10th - 12th Jun</span>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={styles.chevronDown}>
-                  <path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
+                <span className={styles.dateRange}>Stats Summary</span>
               </div>
               <StatsSummary />
             </div>

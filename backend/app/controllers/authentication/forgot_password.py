@@ -4,12 +4,12 @@ from typing import Dict, Any
 
 from backend.database.database import get_db
 from backend.app.services.authentication.email_service import EmailService
-from backend.app.crud.user import get_user_by_email, set_otp_and_otp_expiry_time
+from backend.app.crud.user import *
 from backend.app.static.lang.error_messages.exception_responses import ErrorMessage
 from backend.app.utils.otp_handler import OTPHandler
 
+
 class ForgotPassword:
-    # Make this async if EmailService.send_otp_email is async
     @staticmethod
     async def forgot_password(
         email: str = Form(...),
@@ -32,7 +32,7 @@ class ForgotPassword:
         if not set_otp_and_otp_expiry_time(db, user, otp, expiry):
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Failed to create password reset otp"
+                detail=ErrorMessage.FAILED_TO_CREATE_RESET_PASSWORD_OTP.value
             )
 
         # Send the reset email
@@ -47,5 +47,5 @@ class ForgotPassword:
             db.commit()
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Failed to send password reset email"
+                detail=ErrorMessage.FAILED_TO_SEND_RESET_PASSWORD_EMAIL.value
             )

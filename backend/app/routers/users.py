@@ -45,10 +45,12 @@ async def delete_user(
 @router.post("/retrieve", response_model=UserResponse, status_code=status.HTTP_200_OK)
 async def retrieve_user(
     email: str = Form(...),
+    otp: str = Form(...),
     db: Session = Depends(get_db)
 ):
     """
     Reactivate a deleted user account and all associated presentations and analyses.
     Only accounts deleted within the last 30 days can be reactivated.
+    Requires OTP verification.
     """
-    return await RetrieveUser.get_user(email=email, db=db)
+    return await RetrieveUser.get_user(email=email, otp=otp, db=db)

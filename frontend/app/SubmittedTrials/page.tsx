@@ -19,12 +19,13 @@ import styles from "./page.module.css";
 import styles1 from "../UploadRecordVideos/page.module.css";
 import uploadStyles from "../UploadRecordVideos/uploadrecord.module.css";
 import SideBar from "../UploadRecordVideos/components/SideBar";
-import PresentationService, { Presentation } from '../services/presentationService';
+import PresentationService from '../services/presentationService';
+import { Presentation as PresentationType } from '../types';
 
 const SubmittedTrials = () => {
   const router = useRouter();
-  const [presentations, setPresentations] = useState<Presentation[]>([]);
-  const [filteredPresentations, setFilteredPresentations] = useState<Presentation[]>([]);
+  const [presentations, setPresentations] = useState<PresentationType[]>([]);
+  const [filteredPresentations, setFilteredPresentations] = useState<PresentationType[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [dateFilter, setDateFilter] = useState<string>('all');
   const [expandedFeedback, setExpandedFeedback] = useState<string | null>(null);
@@ -32,11 +33,50 @@ const SubmittedTrials = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteType, setDeleteType] = useState<'single' | 'bulk'>('single');
+  const [itemToDelete, setItemToDelete] = useState<number | null>(null);
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const presentationsPerPage = 5;
 
   // Fetch presentations on component mount
   useEffect(() => {
     fetchPresentations();
   }, []);
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, dateFilter]);
+
+  // Calculate pagination
+  const indexOfLastPresentation = currentPage * presentationsPerPage;
+  const indexOfFirstPresentation = indexOfLastPresentation - presentationsPerPage;
+  const currentPresentations = filteredPresentations.slice(indexOfFirstPresentation, indexOfLastPresentation);
+  const totalPages = Math.ceil(filteredPresentations.length / presentationsPerPage);
+
+  // Pagination handlers
+  const goToPage = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+  };
+
+  const goToNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const goToPreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleViewFeedback = (presentationId: number) => {
+    router.push(`/Feedback?presentationId=${presentationId}`);
+  };
 
   const fetchPresentations = async () => {
     try {
@@ -44,11 +84,41 @@ const SubmittedTrials = () => {
       setError(null);
       
       const response = await PresentationService.getUserPresentations();
-      
+      console.log(response);
       if (response.success && response.data) {
         const presentationsData = (response.data as any).videos || [];
-        setPresentations(presentationsData);
-        setFilteredPresentations(presentationsData);
+        
+        // Fetch feedback data for each presentation to get overall scores
+        const presentationsWithScores = await Promise.all(
+          presentationsData.map(async (presentation: PresentationType) => {
+            try {
+              const feedbackResponse = await fetch(`http://localhost:8081/feedback/presentation/${presentation.id}/feedback`, {
+                headers: {
+                  'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+                  'Content-Type': 'application/json',
+                },
+              });
+              
+              if (feedbackResponse.ok) {
+                const feedbackData = await feedbackResponse.json();
+                // Extract overall score from enhanced feedback like the Feedback page does
+                const enhanced = feedbackData.enhanced_feedback || {};
+                const overallScore = enhanced.overall_score || feedbackData.overall_score || feedbackData.score || null;
+                return { ...presentation, overall_score: overallScore };
+              } else {
+                // If no feedback available, keep the presentation without score
+                return { ...presentation, overall_score: undefined };
+              }
+            } catch (error) {
+              console.error(`Error fetching feedback for presentation ${presentation.id}:`, error);
+              return { ...presentation, overall_score: undefined };
+            }
+          })
+        );
+        
+        console.log('Presentations with scores:', presentationsWithScores.map((p: PresentationType) => ({ id: p.id, title: p.title, overall_score: p.overall_score })));
+        setPresentations(presentationsWithScores);
+        setFilteredPresentations(presentationsWithScores);
       } else {
         setError(response.error || 'Failed to fetch presentations');
         if (response.error?.includes('Authentication expired')) {
@@ -132,9 +202,11 @@ const SubmittedTrials = () => {
   const handleBulkDelete = async () => {
     if (selectedPresentations.length === 0) return;
     
-    if (!confirm(`Are you sure you want to delete ${selectedPresentations.length} presentation(s)?`)) {
-      return;
-    }
+    setDeleteType('bulk');
+    setShowDeleteModal(true);
+  };
+
+  const confirmBulkDelete = async () => {
 
     try {
       const deletePromises = selectedPresentations.map(id => 
@@ -150,6 +222,7 @@ const SubmittedTrials = () => {
         // Refresh the list after successful deletion
         await fetchPresentations();
         setSelectedPresentations([]);
+        setShowDeleteModal(false);
       }
     } catch (err) {
       setError('Error deleting presentations');
@@ -158,15 +231,21 @@ const SubmittedTrials = () => {
   };
 
   const handleDeletePresentation = async (id: number) => {
-    if (!confirm('Are you sure you want to delete this presentation?')) {
-      return;
-    }
+    setItemToDelete(id);
+    setDeleteType('single');
+    setShowDeleteModal(true);
+  };
+
+  const confirmSingleDelete = async () => {
+    if (!itemToDelete) return;
 
     try {
-      const response = await PresentationService.deletePresentation(id);
+      const response = await PresentationService.deletePresentation(itemToDelete);
       
       if (response.success) {
         await fetchPresentations();
+        setShowDeleteModal(false);
+        setItemToDelete(null);
       } else {
         setError(response.error || 'Failed to delete presentation');
       }
@@ -176,18 +255,98 @@ const SubmittedTrials = () => {
     }
   };
 
-  const handleDownloadPresentation = (presentation: Presentation) => {
-    // Create a download link for the video file
-    const downloadUrl = `http://localhost:8081${presentation.url}`;
-    const link = document.createElement('a');
-    link.href = downloadUrl;
-    link.download = presentation.title;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleConfirmDelete = () => {
+    if (deleteType === 'bulk') {
+      confirmBulkDelete();
+    } else {
+      confirmSingleDelete();
+    }
   };
 
-  const getFeedbackText = (presentation: Presentation): string => {
+  const handleCancelDelete = () => {
+    setShowDeleteModal(false);
+    setItemToDelete(null);
+  };
+
+  const handleDownloadPresentation = async (presentation: PresentationType) => {
+    try {
+      // Get authentication token
+      const accessToken = localStorage.getItem('access_token');
+      if (!accessToken) {
+        setError('Please log in to download videos.');
+        setTimeout(() => router.push('/Login'), 2000);
+        return;
+      }
+
+      // Show loading state
+      setError(null);
+      setRefreshing(true);
+
+      // Fetch the video file with authentication
+      const downloadUrl = `http://localhost:8081${presentation.url}`;
+      const response = await fetch(downloadUrl, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem('access_token');
+          setError('Session expired. Please log in again.');
+          setTimeout(() => router.push('/Login'), 2000);
+          return;
+        } else if (response.status === 404) {
+          setError('Video file not found. It may have been deleted.');
+          return;
+        } else {
+          setError(`Download failed: ${response.statusText}`);
+          return;
+        }
+      }
+
+      // Convert response to blob
+      const blob = await response.blob();
+      
+      // Create object URL for the blob
+      const objectUrl = URL.createObjectURL(blob);
+      
+      // Create and trigger download
+      const link = document.createElement('a');
+      link.href = objectUrl;
+      
+      // Extract file extension from URL or use mp4 as default
+      const urlParts = presentation.url.split('.');
+      const extension = urlParts.length > 1 ? urlParts[urlParts.length - 1] : 'mp4';
+      
+      // Set download filename
+      link.download = `${presentation.title.replace(/[^a-z0-9]/gi, '_')}.${extension}`;
+      
+      // Append to DOM, click, and remove
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Clean up object URL
+      URL.revokeObjectURL(objectUrl);
+      
+    } catch (error) {
+      console.error('Error downloading presentation:', error);
+      setError('Network error. Please check your connection and try again.');
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  const getScoreClass = (score: number): string => {
+    if (score >= 8) return styles.excellentScore;
+    if (score >= 6) return styles.goodScore;
+    if (score >= 4) return styles.averageScore;
+    return styles.poorScore;
+  };
+
+  const getFeedbackText = (presentation: PresentationType): string => {
     // Generate feedback based on presentation properties
     const feedbacks = [
       "Presentation uploaded successfully. Ready for analysis.",
@@ -309,38 +468,17 @@ const SubmittedTrials = () => {
               <table className={styles.trialsTable}>
                 <thead className={styles.tableHeader}>
                   <tr>
-                    <th className={styles.checkboxHeader}>
-                      <input
-                        type="checkbox"
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setSelectedPresentations(filteredPresentations.map(p => p.id));
-                          } else {
-                            setSelectedPresentations([]);
-                          }
-                        }}
-                        checked={selectedPresentations.length === filteredPresentations.length && filteredPresentations.length > 0}
-                        className={styles.checkbox}
-                      />
-                    </th>
                     <th className={styles.tableHeaderCell}>Presentation</th>
                     <th className={styles.tableHeaderCell}>Date</th>
-                    <th className={styles.tableHeaderCell}>Size</th>
-                    <th className={styles.tableHeaderCell}>Status</th>
+                    <th className={styles.tableHeaderCell}>Topic</th>
+                    <th className={styles.tableHeaderCell}>Overall Score</th>
+                    <th className={styles.tableHeaderCell}>Feedback</th>
                     <th className={styles.tableHeaderCell}>Actions</th>
                   </tr>
                 </thead>
                 <tbody className={styles.tableBody}>
-                  {filteredPresentations.map((presentation) => (
+                  {currentPresentations.map((presentation) => (
                     <tr key={presentation.id} className={styles.tableRow}>
-                      <td className={styles.checkboxCell}>
-                        <input
-                          type="checkbox"
-                          checked={selectedPresentations.includes(presentation.id)}
-                          onChange={() => togglePresentationSelection(presentation.id)}
-                          className={styles.checkbox}
-                        />
-                      </td>
                       <td className={styles.trialCell}>
                         <div className={styles.trialInfo}>
                           <div className={styles.videoThumbnail}>
@@ -360,28 +498,29 @@ const SubmittedTrials = () => {
                       <td className={styles.dateCell}>
                         {new Date(presentation.uploaded_at).toLocaleDateString()}
                       </td>
-                      <td className={styles.durationCell}>
-                        {presentation.file_info?.file_size ? 
-                          PresentationService.formatFileSize(presentation.file_info.file_size) : 
-                          'Unknown'
-                        }
+                      <td className={styles.topicCell}>
+                        {presentation.topic || 'Unknown'}
+                      </td>
+                      <td className={styles.scoreCell}>
+                        {presentation.overall_score !== undefined ? (
+                          <div className={styles.scoreDisplay}>
+                            <span className={`${styles.scoreValue} ${getScoreClass(presentation.overall_score)}`}>
+                              {presentation.overall_score}/10
+                            </span>
+                          </div>
+                        ) : (
+                          <span className={styles.noScore}>No score yet</span>
+                        )}
                       </td>
                       <td className={styles.feedbackCell}>
-                        <div className={styles.feedbackContent}>
-                          <p className={`${styles.feedbackText} ${expandedFeedback === presentation.id.toString() ? '' : styles.feedbackTruncated}`}>
-                            {expandedFeedback === presentation.id.toString() ? 
-                              getFeedbackText(presentation) : 
-                              `${getFeedbackText(presentation).substring(0, 80)}...`
-                            }
-                          </p>
-                          <button
-                            onClick={() => toggleFeedback(presentation.id.toString())}
-                            className={styles.viewMoreButton}
-                          >
-                            <IoEyeOutline size={12} />
-                            {expandedFeedback === presentation.id.toString() ? 'Show less' : 'View more'}
-                          </button>
-                        </div>
+                        <button 
+                          className={styles.feedbackButton}
+                          onClick={() => handleViewFeedback(presentation.id)}
+                          title="View detailed feedback"
+                        >
+                          <IoEyeOutline size={16} />
+                          See Feedback
+                        </button>
                       </td>
                       <td className={styles.actionsCell}>
                         <div className={styles.actionButtons}>
@@ -432,15 +571,62 @@ const SubmittedTrials = () => {
           {/* Footer */}
           <div className={styles.tableFooter}>
             <p className={styles.footerText}>
-              Showing {filteredPresentations.length} of {presentations.length} presentations
+              Showing {indexOfFirstPresentation + 1}-{Math.min(indexOfLastPresentation, filteredPresentations.length)} of {filteredPresentations.length} presentations
             </p>
             <div className={styles.pagination}>
-              <button className={styles.paginationButton}>Previous</button>
-              <span className={styles.paginationCurrent}>1</span>
-              <button className={styles.paginationButton}>Next</button>
+              <button 
+                className={styles.paginationButton} 
+                onClick={goToPreviousPage}
+                disabled={currentPage === 1}
+              >
+                Previous
+              </button>
+              <span className={styles.paginationCurrent}>
+                Page {currentPage} of {totalPages}
+              </span>
+              <button 
+                className={styles.paginationButton} 
+                onClick={goToNextPage}
+                disabled={currentPage === totalPages}
+              >
+                Next
+              </button>
             </div>
           </div>
         </div>
+
+        {/* Delete Confirmation Modal */}
+        {showDeleteModal && (
+          <div className={styles.modalOverlay}>
+            <div className={styles.deleteModal}>
+              <div className={styles.modalContent}>
+                <h3 className={styles.modalTitle}>
+                  Confirm Delete
+                </h3>
+                <p className={styles.modalMessage}>
+                  {deleteType === 'bulk' 
+                    ? `Are you sure you want to delete ${selectedPresentations.length} presentation(s)? This action cannot be undone.`
+                    : 'Are you sure you want to delete this presentation? This action cannot be undone.'
+                  }
+                </p>
+                <div className={styles.modalActions}>
+                  <button 
+                    className={styles.cancelButton} 
+                    onClick={handleCancelDelete}
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    className={styles.deleteButton} 
+                    onClick={handleConfirmDelete}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

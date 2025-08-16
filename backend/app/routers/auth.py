@@ -11,6 +11,8 @@ from backend.app.controllers.authentication.verify_otp import VerifyOTP
 from backend.app.controllers.authentication.user_login import LoginUser
 from backend.app.controllers.authentication.forgot_password import ForgotPassword
 from backend.app.controllers.authentication.reset_password import ResetPassword
+from backend.app.controllers.authentication.restore_account_otp import RestoreAccountOTP
+from backend.app.controllers.authentication.send_verification_otp import SendVerificationOTP
 from backend.app.schemas.user.user_schema import UserAuthResponse, UserResponse, UserUpdate
 from backend.app.utils.redis_client import RedisClient
 from backend.app.utils.redis_dependency import get_redis_client
@@ -66,9 +68,12 @@ async def refresh_token(
 
 @router.post("/forgot-password", status_code=status.HTTP_200_OK)
 async def forgot_password(
-    email: str = Form(...),
+    email: EmailStr = Form(...),
     db: Session = Depends(get_db)
-):
+) -> Dict[str, Any]:
+    """
+    Send OTP for password reset
+    """
     return await ForgotPassword.forgot_password(email=email, db=db)
 
 
@@ -79,10 +84,13 @@ async def reset_password(
     confirm_password: str = Form(...),
     db: Session = Depends(get_db)
 ) -> Dict[str, Any]:
+    """
+    Reset password using OTP
+    """
     return await ResetPassword.reset_password(
-        email=email,
-        new_password=new_password,
-        confirm_password=confirm_password,
+        email=email, 
+        new_password=new_password, 
+        confirm_password=confirm_password, 
         db=db
     )
 
@@ -96,94 +104,47 @@ async def verify_user_otp(
     return VerifyOTP.verify_user_otp(email=email, otp=otp, db=db)
 
 
-@router.get("/me", response_model=UserResponse)
-async def get_current_user(current_user: User = Depends(TokenHandler.get_current_user)):
-    return UserResponse.model_validate(current_user)
-
-
-@router.put("/me", response_model=UserResponse)
-async def update_current_user(
-    user_update: UserUpdate = Body(...),
-    current_user: User = Depends(TokenHandler.get_current_user),
+@router.post("/send-verification-otp", status_code=status.HTTP_200_OK)
+async def send_verification_otp(
+    email: EmailStr = Form(...),
     db: Session = Depends(get_db)
-):
+) -> Dict[str, Any]:
     """
-    Update current user profile information
+    Send OTP for email verification (for unverified users)
     """
-    # Update only the fields that are provided
-    if user_update.first_name is not None:
-        current_user.first_name = user_update.first_name
-    if user_update.last_name is not None:
-        current_user.last_name = user_update.last_name
-    if user_update.username is not None:
-        # Check if username is already taken by another user
-        existing_user = db.query(User).filter(
-            User.username == user_update.username,
-            User.id != current_user.id
-        ).first()
-        if existing_user:
-            from fastapi import HTTPException
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Username is already taken"
-            )
-        current_user.username = user_update.username
-    if user_update.email is not None:
-        # Check if email is already taken by another user
-        existing_user = db.query(User).filter(
-            User.email == user_update.email,
-            User.id != current_user.id
-        ).first()
-        if existing_user:
-            from fastapi import HTTPException
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Email is already taken"
-            )
-        current_user.email = user_update.email
-    if user_update.phone_number is not None:
-        # Check if phone number is already taken by another user
-        existing_user = db.query(User).filter(
-            User.phone_number == user_update.phone_number,
-            User.id != current_user.id
-        ).first()
-        if existing_user:
-            from fastapi import HTTPException
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Phone number is already taken"
-            )
-        current_user.phone_number = user_update.phone_number
-    
-    if user_update.gender is not None:
-        current_user.gender = user_update.gender
-    
-    try:
-        db.commit()
-        db.refresh(current_user)
-        return UserResponse.model_validate(current_user)
-    except Exception as e:
-        db.rollback()
-        from fastapi import HTTPException
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to update user profile"
-        )
+    return await SendVerificationOTP.send_verification_otp(email=email, db=db)
+
+
+@router.post("/restore-account-otp", status_code=status.HTTP_200_OK)
+async def send_restore_account_otp(
+    email: EmailStr = Form(...),
+    db: Session = Depends(get_db)
+) -> Dict[str, Any]:
+    """
+    Send OTP for account restoration verification
+    """
+    return await RestoreAccountOTP.send_restore_otp(email=email, db=db)
 
 
 @router.post("/logout", status_code=status.HTTP_200_OK)
-async def logout(
+async def logout_user(
     current_user: User = Depends(TokenHandler.get_current_user),
     redis: RedisClient = Depends(get_redis_client)
+) -> Dict[str, Any]:
+    """
+    Logout user and invalidate tokens
+    """
+    return await TokenHandler.revoke_tokens(user_id=current_user.id, redis=redis)
+
+
+@router.get("/me", response_model=UserResponse, status_code=status.HTTP_200_OK)
+async def get_current_user(
+    current_user: User = Depends(TokenHandler.get_current_user)
 ):
-    # Attempt to revoke tokens and get the result
-    revocation_success = TokenHandler.revoke_tokens(current_user.id, redis=redis)
-    
-    if not revocation_success:
-        # Log the issue but still respond with success to the client
-        print(f"Warning: There was an issue revoking tokens for user {current_user.id}")
-    
-    return {"message": "Successfully logged out", "tokens_revoked": revocation_success}
+    """
+    Get current user information
+    """
+    return current_user
 
 
 @router.delete("/cleanup-temp-user", status_code=status.HTTP_200_OK)

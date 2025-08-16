@@ -80,8 +80,8 @@ const UploadRecordVideos = () => {
                                 <li>All video formats supported (MP4, AVI, MOV, WMV, etc.)</li>
                         <li>Maximum file size: 500MB per video</li>
                         <li>Recommended resolution: 1080p or higher</li>
-                                <li>Minimum duration: 10 seconds</li>
-                                <li>Maximum duration: 30 minutes</li>
+                                <li>Minimum duration: 30 seconds</li>
+                                <li>Maximum duration: 1 hour</li>
                     </ul>
                         </div>
                     </div>

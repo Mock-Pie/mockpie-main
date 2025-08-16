@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from "react";
 import { FiFileText, FiUser } from "react-icons/fi";
 import { AiOutlineAppstore, AiOutlineHome } from "react-icons/ai";
-import { IoSettingsOutline } from "react-icons/io5";
 import { TbLogout } from "react-icons/tb";
 import Link from "next/link";
 import styles from "../page.module.css";
