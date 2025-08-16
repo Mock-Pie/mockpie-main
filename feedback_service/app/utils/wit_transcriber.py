@@ -4,8 +4,6 @@ import tempfile
 from pydub import AudioSegment
 from wit import Wit
 
-WIT_AI_TOKEN_ENGLISH = "4VBDMJSP5MG3FUJSZMQEFQYSN5CTV4UM"
-WIT_AI_TOKEN_ARABIC = "3R5F2QD664A4VLETBF2VM3CCBNKVKP27"
 
 # Configurable limits - you can adjust these values
 MAX_AUDIO_DURATION_SECONDS = 300  # 5 minutes (increased from 30 seconds)
